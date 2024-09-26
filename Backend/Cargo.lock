@@ -11,6 +11,7 @@ dependencies = [
  "axum",
  "httpc-test",
  "lazy-regex",
+ "reqwest",
  "serde",
  "serde_json",
  "serde_with",

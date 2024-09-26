@@ -26,6 +26,7 @@ lazy-regex = "3.3.0"
 strum_macros = "0.26.4"
 uuid = { version = "1", features = ["v4", "fast-rng"] }
 
+reqwest = "0.12.7"
 
 [dev-dependencies]
 anyhow = "1.0.89"
