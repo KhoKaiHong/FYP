@@ -1,0 +1,8 @@
+# Config file for cargo
+# https://doc.rust-lang.org/cargo/reference/config.html
+
+# Environments variables set for all `cargo ...` commands.
+[env]
+
+# Scope down tracing, to filter out external lib tracing.
+RUST_LOG="Backend=debug"
