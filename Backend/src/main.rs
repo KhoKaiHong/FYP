@@ -1,22 +1,11 @@
 pub use self::error::{Error, Result};
 
-use crate::context::Context;
-use crate::log::log_request;
 use crate::model::ModelController;
-use axum::extract::{Path, Query};
-use axum::http::{Method, Uri};
-use axum::response::{Html, IntoResponse, Response};
-use axum::routing::{get, get_service};
-use axum::{middleware, Json, Router};
-use serde::Deserialize;
-use serde_json::json;
-use std::net::SocketAddr;
+use axum::{middleware, Router};
 use tokio::net::TcpListener;
 use tower_cookies::CookieManagerLayer;
-use tower_http::services::ServeDir;
-use tracing_subscriber::{self, EnvFilter};
-use uuid::Uuid;
 use tracing::debug;
+use tracing_subscriber::{self, EnvFilter};
 
 mod context;
 mod error;
@@ -40,10 +29,12 @@ async fn main() -> Result<()> {
         .route_layer(middleware::from_fn(web::middleware_auth::mw_require_auth));
 
     let routes_all = Router::new()
-        .merge(routes_hello())
+        .merge(web::routes_hello::routes())
         .merge(web::routes_login::routes())
         .nest("/api", routes_apis)
-        .layer(middleware::map_response(web::response_map::main_response_mapper))
+        .layer(middleware::map_response(
+            web::response_map::main_response_mapper,
+        ))
         .layer(middleware::from_fn_with_state(
             mc.clone(),
             web::middleware_auth::mw_ctx_resolver,
@@ -61,32 +52,3 @@ async fn main() -> Result<()> {
 
     Ok(())
 }
-
-// region:    --- Routes Hello
-fn routes_hello() -> Router {
-    Router::new()
-        .route("/hello", get(handler_hello))
-        .route("/hello2/:name", get(handler_hello2))
-}
-
-#[derive(Debug, Deserialize)]
-struct HelloParams {
-    name: Option<String>,
-}
-
-// e.g., `/hello?name=Jen`
-async fn handler_hello(Query(params): Query<HelloParams>) -> impl IntoResponse {
-    debug!("{:<12} - handler_hello - {params:?}", "HANDLER");
-
-    let name = params.name.as_deref().unwrap_or("World!");
-    Html(format!("Hello <strong>{name}</strong>"))
-}
-
-// e.g., `/hello2/Mike`
-async fn handler_hello2(Path(name): Path<String>) -> impl IntoResponse {
-    debug!("{:<12} - handler_hello2 - {name:?}", "HANDLER");
-
-    Html(format!("Hello2 <strong>{name}</strong>"))
-}
-
-// endregion: --- Routes Hello

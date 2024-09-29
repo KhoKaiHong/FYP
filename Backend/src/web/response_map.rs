@@ -1,20 +1,11 @@
 use crate::context::Context;
 use crate::log::log_request;
-use crate::model::ModelController;
-use crate::{Error, Result};
-use axum::extract::{Path, Query};
+use crate::Error;
 use axum::http::{Method, Uri};
-use axum::response::{Html, IntoResponse, Response};
-use axum::routing::{get, get_service};
-use axum::{middleware, Json, Router};
-use serde::Deserialize;
+use axum::response::{IntoResponse, Response};
+use axum::Json;
 use serde_json::json;
-use std::net::SocketAddr;
-use tokio::net::TcpListener;
-use tower_cookies::CookieManagerLayer;
-use tower_http::services::ServeDir;
 use tracing::debug;
-use tracing_subscriber::{self, EnvFilter};
 use uuid::Uuid;
 
 pub async fn main_response_mapper(
