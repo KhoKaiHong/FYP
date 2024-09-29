@@ -1,8 +1,8 @@
 use crate::context::Context;
 use crate::log::log_request;
-use crate::Error;
+use crate::web;
 use axum::http::{Method, Uri};
-use axum::response::{IntoResponse, Response};
+use axum::response::{Response, IntoResponse};
 use axum::Json;
 use serde_json::json;
 use tracing::debug;
@@ -18,7 +18,7 @@ pub async fn main_response_mapper(
     let uuid = Uuid::new_v4();
 
     // -- Get the eventual response error.
-    let service_error = res.extensions().get::<Error>();
+    let service_error = res.extensions().get::<web::Error>();
     let client_status_error = service_error.map(|se| se.client_status_and_error());
 
     // -- If client error, build the new reponse.

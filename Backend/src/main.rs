@@ -1,17 +1,19 @@
-pub use self::error::{Error, Result};
-
-use crate::model::ModelController;
-use axum::{middleware, Router};
-use tokio::net::TcpListener;
-use tower_cookies::CookieManagerLayer;
-use tracing::debug;
-use tracing_subscriber::{self, EnvFilter};
-
+mod config;
 mod context;
 mod error;
 mod log;
 mod model;
 mod web;
+
+pub use self::error::{Error, Result};
+
+use axum::{middleware, Router};
+use model::ModelManager;
+use tokio::net::TcpListener;
+use tower_cookies::CookieManagerLayer;
+use tracing::info;
+use tracing_subscriber::{self, EnvFilter};
+
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -22,29 +24,29 @@ async fn main() -> Result<()> {
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
-    // Initialize ModelController.
-    let mc = ModelController::new().await?;
-
-    let routes_apis = web::routes_tickets::routes(mc.clone())
-        .route_layer(middleware::from_fn(web::middleware_auth::mw_require_auth));
+    // Initialize ModelManager.
+	let mm = ModelManager::new().await?;
 
     let routes_all = Router::new()
         .merge(web::routes_hello::routes())
         .merge(web::routes_login::routes())
-        .nest("/api", routes_apis)
         .layer(middleware::map_response(
             web::response_map::main_response_mapper,
         ))
         .layer(middleware::from_fn_with_state(
-            mc.clone(),
+            mm.clone(),
             web::middleware_auth::mw_ctx_resolver,
         ))
         .layer(CookieManagerLayer::new())
-        .fallback_service(web::routes_static::routes_static());
+        .fallback_service(web::routes_static::serve_dir());
 
     // region:    --- Start Server
     let listener = TcpListener::bind("127.0.0.1:3001").await.unwrap();
-    debug!("LISTENING on {:?}\n", listener.local_addr());
+    info!(
+        "{:<12} - {:?}\n",
+        "LISTENING ON",
+        listener.local_addr().unwrap()
+    );
     axum::serve(listener, routes_all.into_make_service())
         .await
         .unwrap();

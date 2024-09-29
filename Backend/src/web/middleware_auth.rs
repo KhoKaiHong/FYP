@@ -1,7 +1,7 @@
 use crate::context::Context;
-use crate::model::ModelController;
+use crate::model::ModelManager;
 use crate::web::AUTH_TOKEN;
-use crate::{Error, Result};
+use crate::web::{Error, Result};
 use async_trait::async_trait;
 use axum::body::Body;
 use axum::extract::{FromRequestParts, State};
@@ -9,7 +9,7 @@ use axum::http::request::Parts;
 use axum::http::Request;
 use axum::middleware::Next;
 use axum::response::Response;
-use lazy_regex::regex_captures;
+use serde::Serialize;
 use tower_cookies::{Cookie, Cookies};
 use tracing::debug;
 
@@ -26,7 +26,7 @@ pub async fn mw_require_auth(
 }
 
 pub async fn mw_ctx_resolver(
-    _mc: State<ModelController>,
+    _mm: State<ModelManager>,
     cookies: Cookies,
     mut req: Request<Body>,
     next: Next,
@@ -35,20 +35,12 @@ pub async fn mw_ctx_resolver(
 
     let auth_token = cookies.get(AUTH_TOKEN).map(|c| c.value().to_string());
 
-    // Compute Result<Ctx>.
-    let result_ctx = match auth_token
-        .ok_or(Error::AuthFailNoAuthTokenCookie)
-        .and_then(parse_token)
-    {
-        Ok((user_id, _exp, _sign)) => {
-            // TODO: Token components validations.
-            Ok(Context::new(user_id))
-        }
-        Err(e) => Err(e),
-    };
+    // FIXME - Compute real CtxAuthResult<Ctx>.
+    let result_ctx =
+        Context::new(100).map_err(|ex| ContextExtractorError::ContextCreateFail(ex.to_string()));
 
     // Remove the cookie if something went wrong other than NoAuthTokenCookie.
-    if result_ctx.is_err() && !matches!(result_ctx, Err(Error::AuthFailNoAuthTokenCookie)) {
+    if result_ctx.is_err() && !matches!(result_ctx, Err(ContextExtractorError::TokenNotInCookie)) {
         cookies.remove(Cookie::from(AUTH_TOKEN))
     }
 
@@ -58,7 +50,7 @@ pub async fn mw_ctx_resolver(
     Ok(next.run(req).await)
 }
 
-// region:    --- Ctx Extractor
+// region:    --- Context Extractor
 #[async_trait]
 impl<S: Send + Sync> FromRequestParts<S> for Context {
     type Rejection = Error;
@@ -68,26 +60,22 @@ impl<S: Send + Sync> FromRequestParts<S> for Context {
 
         parts
             .extensions
-            .get::<Result<Context>>()
-            .ok_or(Error::AuthFailCtxNotInRequestExt)?
-            .clone()
+            .get::<ContextExtractorResult>()
+			.ok_or(Error::ContextExtractor(ContextExtractorError::ContextNotInRequestExtractor))?
+			.clone()
+			.map_err(Error::ContextExtractor)
     }
 }
 
-// endregion: --- Ctx Extractor
+// endregion: --- Context Extractor
 
-/// Parse a token of format `user-[user-id].[expiration].[signature]`
-/// Returns (user_id, expiration, signature)
-fn parse_token(token: String) -> Result<(u64, String, String)> {
-    let (_whole, user_id, exp, sign) = regex_captures!(
-        r#"^user-(\d+)\.(.+)\.(.+)"#, // a literal regex
-        &token
-    )
-    .ok_or(Error::AuthFailTokenWrongFormat)?;
+// region:    --- Context Extractor Result/Error
+type ContextExtractorResult = core::result::Result<Context, ContextExtractorError>;
 
-    let user_id: u64 = user_id
-        .parse()
-        .map_err(|_| Error::AuthFailTokenWrongFormat)?;
-
-    Ok((user_id, exp.to_string(), sign.to_string()))
+#[derive(Clone, Serialize, Debug)]
+pub enum ContextExtractorError {
+    TokenNotInCookie,
+    ContextNotInRequestExtractor,
+    ContextCreateFail(String),
 }
+// endregion: --- Context Extractor Result/Error

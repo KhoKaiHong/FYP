@@ -1,3 +1,7 @@
+mod error;
+
+pub use self::error::{Error, Result};
+
 #[derive(Clone, Debug)]
 pub struct Context {
     user_id: u64,
@@ -5,8 +9,16 @@ pub struct Context {
 
 // Constructor.
 impl Context {
-    pub fn new(user_id: u64) -> Self {
-        Self { user_id }
+    pub fn root_ctx() -> Self {
+        Context { user_id: 0 }
+    }
+
+    pub fn new(user_id: u64) -> Result<Self> {
+        if user_id == 0 {
+            Err(Error::CtxCannotNewRootCtx)
+        } else {
+            Ok(Self { user_id })
+        }
     }
 }
 
