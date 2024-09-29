@@ -1,45 +1,42 @@
 use crate::web;
-use std::sync::Arc;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use serde::Serialize;
+use tracing::debug;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
-#[derive(Debug, Serialize, strum_macros::AsRefStr)]
+#[derive(Clone, Debug, Serialize, strum_macros::AsRefStr)]
 #[serde(tag = "type", content = "data")]
 pub enum Error {
-	// -- Login
-	LoginFail,
+    // -- Login
+    LoginFail,
 
-	// -- Context Extractor Error
-	ContextExtractor(web::middleware_auth::ContextExtractorError),
+    // -- Context Extractor Error
+    ContextExtractor(web::middleware_auth::ContextExtractorError),
 }
 
 // region:    --- Axum IntoResponse
 impl IntoResponse for Error {
-	fn into_response(self) -> Response {
-		println!("->> {:<12} - model::Error {self:?}", "INTO_RES");
+    fn into_response(self) -> Response {
+        debug!("{:<12} - model::Error {self:?}", "INTO_RES");
 
-		// Create a placeholder Axum reponse.
-		let mut response = StatusCode::INTERNAL_SERVER_ERROR.into_response();
+        // Create a placeholder Axum reponse.
+        let mut response = StatusCode::INTERNAL_SERVER_ERROR.into_response();
 
-		// Insert the Error into the reponse.
-		response.extensions_mut().insert(Arc::new(self));
+        // Insert the Error into the reponse.
+        response.extensions_mut().insert(self);
 
-		response
-	}
+        response
+    }
 }
 // endregion: --- Axum IntoResponse
 
 // region:    --- Error Boilerplate
 impl core::fmt::Display for Error {
-	fn fmt(
-		&self,
-		fmt: &mut core::fmt::Formatter,
-	) -> core::result::Result<(), core::fmt::Error> {
-		write!(fmt, "{self:?}")
-	}
+    fn fmt(&self, fmt: &mut core::fmt::Formatter) -> core::result::Result<(), core::fmt::Error> {
+        write!(fmt, "{self:?}")
+    }
 }
 
 impl std::error::Error for Error {}
@@ -48,27 +45,27 @@ impl std::error::Error for Error {}
 // region:    --- Client Error
 /// From the root error to the http status code and ClientError
 impl Error {
-	pub fn client_status_and_error(&self) -> (StatusCode, ClientError) {
-		use Error::*; // TODO: should change to `use web::Error as E`
+    pub fn client_status_and_error(&self) -> (StatusCode, ClientError) {
+        use web::Error::*;
 
-		match self {
-			// -- Login/Auth
-			ContextExtractor(_) => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+        match self {
+            // -- Login/Auth
+            ContextExtractor(_) => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
 
-			// -- Fallback.
-			_ => (
-				StatusCode::INTERNAL_SERVER_ERROR,
-				ClientError::SERVICE_ERROR,
-			),
-		}
-	}
+            // -- Fallback.
+            _ => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                ClientError::SERVICE_ERROR,
+            ),
+        }
+    }
 }
 
 #[derive(Debug, strum_macros::AsRefStr)]
 #[allow(non_camel_case_types)]
 pub enum ClientError {
-	LOGIN_FAIL,
-	NO_AUTH,
-	SERVICE_ERROR,
+    LOGIN_FAIL,
+    NO_AUTH,
+    SERVICE_ERROR,
 }
 // endregion: --- Client Error

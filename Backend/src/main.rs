@@ -6,6 +6,7 @@ mod model;
 mod web;
 
 pub use self::error::{Error, Result};
+pub use config::config;
 
 use axum::{middleware, Router};
 use model::ModelManager;
@@ -13,7 +14,6 @@ use tokio::net::TcpListener;
 use tower_cookies::CookieManagerLayer;
 use tracing::info;
 use tracing_subscriber::{self, EnvFilter};
-
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -25,7 +25,7 @@ async fn main() -> Result<()> {
         .init();
 
     // Initialize ModelManager.
-	let mm = ModelManager::new().await?;
+    let mm = ModelManager::new().await?;
 
     let routes_all = Router::new()
         .merge(web::routes_hello::routes())
