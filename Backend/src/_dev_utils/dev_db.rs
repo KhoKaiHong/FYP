@@ -11,7 +11,7 @@ type Db = Pool<Postgres>;
 
 // NOTE: Hardcode to prevent deployed system db update.
 const PG_DEV_POSTGRES_URL: &str = "postgresql://postgres:postgres@localhost:5432/postgres";
-const PG_DEV_APP_URL: &str = "postgresql://dev:dev_only_pwd@localhost/dev_db";
+const PG_DEV_APP_URL: &str = "postgresql://dev:dev_only_pwd@localhost:5432/dev_db";
 
 // sql files
 const SQL_RECREATE_DB: &str = "sql/dev_initial/00-recreate-db.sql";
@@ -33,17 +33,17 @@ pub async fn init_dev_db() -> Result<(), Box<dyn std::error::Error>> {
     paths.sort();
 
     // -- SQL Execute each file.
-	let app_db = new_db_pool(PG_DEV_APP_URL).await?;
-	for path in paths {
-		if let Some(path) = path.to_str() {
-			let path = path.replace('\\', "/"); // for windows.
+    let app_db = new_db_pool(PG_DEV_APP_URL).await?;
+    for path in paths {
+        if let Some(path) = path.to_str() {
+            let path = path.replace('\\', "/"); // for windows.
 
-			// Only take the .sql and skip the SQL_RECREATE_DB
-			if path.ends_with(".sql") && path != SQL_RECREATE_DB {
-				pexec(&app_db, &path).await?;
-			}
-		}
-	}
+            // Only take the .sql and skip the SQL_RECREATE_DB
+            if path.ends_with(".sql") && path != SQL_RECREATE_DB {
+                pexec(&app_db, &path).await?;
+            }
+        }
+    }
 
     Ok(())
 }

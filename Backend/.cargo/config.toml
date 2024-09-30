@@ -13,6 +13,13 @@ RUST_LOG="Backend=debug"
 #   For deployed env, should be managed by container 
 #   (e.g., Kubernetes).
 
+## -- Secrets
+# Keys and passwords below are for localhost dev ONLY.
+# e.g., "welcome" type of passwords.
+# i.e., Encryption not needed.
+
+SERVICE_DB_URL = "postgresql://dev:dev_only_pwd@localhost:5432/dev_db"
+
 
 ## -- ConfigMap
 

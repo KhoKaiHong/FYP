@@ -39,3 +39,4 @@ uuid = { version = "1.10.0", features = ["v4", "fast-rng"] }
 [dev-dependencies]
 anyhow = "1.0.89"
 httpc-test = "0.1.10"
+serial_test = "3.1.1"

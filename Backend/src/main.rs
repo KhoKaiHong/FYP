@@ -5,7 +5,6 @@ mod log;
 mod model;
 mod web;
 
-// #[cfg(test)] // Commented during early development.
 pub mod _dev_utils;
 
 pub use self::error::{Error, Result};
@@ -31,7 +30,7 @@ async fn main() -> Result<()> {
     _dev_utils::init_dev().await;
 
     // Initialize ModelManager.
-    let mm = ModelManager::new().await?;
+    let model_manager = ModelManager::new().await?;
 
     let routes_all = Router::new()
         .merge(web::routes_hello::routes())
@@ -40,7 +39,7 @@ async fn main() -> Result<()> {
             web::response_map::main_response_mapper,
         ))
         .layer(middleware::from_fn_with_state(
-            mm.clone(),
+            model_manager.clone(),
             web::middleware_auth::mw_ctx_resolver,
         ))
         .layer(CookieManagerLayer::new())

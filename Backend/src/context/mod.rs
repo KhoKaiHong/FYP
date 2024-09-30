@@ -4,7 +4,7 @@ pub use self::error::{Error, Result};
 
 #[derive(Clone, Debug)]
 pub struct Context {
-    user_id: u64,
+    user_id: i64,
 }
 
 // Constructor.
@@ -13,7 +13,7 @@ impl Context {
         Context { user_id: 0 }
     }
 
-    pub fn new(user_id: u64) -> Result<Self> {
+    pub fn new(user_id: i64) -> Result<Self> {
         if user_id == 0 {
             Err(Error::CtxCannotNewRootCtx)
         } else {
@@ -24,7 +24,7 @@ impl Context {
 
 // Property Accessors.
 impl Context {
-    pub fn user_id(&self) -> u64 {
+    pub fn user_id(&self) -> i64 {
         self.user_id
     }
 }
