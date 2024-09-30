@@ -49,8 +49,11 @@ impl Error {
         use web::Error::*;
 
         match self {
-            // -- Login/Auth
+            // -- Context Extractor Errors
             ContextExtractor(_) => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+
+            // -- Login Fail
+            LoginFail => (StatusCode::UNAUTHORIZED, ClientError::LOGIN_FAIL),
 
             // -- Fallback.
             _ => (
