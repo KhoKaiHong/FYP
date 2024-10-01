@@ -23,6 +23,7 @@ cargo run --example quick_dev --color always
 ## Unit Test (watch)
 
 ```sh
+# Perform all unit tests
 bacon test
 
 # Specific test with filter.
@@ -32,6 +33,7 @@ bacon test -- model::task::tests::test_create
 ## Unit Test (cargo)
 
 ```sh
+# Perform all unit tests
 cargo test -- --nocapture --color always
 
 # Specific test with filter.
