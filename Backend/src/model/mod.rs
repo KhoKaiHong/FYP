@@ -25,7 +25,7 @@ pub mod task;
 
 pub use self::error::{Error, Result};
 
-use store::{Db, new_db_pool};
+use store::{new_db_pool, Db};
 
 // endregion: --- Modules
 
@@ -36,15 +36,15 @@ pub struct ModelManager {
 
 impl ModelManager {
     /// Constructor
-	pub async fn new() -> Result<Self> {
-		let db = new_db_pool().await?;
+    pub async fn new() -> Result<Self> {
+        let db = new_db_pool().await?;
 
-		Ok(ModelManager { db })
-	}
+        Ok(ModelManager { db })
+    }
 
-	/// Returns the sqlx db pool reference.
-	/// (Only for the model layer)
-	pub(in crate::model) fn db(&self) -> &Db {
-		&self.db
-	}
+    /// Returns the sqlx db pool reference.
+    /// (Only for the model layer)
+    pub(in crate::model) fn db(&self) -> &Db {
+        &self.db
+    }
 }

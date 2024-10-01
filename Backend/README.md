@@ -1,19 +1,39 @@
-## Dev (watch)
+> NOTE: To use watch, install bacon with `cargo install bacon`.
 
-> NOTE: Install cargo watch with `cargo install cargo-watch`.
+## Dev (watch)
 
 ```sh
 # Terminal 1 - To run the server.
-cargo watch -q -c -w src/ -w .cargo/ -x "run"
+bacon run-backend
 
-# Terminal 2 - To run the quick_dev.
-cargo watch -q -c -w examples/ -x "run --example quick_dev"
+# Terminal 2 - To run the quick_dev (tests).
+bacon run-quick_dev
+```
+
+## Dev (cargo)
+
+```sh
+# Terminal 1 - To run the server.
+cargo run --color always
+
+# Terminal 2 - To run the quick_dev (tests).
+cargo run --example quick_dev --color always
 ```
 
 ## Unit Test (watch)
 
 ```sh
-cargo watch -q -c -x "test -- --nocapture"
+bacon test
 
 # Specific test with filter.
-cargo watch -q -c -x "test model::task::tests::test_create -- --nocapture"
+bacon test -- model::task::tests::test_create
+```
+
+## Unit Test (cargo)
+
+```sh
+cargo test -- --nocapture --color always
+
+# Specific test with filter.
+cargo test -- model::task::tests::test_create --nocapture --color always
+```

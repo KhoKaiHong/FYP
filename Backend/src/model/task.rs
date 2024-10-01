@@ -36,11 +36,10 @@ impl TaskBmc {
     ) -> Result<i64> {
         let db = model_manager.db();
 
-        let (id,) =
-            sqlx::query_as::<_, (i64,)>("INSERT INTO task (title) values ($1) returning id")
-                .bind(task_created.title)
-                .fetch_one(db)
-                .await?;
+        let (id,) = sqlx::query_as("INSERT INTO task (title) values ($1) returning id")
+            .bind(task_created.title)
+            .fetch_one(db)
+            .await?;
 
         Ok(id)
     }
@@ -102,8 +101,8 @@ mod tests {
     use anyhow::Result;
     use serial_test::serial;
 
-    #[serial]
     #[tokio::test]
+    #[serial]
     async fn test_create_ok() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
@@ -126,8 +125,8 @@ mod tests {
         Ok(())
     }
 
-    #[serial]
     #[tokio::test]
+    #[serial]
     async fn test_get_err_not_found() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
@@ -142,7 +141,7 @@ mod tests {
             matches!(
                 res,
                 Err(Error::EntityNotFound {
-                    entity: "task",
+                    entity: "task;",
                     id: 100
                 })
             ),
@@ -152,8 +151,8 @@ mod tests {
         Ok(())
     }
 
-    #[serial]
     #[tokio::test]
+    #[serial]
     async fn test_list_ok() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
@@ -174,7 +173,7 @@ mod tests {
             .into_iter()
             .filter(|t| t.title.starts_with("test_list_ok-task"))
             .collect();
-        assert_eq!(tasks.len(), 3, "number of seeded tasks.");
+        assert_eq!(tasks.len(), 2, "number of seeded tasks.");
 
         // -- Clean
         for task in tasks.iter() {
@@ -214,8 +213,8 @@ mod tests {
     // 	Ok(())
     // }
 
-    #[serial]
     #[tokio::test]
+    #[serial]
     async fn test_delete_err_not_found() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
@@ -230,7 +229,7 @@ mod tests {
             matches!(
                 res,
                 Err(Error::EntityNotFound {
-                    entity: "task",
+                    entity: "taskf",
                     id: 100
                 })
             ),

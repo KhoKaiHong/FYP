@@ -2,7 +2,7 @@ use crate::context::Context;
 use crate::log::log_request;
 use crate::web;
 use axum::http::{Method, Uri};
-use axum::response::{Response, IntoResponse};
+use axum::response::{IntoResponse, Response};
 use axum::Json;
 use serde_json::json;
 use tracing::debug;
@@ -32,7 +32,7 @@ pub async fn main_response_mapper(
                 }
             });
 
-            debug!("CLIENT ERTROR BODY: {client_error_body}");
+            debug!("CLIENT ERROR BODY: {client_error_body}");
 
             // Build the new response from the client_error_body
             (*status_code, Json(client_error_body)).into_response()
