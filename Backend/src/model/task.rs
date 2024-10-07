@@ -17,16 +17,12 @@ pub struct TaskForCreate {
 
 #[derive(Deserialize)]
 pub struct TaskForUpdate {
-    pub title: Option<String>,
+    pub title: String,
 }
 // endregion: --- Task Types
 
 // region:    --- Task Model Controller
 pub struct TaskBmc;
-
-// impl DbBmc for TaskBmc {
-//     const TABLE: &'static str = "task";
-// }
 
 impl TaskBmc {
     pub async fn create(
@@ -66,14 +62,27 @@ impl TaskBmc {
         Ok(tasks)
     }
 
-    // pub async fn update(
-    //     ctx: &Context,
-    //     mm: &ModelManager,
-    //     id: i64,
-    //     task_updated: TaskForUpdate,
-    // ) -> Result<()> {
-    //     base::update::<Self, _>(ctx, mm, id, task_updated).await
-    // }
+    pub async fn update(
+        context: &Context,
+        model_manager: &ModelManager,
+        id: i64,
+        task_updated: TaskForUpdate,
+    ) -> Result<()> {
+        let db = model_manager.db();
+
+        let count = sqlx::query("UPDATE task SET title = $1 where id = $2")
+            .bind(task_updated.title)
+            .bind(id)
+            .execute(db)
+            .await?
+            .rows_affected();
+
+        if count == 0 {
+            return Err(Error::EntityNotFound { entity: "task", id });
+        }
+
+        Ok(())
+    }
 
     pub async fn delete(context: &Context, model_manager: &ModelManager, id: i64) -> Result<()> {
         let db = model_manager.db();
@@ -141,7 +150,7 @@ mod tests {
             matches!(
                 res,
                 Err(Error::EntityNotFound {
-                    entity: "task;",
+                    entity: "task",
                     id: 100
                 })
             ),
@@ -173,7 +182,7 @@ mod tests {
             .into_iter()
             .filter(|t| t.title.starts_with("test_list_ok-task"))
             .collect();
-        assert_eq!(tasks.len(), 2, "number of seeded tasks.");
+        assert_eq!(tasks.len(), 3, "number of seeded tasks.");
 
         // -- Clean
         for task in tasks.iter() {
@@ -183,35 +192,35 @@ mod tests {
         Ok(())
     }
 
-    // #[serial]
-    // #[tokio::test]
-    // async fn test_update_ok() -> Result<()> {
-    // 	// -- Setup & Fixtures
-    // 	let mm = _dev_utils::init_test().await;
-    // 	let ctx = Ctx::root_ctx();
-    // 	let fx_title = "test_update_ok - task 01";
-    // 	let fx_title_new = "test_update_ok - task 01 - new";
-    // 	let fx_task = _dev_utils::seed_tasks(&ctx, &mm, &[fx_title])
-    // 		.await?
-    // 		.remove(0);
+    #[tokio::test]
+    #[serial]
+    async fn test_update_ok() -> Result<()> {
+        // -- Setup & Fixtures
+        let model_manager = _dev_utils::init_test().await;
+        let context = Context::root_ctx();
+        let function_title = "test_update_ok - task 01";
+        let function_title_new = "test_update_ok - task 01 - new";
+        let function_task = _dev_utils::seed_tasks(&context, &model_manager, &[function_title])
+            .await?
+            .remove(0);
 
-    // 	// -- Exec
-    // 	TaskBmc::update(
-    // 		&ctx,
-    // 		&mm,
-    // 		fx_task.id,
-    // 		TaskForUpdate {
-    // 			title: Some(fx_title_new.to_string()),
-    // 		},
-    // 	)
-    // 	.await?;
+        // -- Exec
+        TaskBmc::update(
+            &context,
+            &model_manager,
+            function_task.id,
+            TaskForUpdate {
+                title: function_title_new.to_string(),
+            },
+        )
+        .await?;
 
-    // 	// -- Check
-    // 	let task = TaskBmc::get(&ctx, &mm, fx_task.id).await?;
-    // 	assert_eq!(task.title, fx_title_new);
+        // -- Check
+        let task = TaskBmc::get(&context, &model_manager, function_task.id).await?;
+        assert_eq!(task.title, function_title_new);
 
-    // 	Ok(())
-    // }
+        Ok(())
+    }
 
     #[tokio::test]
     #[serial]
@@ -229,7 +238,7 @@ mod tests {
             matches!(
                 res,
                 Err(Error::EntityNotFound {
-                    entity: "taskf",
+                    entity: "task",
                     id: 100
                 })
             ),

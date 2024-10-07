@@ -83,6 +83,7 @@ need_stdout = true
 allow_warnings = true
 background = true
 
+# -- Custom run functions region start
 [jobs.run-backend]
 command = ["cargo", "run", "--color", "always"]
 watch = ["src", ".cargo"]
@@ -100,6 +101,7 @@ allow_warnings = true
 background = true
 default_watch = false
 on_change_strategy = "wait_then_restart"
+# -- Custom run functions region end
 
 # This parameterized job runs the example of your choice, as soon
 # as the code compiles.
