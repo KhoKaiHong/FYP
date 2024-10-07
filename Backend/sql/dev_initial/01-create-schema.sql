@@ -72,7 +72,7 @@ CREATE TABLE "blood_donation_events" (
     start timestamp NOT NULL,
     end timestamp NOT NULL,
     max_attendees INTEGER NOT NULL,
-    facility_id INTEGER REFERENCES blood_collection_facilities(id),
+    facility_id INTEGER REFERENCES blood_collection_facilities(id) NOT NULL,
     state_id INTEGER REFERENCES states(id) NOT NULL,
     district_id INTEGER REFERENCES districts(id) NOT NULL
 );
