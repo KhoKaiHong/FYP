@@ -22,7 +22,6 @@ serde_with = "3.11.0"
 # Authentication
 jsonwebtoken = "9.3.0"
 argon2 = "0.5.3"
-base64-url = "3.0.0"
 
 # Web
 axum = "0.7.7"
@@ -38,9 +37,11 @@ tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 
 # Others
+base64-url = "3.0.0"
 lazy-regex = "3.3.0"
 strum_macros = "0.26.4"
 uuid = { version = "1.10.0", features = ["v4", "fast-rng"] }
+chrono = { version = "0.4.38", features = ["serde"] }
 
 [dev-dependencies]
 anyhow = "1.0.89"

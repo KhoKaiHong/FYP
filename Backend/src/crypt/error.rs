@@ -8,7 +8,11 @@ pub enum Error {
 	KeyFailHmac,
 
 	// -- Pwd
-	PwdNotMatching,
+	FailedToHashPassword,
+	PasswordNotMatching,
+	FailSpawnBlockForEncrypt,
+	PasswordHashWrongFormat,
+	FailSpawnBlockForValidate,
 
 	// -- Token
 	TokenInvalidFormat,

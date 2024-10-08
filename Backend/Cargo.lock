@@ -11,6 +11,7 @@ dependencies = [
  "async-trait",
  "axum",
  "base64-url",
+ "chrono",
  "httpc-test",
  "jsonwebtoken",
  "lazy-regex",
@@ -301,8 +302,10 @@ checksum = "a21f936df1771bf62b77f047b726c4625ff2e8aa607c01ec06e5a05bd8463401"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
+ "js-sys",
  "num-traits",
  "serde",
+ "wasm-bindgen",
  "windows-targets 0.52.6",
 ]
 
