@@ -4,6 +4,7 @@ pub type Result<T> = core::result::Result<T, Error>;
 pub enum Error {
 	// -- Time
 	DateFailParse(String),
+	InvalidSecondFormat(String),
 
 	// -- Base64
 	FailToB64uDecode,

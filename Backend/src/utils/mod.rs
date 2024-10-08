@@ -18,12 +18,22 @@ pub fn format_time(time: DateTime<Utc>) -> String {
 	time.to_rfc3339()
 }
 
-pub fn now_add_sec(sec: i64) -> DateTime<Utc> {
-	now_utc() + TimeDelta::try_seconds(sec).unwrap()
+pub fn now_add_sec(sec: i64) -> Result<DateTime<Utc>> {
+	let duration = TimeDelta::try_seconds(sec).ok_or(Error::InvalidSecondFormat(sec.to_string()))?;
+
+    Ok(now_utc() + duration)
 }
 
-pub fn parse_utc(moment: &str) -> Result<DateTime<Utc>> {
+pub fn parse_utc_from_str(moment: &str) -> Result<DateTime<Utc>> {
     moment.parse::<DateTime<Utc>>().map_err(|_| Error::DateFailParse(moment.to_string()))
+}
+
+pub fn parse_utc_from_timestamp(timestamp: i64) -> Result<DateTime<Utc>> {
+    DateTime::from_timestamp(timestamp, 0).ok_or(Error::DateFailParse(timestamp.to_string()))
+}
+
+pub fn parse_timestamp_from_utc(time: DateTime<Utc>) -> i64 {
+	time.timestamp()
 }
 // endregion: --- Time
 
