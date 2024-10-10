@@ -14,9 +14,7 @@ pub fn config() -> &'static Config {
 pub struct Config {
     // -- Crypt
     pub ACCESS_TOKEN_KEY: Vec<u8>,
-    pub ACCESS_TOKEN_DURATION: i64,
     pub REFRESH_TOKEN_KEY: Vec<u8>,
-    pub REFRESH_TOKEN_DURATION: i64,
 
     // -- Database
     pub DATABASE_URL: String,
@@ -30,10 +28,7 @@ impl Config {
         Ok(Config {
             // -- Crypt
             ACCESS_TOKEN_KEY: get_env_b64u_as_u8("ACCESS_TOKEN_KEY")?,
-            ACCESS_TOKEN_DURATION: get_env_parse("ACCESS_TOKEN_DURATION")?,
-
             REFRESH_TOKEN_KEY: get_env_b64u_as_u8("REFRESH_TOKEN_KEY")?,
-            REFRESH_TOKEN_DURATION: get_env_parse("REFRESH_TOKEN_DURATION")?,
 
             // -- Database
             DATABASE_URL: get_env("SERVICE_DB_URL")?,

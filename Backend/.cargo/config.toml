@@ -21,9 +21,7 @@ RUST_LOG="Backend=debug"
 SERVICE_DB_URL = "postgresql://dev:dev_only_pwd@localhost:5432/dev_db"
 
 ACCESS_TOKEN_KEY = "3FfRZM3zUDkrE3HCmomcH9hrCdr3M8IKi_wHjzWQmlVPD9ljyAuiUN0i3ZfY4SatztRXh3GvsTmnpCqc6YeVhQ" # Public key to encode access token in HMAC 512
-ACCESS_TOKEN_DURATION = "900" # 15 min
 REFRESH_TOKEN_KEY = "uuqY7SNuIFtkuXUXzgrPJrqc2jJTYt1y9YInr8g0n_dkxKXJSjXDGENyqOkeufLv4bFLpshxt1yB7s2v4w8vCw" # Public key to encode refresh token in HMAC 512
-REFRESH_TOKEN_DURATION = "604800" # 7 days
 
 
 ## -- ConfigMap

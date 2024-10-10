@@ -15,12 +15,15 @@ pub enum Error {
 	FailSpawnBlockForValidate,
 
 	// -- Token
-	TokenInvalidFormat,
-	TokenCannotDecodeIdent,
-	TokenCannotDecodeExp,
-	TokenSignatureNotMatching,
-	TokenExpNotIso,
-	TokenExpired,
+	FailGenerateAccessToken,
+	FailGenerateRefreshToken,
+	AccessTokenInvalidFormat,
+	RefreshTokenInvalidFormat,
+	AccessTokenExpInvalidFormat,
+	RefreshTokenExpInvalidFormat,
+	AccessTokenExpired,
+	RefreshTokenExpired,
+
 }
 
 // region:    --- Error Boilerplate
