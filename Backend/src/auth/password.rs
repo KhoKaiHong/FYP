@@ -8,7 +8,9 @@ use argon2::{
 // With many requests, OS thread will be held and cannot be moved.
 
 // Encrypt the password using argon2 algorithm
-pub async fn encrypt_password(password: String) -> Result<String> {
+pub async fn encrypt_password(password: &str) -> Result<String> {
+    let password = password.to_owned();
+
     tokio::task::spawn_blocking(move || {
         let salt = SaltString::generate(&mut OsRng);
 
@@ -26,7 +28,10 @@ pub async fn encrypt_password(password: String) -> Result<String> {
 }
 
 // Validate a password using the same algorithm
-pub async fn validate_password(password: String, password_hash: String) -> Result<()> {
+pub async fn validate_password(password: &str, password_hash: &str) -> Result<()> {
+    let password = password.to_owned();
+    let password_hash = password_hash.to_owned();
+
     tokio::task::spawn_blocking(move || {
         let parsed_hash =
             PasswordHash::new(&password_hash).map_err(|_| Error::PasswordHashWrongFormat)?;
@@ -52,9 +57,9 @@ mod tests {
     async fn password_test() -> Result<()> {
         // -- Exec
         let password = "test_password";
-        let password_hashed = encrypt_password(password.to_owned()).await?;
+        let password_hashed = encrypt_password(password).await?;
 
-        let validate_result = validate_password("test_password".to_owned(), password_hashed).await?;
+        let validate_result = validate_password("test_password", &password_hashed).await?;
         Ok(())
     }
 }

@@ -4,7 +4,7 @@ mod error;
 mod log;
 mod model;
 mod web;
-mod crypt;
+mod auth;
 mod utils;
 
 pub mod _dev_utils;

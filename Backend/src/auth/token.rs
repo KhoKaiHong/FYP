@@ -1,13 +1,12 @@
 use super::Role;
 use crate::config;
-use crate::crypt::{Error, Result};
+use crate::auth::{Error, Result};
 use crate::utils::{
     format_time, now_add_sec, now_utc, parse_utc_from_str, parse_utc_from_timestamp,
 };
 use jsonwebtoken::errors::ErrorKind;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AccessTokenClaims {
@@ -120,6 +119,7 @@ mod tests {
     use super::*;
     use anyhow::Result;
     use chrono::TimeDelta;
+    use uuid::Uuid;
     use serial_test::serial;
 
     #[test]
