@@ -1,16 +1,16 @@
+use crate::auth;
+use crate::auth::token::{validate_access_token, validate_refresh_token};
 use crate::context::Context;
 use crate::model::ModelManager;
-use crate::web::AUTH_TOKEN;
 use crate::web::{Error, Result};
 use async_trait::async_trait;
 use axum::body::Body;
 use axum::extract::{FromRequestParts, State};
 use axum::http::request::Parts;
-use axum::http::Request;
+use axum::http::{header, Request};
 use axum::middleware::Next;
 use axum::response::Response;
 use serde::Serialize;
-use tower_cookies::{Cookie, Cookies};
 use tracing::debug;
 
 pub async fn mw_require_auth(
@@ -27,25 +27,46 @@ pub async fn mw_require_auth(
 
 pub async fn mw_ctx_resolver(
     _mm: State<ModelManager>,
-    cookies: Cookies,
     mut req: Request<Body>,
     next: Next,
 ) -> Result<Response> {
     debug!("{:<12} - mw_ctx_resolver", "MIDDLEWARE");
 
-    let auth_token = cookies.get(AUTH_TOKEN).map(|c| c.value().to_string());
+    let auth_header = req
+        .headers()
+        .get(header::AUTHORIZATION)
+        .ok_or(Error::ContextExtractor(
+            ContextExtractorError::AccessTokenNotInHeader,
+        ))?;
 
-    // FIXME - Compute real CtxAuthResult<Ctx>.
-    let result_ctx =
-        Context::new(100).map_err(|ex| ContextExtractorError::ContextCreateFail(ex.to_string()));
+    let auth_header = auth_header
+        .to_str()
+        .map_err(|_| Error::ContextExtractor(ContextExtractorError::InvalidAccessToken))?;
 
-    // Remove the cookie if something went wrong other than NoAuthTokenCookie.
-    if result_ctx.is_err() && !matches!(result_ctx, Err(ContextExtractorError::TokenNotInCookie)) {
-        cookies.remove(Cookie::from(AUTH_TOKEN))
-    }
+    let access_token = auth_header
+        .strip_prefix("Bearer ")
+        .ok_or(Error::ContextExtractor(
+            ContextExtractorError::InvalidAccessToken,
+        ))?
+        .to_string();
+
+    let claims = validate_access_token(&access_token).map_err(|err| match err {
+        auth::Error::AccessTokenExpired => {
+            Error::ContextExtractor(ContextExtractorError::AccessTokenExpired)
+        }
+        _ => Error::ContextExtractor(ContextExtractorError::AccessTokenExpired),
+    })?;
+
+    let role = claims
+        .role()
+        .map_err(|_| Error::ContextExtractor(ContextExtractorError::AccessTokenExpired))?;
+
+    let context = Context::new(claims.id(), role).map_err(|ex| {
+        Error::ContextExtractor(ContextExtractorError::ContextCreateFail(ex.to_string()))
+    })?;
 
     // Store the ctx_result in the request extension.
-    req.extensions_mut().insert(result_ctx);
+    req.extensions_mut().insert(context);
 
     Ok(next.run(req).await)
 }
@@ -61,9 +82,11 @@ impl<S: Send + Sync> FromRequestParts<S> for Context {
         parts
             .extensions
             .get::<ContextExtractorResult>()
-			.ok_or(Error::ContextExtractor(ContextExtractorError::ContextNotInRequestExtractor))?
-			.clone()
-			.map_err(Error::ContextExtractor)
+            .ok_or(Error::ContextExtractor(
+                ContextExtractorError::ContextNotInRequestExtractor,
+            ))?
+            .clone()
+            .map_err(Error::ContextExtractor)
     }
 }
 
@@ -74,7 +97,9 @@ type ContextExtractorResult = core::result::Result<Context, ContextExtractorErro
 
 #[derive(Clone, Serialize, Debug)]
 pub enum ContextExtractorError {
-    TokenNotInCookie,
+    AccessTokenNotInHeader,
+    AccessTokenExpired,
+    InvalidAccessToken,
     ContextNotInRequestExtractor,
     ContextCreateFail(String),
 }

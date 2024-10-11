@@ -1,8 +1,8 @@
-#[derive(Debug, strum_macros::Display, Clone)]
+#[derive(Debug, strum_macros::Display, strum_macros::EnumString, Clone)]
 pub enum Role {
     User,
     Admin,
-    #[strum(to_string = "Blood Collection Facility")]
+    #[strum(serialize = "Blood Collection Facility")]
     BloodCollectionFacility,
     Organiser,
 }

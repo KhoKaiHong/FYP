@@ -7,6 +7,7 @@ use crate::utils::{
 use jsonwebtoken::errors::ErrorKind;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AccessTokenClaims {
@@ -33,6 +34,14 @@ impl AccessTokenClaims {
             iat: now_utc().timestamp(),
             exp: now_add_sec(duration).timestamp(),
         }
+    }
+
+    pub fn id(&self) -> i64 {
+        self.id
+    }
+
+    pub fn role(&self) -> Result<Role> {
+        Role::from_str(&self.role).map_err(|_|Error::AccessTokenInvalidFormat)
     }
 }
 
@@ -88,6 +97,10 @@ impl RefreshTokenClaims {
             exp: now_add_sec(duration).timestamp(),
         }
     }
+
+    pub fn jti(&self) -> &str {
+        &self.jti
+    }
 }
 
 pub fn generate_refresh_token(jti: &str, role: &Role) -> Result<String> {
@@ -126,7 +139,7 @@ mod tests {
     #[serial]
     fn access_token_test() -> Result<()> {
         let id = 10;
-        let role = Role::User;
+        let role = Role::BloodCollectionFacility;
         let access_token = generate_access_token(id, &role)?;
 
         let validation_result = validate_access_token(&access_token)?;
@@ -134,7 +147,7 @@ mod tests {
         assert_eq!(validation_result.role, role.to_string());
         assert_eq!(validation_result.id, id);
         assert_eq!(
-            parse_utc_from_timestamp(validation_result.iat).unwrap() + TimeDelta::try_seconds(900).unwrap(), 
+            parse_utc_from_timestamp(validation_result.iat).unwrap() + TimeDelta::try_seconds(600).unwrap(), 
             parse_utc_from_timestamp(validation_result.exp).unwrap()
         );
 
