@@ -1,4 +1,4 @@
-#[derive(Debug, strum_macros::Display)]
+#[derive(Debug, strum_macros::Display, Clone)]
 pub enum Role {
     User,
     Admin,

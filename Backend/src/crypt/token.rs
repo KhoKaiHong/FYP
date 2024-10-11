@@ -4,6 +4,7 @@ use crate::crypt::{Error, Result};
 use crate::utils::{
     format_time, now_add_sec, now_utc, parse_utc_from_str, parse_utc_from_timestamp,
 };
+use jsonwebtoken::errors::ErrorKind;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -17,7 +18,7 @@ pub struct AccessTokenClaims {
 }
 
 impl AccessTokenClaims {
-    fn new(id: i64, role: Role) -> Self {
+    fn new(id: i64, role: &Role) -> Self {
         let duration: i64;
 
         match role {
@@ -36,32 +37,28 @@ impl AccessTokenClaims {
     }
 }
 
-pub fn generate_access_token(id: i64, role: Role) -> Result<String> {
+pub fn generate_access_token(id: i64, role: &Role) -> Result<String> {
     jsonwebtoken::encode(
         &Header::new(Algorithm::HS512),
-        &AccessTokenClaims::new(id, role),
+        &AccessTokenClaims::new(id, &role),
         &EncodingKey::from_secret(&config().ACCESS_TOKEN_KEY),
     )
     .map_err(|_| Error::FailGenerateAccessToken)
 }
 
-pub fn validate_access_token(access_token: String) -> Result<()> {
+pub fn validate_access_token(access_token: &str) -> Result<AccessTokenClaims> {
     let claims = jsonwebtoken::decode::<AccessTokenClaims>(
-        &access_token,
+        access_token,
         &DecodingKey::from_secret(&config().ACCESS_TOKEN_KEY),
-        &Validation::default(),
+        &Validation::new(Algorithm::HS512),
     )
-    .map_err(|_| Error::RefreshTokenInvalidFormat)?
+    .map_err(|err| match err.kind() {
+        ErrorKind::ExpiredSignature => Error::AccessTokenExpired,
+        _ => Error::AccessTokenInvalidFormat,
+    })?
     .claims;
 
-    let exp =
-        parse_utc_from_timestamp(claims.exp).map_err(|_| Error::AccessTokenExpInvalidFormat)?;
-
-    if exp < now_utc() {
-        return Err(Error::AccessTokenExpired);
-    }
-
-    Ok(())
+    Ok(claims)
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -72,8 +69,9 @@ pub struct RefreshTokenClaims {
 }
 
 impl RefreshTokenClaims {
-    fn new(role: Role) -> Self {
+    fn new(jti: &str, role: &Role) -> Self {
         let duration: i64;
+        let jti = jti.to_string();
 
         match role {
             // 15 days
@@ -86,37 +84,78 @@ impl RefreshTokenClaims {
         }
 
         RefreshTokenClaims {
-            jti: Uuid::new_v4().to_string(),
+            jti,
             iat: now_utc().timestamp(),
             exp: now_add_sec(duration).timestamp(),
         }
     }
 }
 
-pub fn generate_refresh_token(role: Role) -> Result<String> {
+pub fn generate_refresh_token(jti: &str, role: &Role) -> Result<String> {
     jsonwebtoken::encode(
         &Header::new(Algorithm::HS512),
-        &RefreshTokenClaims::new(role),
+        &RefreshTokenClaims::new(jti, role),
         &EncodingKey::from_secret(&config().REFRESH_TOKEN_KEY),
     )
     .map_err(|_| Error::FailGenerateRefreshToken)
 }
 
-pub fn validate_refresh_token(refresh_token: String) -> Result<()> {
+pub fn validate_refresh_token(refresh_token: &str) -> Result<RefreshTokenClaims> {
     let claims = jsonwebtoken::decode::<RefreshTokenClaims>(
-        &refresh_token,
+        refresh_token,
         &DecodingKey::from_secret(&config().REFRESH_TOKEN_KEY),
-        &Validation::default(),
+        &Validation::new(Algorithm::HS512),
     )
-    .map_err(|_| Error::RefreshTokenInvalidFormat)?
+    .map_err(|err| match err.kind() {
+        ErrorKind::ExpiredSignature => Error::RefreshTokenExpired,
+        _ => Error::RefreshTokenInvalidFormat,
+    })?
     .claims;
 
-    let exp =
-        parse_utc_from_timestamp(claims.exp).map_err(|_| Error::RefreshTokenExpInvalidFormat)?;
+    Ok(claims)
+}
 
-    if exp < now_utc() {
-        return Err(Error::RefreshTokenExpired);
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::Result;
+    use chrono::TimeDelta;
+    use serial_test::serial;
+
+    #[test]
+    #[serial]
+    fn access_token_test() -> Result<()> {
+        let id = 10;
+        let role = Role::User;
+        let access_token = generate_access_token(id, &role)?;
+
+        let validation_result = validate_access_token(&access_token)?;
+
+        assert_eq!(validation_result.role, role.to_string());
+        assert_eq!(validation_result.id, id);
+        assert_eq!(
+            parse_utc_from_timestamp(validation_result.iat).unwrap() + TimeDelta::try_seconds(900).unwrap(), 
+            parse_utc_from_timestamp(validation_result.exp).unwrap()
+        );
+
+        Ok(())
     }
 
-    Ok(())
+    #[test]
+    #[serial]
+    fn refresh_token_test() -> Result<()> {
+        let role = Role::User;
+        let jti = Uuid::new_v4().to_string();
+        let refresh_token = generate_refresh_token(&jti, &role)?;
+
+        let validation_result = validate_refresh_token(&refresh_token)?;
+
+        assert_eq!(
+            parse_utc_from_timestamp(validation_result.iat).unwrap() + TimeDelta::try_seconds(1296000).unwrap(), 
+            parse_utc_from_timestamp(validation_result.exp).unwrap()
+        );
+        assert_eq!(jti, validation_result.jti);
+
+        Ok(())
+    }
 }

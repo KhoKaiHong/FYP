@@ -38,3 +38,25 @@ pub async fn validate_password(password: String, password_hash: String) -> Resul
     .await
     .map_err(|_| Error::FailSpawnBlockForValidate)?
 }
+
+// region:    --- Tests
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+	use anyhow::Result;
+    use serial_test::serial;
+
+    #[tokio::test]
+    #[serial]
+    async fn password_test() -> Result<()> {
+        // -- Exec
+        let password = "test_password";
+        let password_hashed = encrypt_password(password.to_owned()).await?;
+
+        let validate_result = validate_password("test_password".to_owned(), password_hashed).await?;
+        Ok(())
+    }
+}
+
+// endregion: --- Tests
