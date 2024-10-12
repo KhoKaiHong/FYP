@@ -12,7 +12,7 @@ pub enum Error {
     // -- Login
     LoginFail,
 
-    // -- Context Extractor Error
+    // -- Context Errors
     ContextExtractor(web::middleware_auth::ContextExtractorError),
 }
 
