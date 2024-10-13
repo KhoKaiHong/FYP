@@ -9,7 +9,7 @@ INSERT INTO "blood_collection_facilities" (name, email, password, address, phone
 ('Hospital Sultan Haji Ahmad Shah', 'sultan.shah@example.com', 'password123', 'Address 2, Pahang', '60123456786', (SELECT id FROM states WHERE name = 'Pahang')),
 ('Hospital Seberang Jaya', 'seberang.jaya@example.com', 'password123', 'Address 1, Pulau Pinang', '60123456787', (SELECT id FROM states WHERE name = 'Pulau Pinang')),
 ('Hospital Pulau Pinang', 'pulau.pinang@example.com', 'password123', 'Address 2, Pulau Pinang', '60123456788', (SELECT id FROM states WHERE name = 'Pulau Pinang')),
-('Hospital Raja Permaisuri Bainun', 'bainun@example.com', 'password123', 'Address 1, Perak', '60123456789', (SELECT id FROM states WHERE name = 'Perak')),
+('Hospital Raja Permaisuri Bainun', 'bainun@example.com', 'password123', 'Address 1, Perak', '60169349582', (SELECT id FROM states WHERE name = 'Perak')),
 ('Hospital Taiping', 'taiping@example.com', 'password123', 'Address 2, Perak', '60123456790', (SELECT id FROM states WHERE name = 'Perak')),
 ('Hospital Seri Manjung', 'seri.manjung@example.com', 'password123', 'Address 3, Perak', '60123456791', (SELECT id FROM states WHERE name = 'Perak')),
 ('Hospital Tengku Ampuan Rahimah', 'rahimah@example.com', 'password123', 'Address 1, Selangor', '60123456792', (SELECT id FROM states WHERE name = 'Selangor')),
