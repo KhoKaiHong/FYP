@@ -39,7 +39,7 @@ CREATE TABLE "users" (
   name TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   phone_number TEXT NOT NULL UNIQUE,
-  blood_type TEXT,
+  blood_type TEXT NOT NULL,
   eligibility eligibility_status NOT NULL DEFAULT 'Eligible', -- Enum type
   state_id INTEGER REFERENCES states(id) NOT NULL,
   district_id INTEGER REFERENCES districts(id) NOT NULL
