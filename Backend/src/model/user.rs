@@ -3,7 +3,6 @@ use crate::context::Context;
 use crate::model::{Error, ModelManager, Result};
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, Type};
-use strum_macros::{Display, EnumString};
 
 // region:    --- User Types
 #[derive(Debug, Clone, FromRow, Serialize)]

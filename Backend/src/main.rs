@@ -3,6 +3,7 @@ mod context;
 mod error;
 mod log;
 mod model;
+mod state;
 mod web;
 mod auth;
 mod utils;
@@ -14,6 +15,8 @@ pub use config::config;
 
 use axum::{middleware, Router};
 use model::ModelManager;
+use resend_rs::Resend;
+use state::AppState;
 use tokio::net::TcpListener;
 use tower_cookies::CookieManagerLayer;
 use tracing::info;
@@ -31,8 +34,11 @@ async fn main() -> Result<()> {
     // -- FOR DEV ONLY
     _dev_utils::init_dev().await;
 
-    // Initialize ModelManager.
-    let model_manager = ModelManager::new().await?;
+    // Initialize AppState.
+    let app_state = AppState {
+        model_manager: ModelManager::new().await?,
+        email_manager: Resend::new(config().RESEND_API_KEY.as_str()),
+    };
 
     let routes_all = Router::new()
         .merge(web::routes_hello::routes())
@@ -41,7 +47,7 @@ async fn main() -> Result<()> {
             web::response_map::main_response_mapper,
         ))
         .layer(middleware::from_fn_with_state(
-            model_manager.clone(),
+            app_state.clone(),
             web::middleware_auth::mw_ctx_resolver,
         ))
         .layer(CookieManagerLayer::new())

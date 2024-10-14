@@ -12,7 +12,7 @@ pub fn config() -> &'static Config {
 
 #[allow(non_snake_case)]
 pub struct Config {
-    // -- Crypt
+    // -- Auth
     pub ACCESS_TOKEN_KEY: Vec<u8>,
     pub REFRESH_TOKEN_KEY: Vec<u8>,
 
@@ -21,12 +21,15 @@ pub struct Config {
 
     // -- Web
     pub WEB_FOLDER: String,
+
+    // -- Email Service
+    pub RESEND_API_KEY: String,
 }
 
 impl Config {
     fn load_from_env() -> Result<Config> {
         Ok(Config {
-            // -- Crypt
+            // -- Auth
             ACCESS_TOKEN_KEY: get_env_b64u_as_u8("ACCESS_TOKEN_KEY")?,
             REFRESH_TOKEN_KEY: get_env_b64u_as_u8("REFRESH_TOKEN_KEY")?,
 
@@ -35,6 +38,9 @@ impl Config {
 
             // -- Web
             WEB_FOLDER: get_env("SERVICE_WEB_FOLDER")?,
+
+            // -- Email Service
+            RESEND_API_KEY: get_env("RESEND_API_KEY")?,
         })
     }
 }

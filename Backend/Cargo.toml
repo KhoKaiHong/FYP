@@ -29,12 +29,14 @@ tower-http = { version = "0.6.1", features = ["fs"] }
 tower-cookies = "0.10.0"
 
 # Database
-sqlx = { version = "0.8.2", features = [ "runtime-tokio", "tls-rustls-ring", "postgres", "uuid", "time" ] }
-sea-query = "0.31.1"
+sqlx = { version = "0.8", features = [ "runtime-tokio", "tls-rustls-ring", "postgres", "uuid", "chrono" ] }
 
 # Tracing
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+
+# Email
+resend-rs = { version = "0.9.1", default-features = false, features = ["rustls-tls"] }
 
 # Others
 base64-url = "3.0.0"
