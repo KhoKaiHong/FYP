@@ -19,6 +19,22 @@ pub struct User {
     pub district_id: i32,
 }
 
+#[derive(Debug, FromRow)]
+pub struct UserWithLocation {
+    pub id: i64,
+    pub ic_number: String,
+    pub password: String,
+    pub name: String,
+    pub email: String,
+    pub phone_number: String,
+    pub blood_type: String,
+    pub eligibility: EligibilityStatus,
+    pub state_id: i32,
+    pub district_id: i32,
+    pub state_name: String,
+    pub district_name: String,
+}
+
 #[derive(Deserialize)]
 pub struct UserForCreate {
     pub ic_number: String,
@@ -27,19 +43,15 @@ pub struct UserForCreate {
     pub email: String,
     pub phone_number: String,
     pub blood_type: String,
-    pub eligibility: Option<EligibilityStatus>,
     pub state_id: i32,
     pub district_id: i32,
 }
 
-#[derive(Deserialize, FromRow)]
+#[derive(Deserialize)]
 pub struct UserForUpdate {
     pub password: Option<String>,
-    pub name: Option<String>,
     pub email: Option<String>,
     pub phone_number: Option<String>,
-    pub blood_type: Option<String>,
-    pub eligibility: Option<EligibilityStatus>,
     pub state_id: Option<i32>,
     pub district_id: Option<i32>,
 }
@@ -55,9 +67,9 @@ pub enum EligibilityStatus {
 // endregion: --- User Types
 
 // region:    --- User Model Controller
-pub struct UserBmc;
+pub struct UserModelController;
 
-impl UserBmc {
+impl UserModelController {
     pub async fn create(
         context: &Context,
         model_manager: &ModelManager,
@@ -66,7 +78,7 @@ impl UserBmc {
         let db = model_manager.db();
 
         let (id,) = sqlx::query_as(
-            "INSERT INTO users (ic_number, password, name, email, phone_number, blood_type, eligibility, state_id, district_id) values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id",
+            "INSERT INTO users (ic_number, password, name, email, phone_number, blood_type, state_id, district_id) values ($1, $2, $3, $4, $5, $6, $7, $8) returning id",
         )
         .bind(user_created.ic_number)
         .bind(user_created.password)
@@ -74,7 +86,6 @@ impl UserBmc {
         .bind(user_created.email)
         .bind(user_created.phone_number)
         .bind(user_created.blood_type)
-        .bind(user_created.eligibility.or(Some(EligibilityStatus::Eligible)))
         .bind(user_created.state_id)
         .bind(user_created.district_id)
         .fetch_one(db)
@@ -83,10 +94,30 @@ impl UserBmc {
         Ok(id)
     }
 
-    pub async fn get(context: &Context, model_manager: &ModelManager, id: i64) -> Result<User> {
+    pub async fn get(
+        context: &Context,
+        model_manager: &ModelManager,
+        id: i64,
+    ) -> Result<UserWithLocation> {
         let db = model_manager.db();
 
-        let user = sqlx::query_as("SELECT * from users where id = $1")
+        let user = sqlx::query_as(
+            "SELECT users.*, 
+                    states.name AS state_name, 
+                    districts.name AS district_name
+             FROM users 
+             JOIN states ON users.state_id = states.id 
+             JOIN districts ON users.district_id = districts.id 
+             WHERE users.id = $1",
+        )
+        .bind(id)
+        .fetch_optional(db)
+        .await?
+        .ok_or(Error::EntityNotFound { entity: "user", id })?;
+
+        println!("user: {:?}", user);
+
+        let user = sqlx::query_as("SELECT users.*, states.name AS state_name, districts.name AS district_name FROM users JOIN states ON users.state_id = states.id JOIN districts ON users.district_id = districts.id WHERE users.id = $1")
             .bind(id)
             .fetch_optional(db)
             .await?
@@ -95,10 +126,10 @@ impl UserBmc {
         Ok(user)
     }
 
-    pub async fn list(context: &Context, model_manager: &ModelManager) -> Result<Vec<User>> {
+    pub async fn list(context: &Context, model_manager: &ModelManager) -> Result<Vec<UserWithLocation>> {
         let db = model_manager.db();
 
-        let users = sqlx::query_as("SELECT * from users ORDER BY id")
+        let users = sqlx::query_as("SELECT users.*, states.name AS state_name, districts.name AS district_name FROM users JOIN states ON users.state_id = states.id JOIN districts ON users.district_id = districts.id")
             .fetch_all(db)
             .await?;
 
@@ -113,20 +144,61 @@ impl UserBmc {
     ) -> Result<()> {
         let db = model_manager.db();
 
-        sqlx::query(
-            "UPDATE users SET password = $1, name = $2, email = $3, phone_number = $4, blood_type = $5, eligibility = $6, state_id = $7, district_id = $8 WHERE id = $9",
-        )
-        .bind(user_updated.password)
-        .bind(user_updated.name)
-        .bind(user_updated.email)
-        .bind(user_updated.phone_number)
-        .bind(user_updated.blood_type)
-        .bind(user_updated.eligibility)
-        .bind(user_updated.state_id)
-        .bind(user_updated.district_id)
-        .bind(id)
-        .execute(db)
-        .await?;
+        let mut query_builder = sqlx::QueryBuilder::new("UPDATE users SET ");
+
+        let mut first = true;
+
+        if let Some(password) = user_updated.password {
+            query_builder.push("password = ");
+            query_builder.push_bind(password);
+            first = false;
+        }
+
+        if let Some(email) = user_updated.email {
+            if !first {
+                query_builder.push(", ");
+            }
+            query_builder.push("email = ");
+            query_builder.push_bind(email);
+            first = false;
+        }
+
+        if let Some(phone_number) = user_updated.phone_number {
+            if !first {
+                query_builder.push(", ");
+            }
+            query_builder.push("phone_number = ");
+            query_builder.push_bind(phone_number);
+            first = false;
+        }
+
+        if let Some(state_id) = user_updated.state_id {
+            if !first {
+                query_builder.push(", ");
+            }
+            query_builder.push("state_id = ");
+            query_builder.push_bind(state_id);
+            first = false;
+        }
+
+        if let Some(district_id) = user_updated.district_id {
+            if !first {
+                query_builder.push(", ");
+            }
+            query_builder.push("district_id = ");
+            query_builder.push_bind(district_id);
+        }
+
+        // If no fields were updated, return early
+        if first {
+            return Ok(());
+        }
+
+        query_builder.push(" WHERE id = ");
+        query_builder.push_bind(id);
+
+        let query = query_builder.build();
+        query.execute(db).await?;
 
         Ok(())
     }
@@ -155,23 +227,22 @@ mod tests {
             email: "john@example.com".to_string(),
             phone_number: "1234567890".to_string(),
             blood_type: "A+".to_string(),
-            eligibility: Some(EligibilityStatus::IneligibleCondition),
             state_id: 1,
             district_id: 1,
         };
 
         // -- Exec
-        let id = UserBmc::create(&context, &model_manager, user_created).await?;
+        let id = UserModelController::create(&context, &model_manager, user_created).await?;
 
         // -- Check
-        let user = UserBmc::get(&context, &model_manager, id).await?;
+        let user = UserModelController::get(&context, &model_manager, id).await?;
         assert_eq!(user.ic_number, "1234567890");
         assert_eq!(user.password, "password");
         assert_eq!(user.name, "John Doe");
         assert_eq!(user.email, "john@example.com");
         assert_eq!(user.phone_number, "1234567890");
         assert_eq!(user.blood_type, "A+".to_string());
-        assert_eq!(user.eligibility, EligibilityStatus::IneligibleCondition);
+        assert_eq!(user.eligibility, EligibilityStatus::Eligible);
         assert_eq!(user.state_id, 1);
         assert_eq!(user.district_id, 1);
 
@@ -195,7 +266,7 @@ mod tests {
         let id = 100;
 
         // -- Exec
-        let res = UserBmc::get(&context, &model_manager, id).await;
+        let res = UserModelController::get(&context, &model_manager, id).await;
 
         // -- Check
         assert!(
@@ -226,7 +297,6 @@ mod tests {
             email: "john@example.com".to_string(),
             phone_number: "1234567890".to_string(),
             blood_type: "A+".to_string(),
-            eligibility: None,
             state_id: 1,
             district_id: 1,
         };
@@ -237,15 +307,14 @@ mod tests {
             email: "jane@example.com".to_string(),
             phone_number: "9876543210".to_string(),
             blood_type: "O-".to_string(),
-            eligibility: Some(EligibilityStatus::Ineligible),
             state_id: 2,
             district_id: 2,
         };
 
         // -- Exec
-        let id1 = UserBmc::create(&context, &model_manager, user_created1).await?;
-        let id2 = UserBmc::create(&context, &model_manager, user_created2).await?;
-        let users = UserBmc::list(&context, &model_manager).await?;
+        let id1 = UserModelController::create(&context, &model_manager, user_created1).await?;
+        let id2 = UserModelController::create(&context, &model_manager, user_created2).await?;
+        let users = UserModelController::list(&context, &model_manager).await?;
 
         // -- Check
         // Seeded 5 at the first place
@@ -253,8 +322,9 @@ mod tests {
         assert_eq!(users[3].ic_number, "1234567890");
         assert_eq!(users[4].ic_number, "9876543210");
 
-        println!("\n\nuser1: {:?}", users[0]);
-        println!("\n\nuser2: {:?}", users[0]);
+        for user in users {
+            println!("user: {:?}", user);
+        }
 
         // Clean
         sqlx::query("DELETE FROM users WHERE id = $1")
@@ -282,36 +352,32 @@ mod tests {
             email: "john@example.com".to_string(),
             phone_number: "1234567890".to_string(),
             blood_type: "A+".to_string(),
-            eligibility: None,
             state_id: 1,
             district_id: 1,
         };
 
         // -- Exec
-        let id = UserBmc::create(&context, &model_manager, user_created).await?;
+        let id = UserModelController::create(&context, &model_manager, user_created).await?;
 
         let user_updated = UserForUpdate {
             password: Some("new_password".to_string()),
-            name: Some("Jane Doe".to_string()),
-            email: Some("jane@example.com".to_string()),
+            email: None,
             phone_number: Some("9876543210".to_string()),
-            blood_type: Some("O-".to_string()),
-            eligibility: Some(EligibilityStatus::IneligibleCondition),
             state_id: Some(2),
             district_id: Some(2),
         };
 
-        UserBmc::update(&context, &model_manager, id, user_updated).await?;
+        UserModelController::update(&context, &model_manager, id, user_updated).await?;
 
         // -- Check
-        let user = UserBmc::get(&context, &model_manager, id).await?;
+        let user = UserModelController::get(&context, &model_manager, id).await?;
         assert_eq!(user.ic_number, "1234567890");
         assert_eq!(user.password, "new_password");
-        assert_eq!(user.name, "Jane Doe");
-        assert_eq!(user.email, "jane@example.com");
+        assert_eq!(user.name, "John Doe");
+        assert_eq!(user.email, "john@example.com");
         assert_eq!(user.phone_number, "9876543210");
-        assert_eq!(user.blood_type, "O-".to_string());
-        assert_eq!(user.eligibility, EligibilityStatus::IneligibleCondition);
+        assert_eq!(user.blood_type, "A+".to_string());
+        assert_eq!(user.eligibility, EligibilityStatus::Eligible);
         assert_eq!(user.state_id, 2);
         assert_eq!(user.district_id, 2);
 
