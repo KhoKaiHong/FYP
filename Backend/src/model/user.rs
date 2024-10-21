@@ -1,11 +1,12 @@
-// Backend/src/model/user.rs
 use crate::context::Context;
 use crate::model::{Error, ModelManager, Result};
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, Type};
 
 // region:    --- User Types
-#[derive(Debug, Clone, FromRow, Serialize)]
+
+// Not needed if state and district name is required
+#[derive(Debug, FromRow)]
 pub struct User {
     pub id: i64,
     pub ic_number: String,
