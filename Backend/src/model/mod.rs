@@ -26,6 +26,7 @@ pub mod user;
 pub mod state;
 pub mod district;
 pub mod facility;
+pub mod organiser;
 
 pub use self::error::{Error, Result};
 

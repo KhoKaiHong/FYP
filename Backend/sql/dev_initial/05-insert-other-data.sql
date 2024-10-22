@@ -11,16 +11,10 @@ INSERT INTO event_organisers (email, password, name, phone_number) VALUES
 ('organiser3@example.com', 'password123', 'Blood Organiser 3', '60123456797');
 
 -- Insert data into blood_donation_events
-INSERT INTO blood_donation_events (address, start_time, end_time, max_attendees, facility_id, state_id, district_id) VALUES
-('Jalan Hospital, Johor Bahru', '2024-10-15 08:00:00', '2024-10-15 16:00:00', 100, 1, 1, 1),
-('Jalan Langgar, Alor Setar', '2024-10-18 09:00:00', '2024-10-18 17:00:00', 150, 2, 1, 1),
-('Jalan Tun Razak, Kuala Lumpur', '2024-10-20 10:00:00', '2024-10-20 18:00:00', 200, 3, 1, 1);
-
--- Insert data into event_organisers_events
-INSERT INTO event_organisers_events (event_id, organiser_id) VALUES
-(1, 1),
-(2, 2),
-(3, 3);
+INSERT INTO blood_donation_events (address, start_time, end_time, max_attendees, facility_id, state_id, district_id, organiser_id) VALUES
+('Jalan Hospital, Johor Bahru', '2024-10-15 08:00:00', '2024-10-15 16:00:00', 100, 1, 1, 1, 1),
+('Jalan Langgar, Alor Setar', '2024-10-18 09:00:00', '2024-10-18 17:00:00', 150, 2, 1, 1, 2),
+('Jalan Tun Razak, Kuala Lumpur', '2024-10-20 10:00:00', '2024-10-20 18:00:00', 200, 3, 1, 1, 3);
 
 -- Insert data into registrations
 INSERT INTO registrations (status, event_id, user_id) VALUES
