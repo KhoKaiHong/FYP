@@ -27,6 +27,9 @@ pub mod state;
 pub mod district;
 pub mod facility;
 pub mod organiser;
+pub mod event;
+pub mod registration;
+pub mod donation_history;
 
 pub use self::error::{Error, Result};
 

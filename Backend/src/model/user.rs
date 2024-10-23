@@ -102,22 +102,6 @@ impl UserModelController {
     ) -> Result<UserWithLocation> {
         let db = model_manager.db();
 
-        let user = sqlx::query_as(
-            "SELECT users.*, 
-                    states.name AS state_name, 
-                    districts.name AS district_name
-             FROM users 
-             JOIN states ON users.state_id = states.id 
-             JOIN districts ON users.district_id = districts.id 
-             WHERE users.id = $1",
-        )
-        .bind(id)
-        .fetch_optional(db)
-        .await?
-        .ok_or(Error::EntityNotFound { entity: "user", id })?;
-
-        println!("user: {:?}", user);
-
         let user = sqlx::query_as("SELECT users.*, states.name AS state_name, districts.name AS district_name FROM users JOIN states ON users.state_id = states.id JOIN districts ON users.district_id = districts.id WHERE users.id = $1")
             .bind(id)
             .fetch_optional(db)

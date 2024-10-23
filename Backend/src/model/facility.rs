@@ -1,7 +1,7 @@
 use crate::context::Context;
 use crate::model::{Error, ModelManager, Result};
-use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, Type};
+use serde::Deserialize;
+use sqlx::FromRow;
 
 // region:    --- Facility Types
 

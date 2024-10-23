@@ -1,10 +1,9 @@
 use crate::context::Context;
-use crate::model::{Error, ModelManager, Result};
-use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, Type};
+use crate::model::{ModelManager, Result};
+use sqlx::FromRow;
 
 // region:    --- State Types
-#[derive(Debug, Clone, FromRow, Serialize)]
+#[derive(Debug, FromRow)]
 pub struct District {
     pub id: i32,
     pub name: String,
