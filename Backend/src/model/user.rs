@@ -111,6 +111,21 @@ impl UserModelController {
         Ok(user)
     }
 
+    pub async fn get_by_ic_number(
+        model_manager: &ModelManager,
+        ic_number: String,
+    ) -> Result<UserWithLocation> {
+        let db = model_manager.db();
+
+        let user = sqlx::query_as("SELECT users.*, states.name AS state_name, districts.name AS district_name FROM users JOIN states ON users.state_id = states.id JOIN districts ON users.district_id = districts.id WHERE users.ic_number = $1")
+            .bind(ic_number)
+            .fetch_optional(db)
+            .await?
+            .ok_or(Error::UserNotFound)?;
+
+        Ok(user)
+    }
+
     pub async fn list(context: &Context, model_manager: &ModelManager) -> Result<Vec<UserWithLocation>> {
         let db = model_manager.db();
 

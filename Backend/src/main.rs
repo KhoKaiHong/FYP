@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
 
     let routes_all = Router::new()
         .merge(web::routes_hello::routes())
-        .merge(web::routes_login::routes())
+        .merge(web::routes_login::routes(app_state.clone()))
         .layer(middleware::map_response(
             web::response_map::main_response_mapper,
         ))
