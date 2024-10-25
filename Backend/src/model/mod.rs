@@ -30,6 +30,9 @@ pub mod organiser;
 pub mod event;
 pub mod registration;
 pub mod donation_history;
+pub mod user_session;
+pub mod facility_session;
+pub mod organiser_session;
 
 pub use self::error::{Error, Result};
 

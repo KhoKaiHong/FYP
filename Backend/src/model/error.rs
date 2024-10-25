@@ -1,5 +1,6 @@
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
+use uuid::Uuid;
 use crate::model::store;
 
 pub type Result<T> = core::result::Result<T, Error>;
@@ -8,6 +9,7 @@ pub type Result<T> = core::result::Result<T, Error>;
 #[derive(Debug, Serialize)]
 pub enum Error {
 	EntityNotFound { entity: &'static str, id: i64 },
+	SessionNotFound { session: &'static str, id: Uuid },
 	
 	// -- Modules
 	Store(store::Error),
