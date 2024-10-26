@@ -61,9 +61,7 @@ pub async fn mw_ctx_resolver(
         .role()
         .map_err(|_| Error::ContextExtractor(ContextExtractorError::AccessTokenExpired))?;
 
-    let context = Context::new(claims.id(), role).map_err(|ex| {
-        Error::ContextExtractor(ContextExtractorError::ContextCreateFail(ex.to_string()))
-    })?;
+    let context = Context::new(claims.id(), role);
 
     // Store the ctx_result in the request extension.
     req.extensions_mut().insert(context);

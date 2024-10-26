@@ -18,11 +18,10 @@ impl Context {
         }
     }
 
-    pub fn new(user_id: i64, role: Role) -> Result<Self> {
-        if user_id == 0 {
-            Err(Error::CtxCannotNewRootCtx)
-        } else {
-            Ok(Self { user_id, role })
+    pub fn new(user_id: i64, role: Role) -> Self {
+        Context {
+            user_id,
+            role,
         }
     }
 }

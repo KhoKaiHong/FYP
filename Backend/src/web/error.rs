@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{model, web};
+use crate::{auth, model, web};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use serde::Serialize;
@@ -19,7 +19,10 @@ pub enum Error {
     ContextExtractor(web::middleware_auth::ContextExtractorError),
 
     // -- Model Error
-    ModelError(model::Error)
+    ModelError(model::Error),
+
+    // -- Auth Error
+    AuthError(auth::Error),
 }
 
 // region:    --- Axum IntoResponse
@@ -58,8 +61,13 @@ impl Error {
             // -- Context Extractor Errors
             ContextExtractor(_) => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
 
+            // -- Auth Errors
+            AuthError(_) => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+
             // -- Login Fail
-            LoginFail => (StatusCode::UNAUTHORIZED, ClientError::LOGIN_FAIL),
+            LoginFailUsernameNotFound => (StatusCode::UNAUTHORIZED, ClientError::USERNAME_NOT_FOUND),
+            LoginFailPasswordNotMatching => (StatusCode::UNAUTHORIZED, ClientError::INCORRECT_PASSWORD),
+            
 
             // -- Fallback.
             _ => (
@@ -73,7 +81,8 @@ impl Error {
 #[derive(Debug, strum_macros::AsRefStr)]
 #[allow(non_camel_case_types)]
 pub enum ClientError {
-    LOGIN_FAIL,
+    USERNAME_NOT_FOUND,
+    INCORRECT_PASSWORD,
     NO_AUTH,
     SERVICE_ERROR,
 }

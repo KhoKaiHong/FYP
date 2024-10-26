@@ -8,19 +8,19 @@ async fn main() -> Result<()> {
     hc.do_get("/index.html").await?.print().await?;
 
     let req_login = hc.do_post(
-        "/api/login",
+        "/api/userlogin",
         json!({
-            "username": "demo",
-            "pwd": "welcome"
+            "ic_number": "900101-01-1234",
+            "password": "password123"
         }),
     );
     req_login.await?.print().await?;
 
     let req_login = hc.do_post(
-        "/api/login",
+        "/api/userlogin",
         json!({
-            "username": "demo",
-            "pwd": "welcome"
+            "ic_number": "demo",
+            "password": "welcome"
         }),
     );
     req_login.await?.print().await?;
