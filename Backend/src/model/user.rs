@@ -20,10 +20,11 @@ pub struct User {
     pub district_id: i32,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, FromRow, Serialize)]
 pub struct UserWithLocation {
     pub id: i64,
     pub ic_number: String,
+    #[serde(skip_serializing)]
     pub password: String,
     pub name: String,
     pub email: String,

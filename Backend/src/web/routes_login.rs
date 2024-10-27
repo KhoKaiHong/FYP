@@ -8,10 +8,7 @@ use crate::model::user::UserModelController;
 use crate::model::user_session::{UserSessionForCreate, UserSessionModelController};
 use crate::state::AppState;
 use crate::web::{Error, Result};
-use axum::body::Body;
 use axum::extract::State;
-use axum::http::header::{self, HeaderMap, HeaderValue};
-use axum::response::IntoResponse;
 use axum::routing::post;
 use axum::{Json, Router};
 use serde::Deserialize;
@@ -69,6 +66,7 @@ async fn user_login_handler(
             "success": true,
             "access_token": access_token,
             "refresh_token": refresh_token,
+            "user_details": user,
         }
     }));
 

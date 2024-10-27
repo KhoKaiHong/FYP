@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::context::Context;
 use crate::log::log_request;
 use crate::web;
@@ -12,14 +14,17 @@ pub async fn main_response_mapper(
     ctx: Option<Context>,
     uri: Uri,
     req_method: Method,
-    res: Response,
+    response: Response,
 ) -> Response {
     debug!("{:<12} - main_response_mapper", "RES_MAPPER");
     let uuid = Uuid::new_v4();
 
     // -- Get the eventual response error.
-    let service_error = res.extensions().get::<web::Error>();
-    let client_status_error = service_error.map(|se| se.client_status_and_error());
+    let web_error = response
+        .extensions()
+        .get::<Arc<web::Error>>()
+        .map(Arc::as_ref);
+    let client_status_error = web_error.map(|se| se.client_status_and_error());
 
     // -- If client error, build the new reponse.
     let error_response = client_status_error
@@ -41,8 +46,8 @@ pub async fn main_response_mapper(
     // Build and log the server log line.
     let client_error = client_status_error.unzip().1;
     // TODO: Need to hander if log_request fail (but should not fail request)
-    let _ = log_request(uuid, req_method, uri, ctx, service_error, client_error).await;
+    let _ = log_request(uuid, req_method, uri, ctx, web_error, client_error).await;
 
     debug!("\n");
-    error_response.unwrap_or(res)
+    error_response.unwrap_or(response)
 }

@@ -19,7 +19,7 @@ async fn main() -> Result<()> {
     let req_login = hc.do_post(
         "/api/userlogin",
         json!({
-            "ic_number": "demo",
+            "ic_number": "grfgbvrfgbvre",
             "password": "welcome"
         }),
     );
