@@ -1,14 +1,15 @@
 use crate::context::Context;
 use crate::model::{Error, ModelManager, Result};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
 // region:    --- Organiser Types
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, FromRow, Serialize)]
 pub struct Organiser {
     pub id: i64,
     pub email: String,
+    #[serde(skip_serializing)]
     pub password: String,
     pub name: String,
     pub phone_number: String,
@@ -70,6 +71,23 @@ impl OrganiserModelController {
         .fetch_optional(db)
         .await?
         .ok_or(Error::EntityNotFound { entity: "organiser", id })?;
+
+        Ok(organiser)
+    }
+
+    pub async fn get_by_email(
+        model_manager: &ModelManager,
+        email: String,
+    ) -> Result<Organiser> {
+        let db = model_manager.db();
+
+        let organiser = sqlx::query_as(
+            "SELECT * FROM event_organisers WHERE email = $1",
+        )
+        .bind(email)
+        .fetch_optional(db)
+        .await?
+        .ok_or(Error::UserNotFound)?;
 
         Ok(organiser)
     }

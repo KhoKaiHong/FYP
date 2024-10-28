@@ -6,7 +6,7 @@ INSERT INTO users (ic_number, password, name, email, phone_number, blood_type, e
 
 -- Insert data into event_organisers
 INSERT INTO event_organisers (email, password, name, phone_number) VALUES
-('organiser1@example.com', 'password123', 'Blood Organiser 1', '60123456795'),
+('organiser1@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Blood Organiser 1', '60123456795'),
 ('organiser2@example.com', 'password123', 'Blood Organiser 2', '60123456796'),
 ('organiser3@example.com', 'password123', 'Blood Organiser 3', '60123456797');
 

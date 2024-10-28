@@ -1,9 +1,12 @@
-use crate::auth;
 use crate::auth::{
-    password::validate_password, token::generate_access_token, token::generate_refresh_token, Role,
+    self, password::validate_password, token::generate_access_token, token::generate_refresh_token, Role,
 };
 use crate::context::Context;
 use crate::model;
+use crate::model::facility::FacilityModelController;
+use crate::model::facility_session::{FacilitySessionForCreate, FacilitySessionModelController};
+use crate::model::organiser::OrganiserModelController;
+use crate::model::organiser_session::{OrganiserSessionForCreate, OrganiserSessionModelController};
 use crate::model::user::UserModelController;
 use crate::model::user_session::{UserSessionForCreate, UserSessionModelController};
 use crate::state::AppState;
@@ -19,6 +22,8 @@ use uuid::Uuid;
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
         .route("/api/userlogin", post(user_login_handler))
+        .route("/api/facilitylogin", post(facility_login_handler))
+        .route("/api/organiserlogin", post(organiser_login_handler))
         .with_state(app_state)
 }
 
@@ -26,7 +31,7 @@ async fn user_login_handler(
     State(app_state): State<AppState>,
     Json(payload): Json<UserLoginPayload>,
 ) -> Result<Json<Value>> {
-    debug!("{:<12} - api_login", "HANDLER");
+    debug!("{:<12} - user_login_api", "HANDLER");
 
     let user = UserModelController::get_by_ic_number(&app_state.model_manager, payload.ic_number)
         .await
@@ -79,10 +84,115 @@ struct UserLoginPayload {
     password: String,
 }
 
+async fn facility_login_handler(
+    State(app_state): State<AppState>,
+    Json(payload): Json<FacilityLoginPayload>,
+) -> Result<Json<Value>> {
+    debug!("{:<12} - facility_login_api", "HANDLER");
+
+    let facility = FacilityModelController::get_by_email(&app_state.model_manager, payload.email)
+        .await
+        .map_err(|err| match err {
+            model::Error::UserNotFound => Error::LoginFailUsernameNotFound,
+            _ => Error::ModelError(err),
+        })?;
+
+    validate_password(&payload.password, &facility.password)
+        .await
+        .map_err(|err| match err {
+            auth::Error::PasswordNotMatching => Error::LoginFailPasswordNotMatching,
+            _ => Error::AuthError(err),
+        })?;
+
+    let access_token = generate_access_token(facility.id, &Role::BloodCollectionFacility)
+        .map_err(|err| Error::AuthError(err))?;
+
+    let refresh_token_id = Uuid::new_v4();
+
+    let refresh_token = generate_refresh_token(
+        &refresh_token_id.to_string(),
+        &Role::BloodCollectionFacility,
+    )
+    .map_err(|err| Error::AuthError(err))?;
+
+    let facility_session = FacilitySessionForCreate {
+        id: refresh_token_id,
+        facility_id: facility.id,
+    };
+
+    let context = Context::new(facility.id, Role::BloodCollectionFacility);
+
+    FacilitySessionModelController::create(&context, &app_state.model_manager, facility_session)
+        .await
+        .map_err(|err| Error::ModelError(err))?;
+
+    let body = Json(json!({
+        "result": {
+            "success": true,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "facility_details": facility,
+        }
+    }));
+
+    Ok(body)
+}
+
 #[derive(Debug, Deserialize)]
 struct FacilityLoginPayload {
     email: String,
     password: String,
+}
+
+async fn organiser_login_handler(
+    State(app_state): State<AppState>,
+    Json(payload): Json<OrganiserLoginPayload>,
+) -> Result<Json<Value>> {
+    debug!("{:<12} - organiser_login_api", "HANDLER");
+
+    let organiser = OrganiserModelController::get_by_email(&app_state.model_manager, payload.email)
+        .await
+        .map_err(|err| match err {
+            model::Error::UserNotFound => Error::LoginFailUsernameNotFound,
+            _ => Error::ModelError(err),
+        })?;
+
+    validate_password(&payload.password, &organiser.password)
+        .await
+        .map_err(|err| match err {
+            auth::Error::PasswordNotMatching => Error::LoginFailPasswordNotMatching,
+            _ => Error::AuthError(err),
+        })?;
+
+    let access_token = generate_access_token(organiser.id, &Role::Organiser)
+        .map_err(|err| Error::AuthError(err))?;
+
+    let refresh_token_id = Uuid::new_v4();
+
+    let refresh_token = generate_refresh_token(&refresh_token_id.to_string(), &Role::Organiser)
+        .map_err(|err| Error::AuthError(err))?;
+
+    let organiser_session = OrganiserSessionForCreate {
+        id: refresh_token_id,
+        organiser_id: organiser.id,
+    };
+
+    let context = Context::new(organiser.id, Role::Organiser);
+
+    OrganiserSessionModelController::create(&context, &app_state.model_manager, organiser_session)
+        .await
+        .map_err(|err| Error::ModelError(err))?;
+
+    let body = Json(json!({
+        "result": {
+            "success": true,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "organiser_details": organiser,
+        }
+    }));
+
+    Ok(body)
 }
 
 #[derive(Debug, Deserialize)]

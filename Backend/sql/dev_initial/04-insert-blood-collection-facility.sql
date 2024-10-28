@@ -1,5 +1,5 @@
 INSERT INTO "blood_collection_facilities" (name, email, password, address, phone_number, state_id) VALUES
-('Hospital Sultanah Aminah', 'sultanah.aminah@example.com', 'password123', 'Address 1, Johor', '60123456789', (SELECT id FROM states WHERE name = 'Johor')),
+('Hospital Sultanah Aminah', 'sultanah.aminah@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Address 1, Johor', '60123456789', (SELECT id FROM states WHERE name = 'Johor')),
 ('Hospital Sultanah Nora Ismail', 'sultanah.nora@example.com', 'password123', 'Address 2, Johor', '60123456780', (SELECT id FROM states WHERE name = 'Johor')),
 ('Hospital Sultanah Bahiyah', 'sultanah.bahiyah@example.com', 'password123', 'Address 1, Kedah', '60123456781', (SELECT id FROM states WHERE name = 'Kedah')),
 ('Hospital Raja Perempuan Zainab II', 'zainab2@example.com', 'password123', 'Address 1, Kelantan', '60123456782', (SELECT id FROM states WHERE name = 'Kelantan')),
