@@ -100,18 +100,21 @@ CREATE TABLE "donation_history" (
 
 -- User Login Session
 CREATE TABLE "user_sessions" (
-    id UUID PRIMARY KEY,
+    refresh_token_id UUID PRIMARY KEY,
+    access_token_id UUID NOT NULL UNIQUE,
     user_id BIGINT REFERENCES users(id) NOT NULL
 );
 
 -- Blood Collection Facilities Login Session
 CREATE TABLE "facility_sessions" (
-    id UUID PRIMARY KEY,
+    refresh_token_id UUID PRIMARY KEY,
+    access_token_id UUID NOT NULL UNIQUE,
     facility_id BIGINT REFERENCES blood_collection_facilities(id) NOT NULL
 );
 
 -- Organiser Login Session
 CREATE TABLE "organiser_sessions" (
-    id UUID PRIMARY KEY,
+    refresh_token_id UUID PRIMARY KEY,
+    access_token_id UUID NOT NULL UNIQUE,
     organiser_id BIGINT REFERENCES event_organisers(id) NOT NULL
 );

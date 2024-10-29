@@ -1,13 +1,14 @@
-use crate::auth;
 use crate::auth::token::{validate_access_token, validate_refresh_token};
 use crate::context::Context;
 use crate::model::ModelManager;
+use crate::state::AppState;
 use crate::web::{Error, Result};
+use crate::{auth, model};
 use async_trait::async_trait;
 use axum::body::Body;
 use axum::extract::{FromRequestParts, State};
 use axum::http::request::Parts;
-use axum::http::{header, Request};
+use axum::http::{header, HeaderMap, Request};
 use axum::middleware::Next;
 use axum::response::Response;
 use serde::Serialize;
@@ -26,47 +27,62 @@ pub async fn mw_require_auth(
 }
 
 pub async fn mw_ctx_resolver(
-    _mm: State<ModelManager>,
+    State(app_state): State<AppState>,
     mut req: Request<Body>,
     next: Next,
-) -> Result<Response> {
+) -> Response {
     debug!("{:<12} - mw_ctx_resolver", "MIDDLEWARE");
 
-    let auth_header = req
-        .headers()
-        .get(header::AUTHORIZATION)
-        .ok_or(Error::ContextExtractor(
-            ContextExtractorError::AccessTokenNotInHeader,
-        ))?;
+    let model_manager = &app_state.model_manager;
 
-    let auth_header = auth_header
-        .to_str()
-        .map_err(|_| Error::ContextExtractor(ContextExtractorError::InvalidAccessToken))?;
+    let header = req.headers();
 
-    let access_token = auth_header
-        .strip_prefix("Bearer ")
-        .ok_or(Error::ContextExtractor(
-            ContextExtractorError::InvalidAccessToken,
-        ))?
-        .to_string();
+    let context = context_from_token(header).await;
 
-    let claims = validate_access_token(&access_token).map_err(|err| match err {
-        auth::Error::AccessTokenExpired => {
-            Error::ContextExtractor(ContextExtractorError::AccessTokenExpired)
-        }
-        _ => Error::ContextExtractor(ContextExtractorError::AccessTokenExpired),
-    })?;
-
-    let role = claims
-        .role()
-        .map_err(|_| Error::ContextExtractor(ContextExtractorError::AccessTokenExpired))?;
-
-    let context = Context::new(claims.id(), role);
+    // if let Err(err) = context {
+    //     match err {
+    //         ContextExtractorError::AccessTokenExpired => {
+    //             return Err(Error::AccessTokenExpired);
+    //         }
+    //         ContextExtractorError::InvalidAccessToken => {
+    //             return Err(Error::InvalidAccessToken);
+    //         }
+    //         _ => {
+    //             return Err(Error::ContextExtractor(err));
+    //         }
+    //     }
+    // }
 
     // Store the ctx_result in the request extension.
     req.extensions_mut().insert(context);
 
-    Ok(next.run(req).await)
+    next.run(req).await
+}
+
+async fn context_from_token(header: &HeaderMap) -> ContextExtractorResult {
+    let auth_header = header
+        .get(header::AUTHORIZATION)
+        .ok_or(ContextExtractorError::AccessTokenNotInHeader)?
+        .to_str()
+        .map_err(|_| ContextExtractorError::InvalidAccessToken)?;
+
+    let access_token = auth_header
+        .strip_prefix("Bearer ")
+        .ok_or(ContextExtractorError::InvalidAccessToken)?
+        .to_string();
+
+    let claims = validate_access_token(&access_token).map_err(|err| match err {
+        auth::Error::AccessTokenExpired => ContextExtractorError::AccessTokenExpired,
+        _ => ContextExtractorError::InvalidAccessToken,
+    })?;
+
+    let role = claims
+        .role()
+        .map_err(|_| ContextExtractorError::InvalidAccessToken)?;
+
+    let context = Context::new(claims.id(), role);
+
+    Ok(context)
 }
 
 // region:    --- Context Extractor
@@ -99,6 +115,5 @@ pub enum ContextExtractorError {
     AccessTokenExpired,
     InvalidAccessToken,
     ContextNotInRequestExtractor,
-    ContextCreateFail(String),
 }
 // endregion: --- Context Extractor Result/Error

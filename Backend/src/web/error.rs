@@ -15,6 +15,13 @@ pub enum Error {
     LoginFailUsernameNotFound,
     LoginFailPasswordNotMatching,
 
+    // -- Access Token Errors
+    AccessTokenExpired,
+    InvalidAccessToken,
+
+    // -- Refresh Token Errors
+    RefreshTokenExpired,
+
     // -- Context Errors
     ContextExtractor(web::middleware_auth::ContextExtractorError),
 
@@ -67,7 +74,13 @@ impl Error {
             // -- Login Fail
             LoginFailUsernameNotFound => (StatusCode::UNAUTHORIZED, ClientError::USERNAME_NOT_FOUND),
             LoginFailPasswordNotMatching => (StatusCode::UNAUTHORIZED, ClientError::INCORRECT_PASSWORD),
-            
+
+            // -- Access Token Errors
+            AccessTokenExpired => (StatusCode::UNAUTHORIZED, ClientError::ACCESS_TOKEN_EXPIRED),
+            InvalidAccessToken => (StatusCode::UNAUTHORIZED, ClientError::INVALID_ACCESS_TOKEN),
+
+            // -- Refresh Token Errors
+            RefreshTokenExpired => (StatusCode::UNAUTHORIZED, ClientError::SESSION_EXPIRED),
 
             // -- Fallback.
             _ => (
@@ -83,6 +96,9 @@ impl Error {
 pub enum ClientError {
     USERNAME_NOT_FOUND,
     INCORRECT_PASSWORD,
+    ACCESS_TOKEN_EXPIRED,
+    INVALID_ACCESS_TOKEN,
+    SESSION_EXPIRED,
     NO_AUTH,
     SERVICE_ERROR,
 }

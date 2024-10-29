@@ -19,11 +19,8 @@ pub enum Error {
 	FailGenerateRefreshToken,
 	AccessTokenInvalidFormat,
 	RefreshTokenInvalidFormat,
-	AccessTokenExpInvalidFormat,
-	RefreshTokenExpInvalidFormat,
 	AccessTokenExpired,
 	RefreshTokenExpired,
-
 }
 
 // region:    --- Error Boilerplate

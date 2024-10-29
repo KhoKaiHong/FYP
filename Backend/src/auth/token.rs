@@ -11,6 +11,7 @@ use std::str::FromStr;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AccessTokenClaims {
+    jti: String,
     id: i64,
     role: String,
     iat: i64,
@@ -18,8 +19,9 @@ pub struct AccessTokenClaims {
 }
 
 impl AccessTokenClaims {
-    fn new(id: i64, role: &Role) -> Self {
+    fn new(jti: &str, id: i64, role: &Role) -> Self {
         let duration: i64;
+        let jti = jti.to_string();
 
         match role {
             Role::User => duration = 900,
@@ -29,6 +31,7 @@ impl AccessTokenClaims {
         }
 
         AccessTokenClaims {
+            jti,
             id,
             role: role.to_string(),
             iat: now_utc().timestamp(),
@@ -45,10 +48,10 @@ impl AccessTokenClaims {
     }
 }
 
-pub fn generate_access_token(id: i64, role: &Role) -> Result<String> {
+pub fn generate_access_token(jti: &str, id: i64, role: &Role) -> Result<String> {
     jsonwebtoken::encode(
         &Header::new(Algorithm::HS512),
-        &AccessTokenClaims::new(id, &role),
+        &AccessTokenClaims::new(jti, id, &role),
         &EncodingKey::from_secret(&config().ACCESS_TOKEN_KEY),
     )
     .map_err(|_| Error::FailGenerateAccessToken)
@@ -139,8 +142,9 @@ mod tests {
     #[serial]
     fn access_token_test() -> Result<()> {
         let id = 10;
+        let jti = Uuid::new_v4().to_string();
         let role = Role::BloodCollectionFacility;
-        let access_token = generate_access_token(id, &role)?;
+        let access_token = generate_access_token(&jti, id, &role)?;
 
         let validation_result = validate_access_token(&access_token)?;
 

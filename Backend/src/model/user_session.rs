@@ -7,13 +7,15 @@ use uuid::Uuid;
 // region:    --- User Session Types
 #[derive(Debug, FromRow)]
 pub struct UserSession {
-    pub id: Uuid,
+    pub refresh_token_id: Uuid,
+    pub access_token_id: Uuid,
     pub user_id: i64,
 }
 
 #[derive(Deserialize)]
 pub struct UserSessionForCreate {
-    pub id: Uuid,
+    pub refresh_token_id: Uuid,
+    pub access_token_id: Uuid,
     pub user_id: i64,
 }
 // endregion:    --- User Session Types
@@ -26,34 +28,35 @@ impl UserSessionModelController {
         context: &Context,
         model_manager: &ModelManager,
         user_session_created: UserSessionForCreate,
-    ) -> Result<Uuid> {
+    ) -> Result<()> {
         let db = model_manager.db();
 
-        let (id,) = sqlx::query_as(
-            "INSERT INTO user_sessions (id, user_id) values ($1, $2) returning id",
+        sqlx::query(
+            "INSERT INTO user_sessions (refresh_token_id, access_token_id, user_id) values ($1, $2, $3)",
         )
-        .bind(user_session_created.id)
+        .bind(user_session_created.refresh_token_id)
+        .bind(user_session_created.access_token_id)
         .bind(user_session_created.user_id)
-        .fetch_one(db)
+        .execute(db)
         .await?;
 
-        Ok(id)
+        Ok(())
     }
 
     pub async fn get(
         context: &Context,
         model_manager: &ModelManager,
-        id: Uuid,
+        refresh_token_id: Uuid,
     ) -> Result<UserSession> {
         let db = model_manager.db();
 
         let user_session = sqlx::query_as(
-            "SELECT * FROM user_sessions WHERE id = $1",
+            "SELECT * FROM user_sessions WHERE refresh_token_id = $1",
         )
-        .bind(id)
+        .bind(refresh_token_id)
         .fetch_optional(db)
         .await?
-        .ok_or(Error::SessionNotFound { session: "user_session", id })?;
+        .ok_or(Error::SessionNotFound { session: "user_session", id: refresh_token_id })?;
 
         Ok(user_session)
     }
@@ -75,17 +78,17 @@ impl UserSessionModelController {
         Ok(user_sessions)
     }
 
-    pub async fn delete(context: &Context, model_manager: &ModelManager, id: Uuid) -> Result<()> {
+    pub async fn delete(context: &Context, model_manager: &ModelManager, refresh_token_id: Uuid) -> Result<()> {
         let db = model_manager.db();
 
-        let count = sqlx::query("DELETE FROM user_sessions WHERE id = $1")
-            .bind(id)
+        let count = sqlx::query("DELETE FROM user_sessions WHERE refresh_token_id = $1")
+            .bind(refresh_token_id)
             .execute(db)
             .await?
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::SessionNotFound { session: "user_session", id });
+            return Err(Error::SessionNotFound { session: "user_session", id: refresh_token_id });
         }
 
         Ok(())
@@ -127,13 +130,18 @@ mod tests {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
+
+        let refresh_token_id = Uuid::new_v4();
+        let access_token_id = Uuid::new_v4();
+        
         let user_session_created = UserSessionForCreate {
-            id: Uuid::new_v4(),
+            refresh_token_id,
+            access_token_id,
             user_id: 1000,
         };
 
         // -- Exec
-        let id = UserSessionModelController::create(
+        UserSessionModelController::create(
             &context,
             &model_manager,
             user_session_created,
@@ -141,11 +149,12 @@ mod tests {
         .await?;
 
         // -- Check
-        let user_session = UserSessionModelController::get(&context, &model_manager, id).await?;
+        let user_session = UserSessionModelController::get(&context, &model_manager, refresh_token_id).await?;
+        println!("\n\nuser_session: {:?}", user_session);
         assert_eq!(user_session.user_id, 1000);
 
         // Clean
-        UserSessionModelController::delete(&context, &model_manager, id).await?;
+        UserSessionModelController::delete(&context, &model_manager, refresh_token_id).await?;
 
         Ok(())
     }
@@ -182,23 +191,33 @@ mod tests {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
+
+        let refresh_token_id1 = Uuid::new_v4();
+        let access_token_id1 = Uuid::new_v4();
+        
         let user_session_created1 = UserSessionForCreate {
-            id: Uuid::new_v4(),
+            refresh_token_id: refresh_token_id1,
+            access_token_id: access_token_id1,
             user_id: 1000,
         };
+
+        let refresh_token_id2 = Uuid::new_v4();
+        let access_token_id2 = Uuid::new_v4();
+
         let user_session_created2 = UserSessionForCreate {
-            id: Uuid::new_v4(),
+            refresh_token_id: refresh_token_id2,
+            access_token_id: access_token_id2,
             user_id: 1000,
         };
 
         // -- Exec
-        let id1 = UserSessionModelController::create(
+        UserSessionModelController::create(
             &context,
             &model_manager,
             user_session_created1,
         )
         .await?;
-        let id2 = UserSessionModelController::create(
+        UserSessionModelController::create(
             &context,
             &model_manager,
             user_session_created2,
@@ -216,8 +235,8 @@ mod tests {
         assert_eq!(user_sessions[1].user_id, 1000);
 
         // Clean
-        UserSessionModelController::delete(&context, &model_manager, id1).await?;
-        UserSessionModelController::delete(&context, &model_manager, id2).await?;
+        UserSessionModelController::delete(&context, &model_manager, refresh_token_id1).await?;
+        UserSessionModelController::delete(&context, &model_manager, refresh_token_id2).await?;
 
         Ok(())
     }
@@ -228,8 +247,13 @@ mod tests {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
+
+        let refresh_token_id = Uuid::new_v4();
+        let access_token_id = Uuid::new_v4();
+        
         let user_session_created = UserSessionForCreate {
-            id: Uuid::new_v4(),
+            refresh_token_id,
+            access_token_id,
             user_id: 1000,
         };
 
@@ -240,16 +264,16 @@ mod tests {
             user_session_created,
         )
         .await?;
-        UserSessionModelController::delete(&context, &model_manager, id).await?;
+        UserSessionModelController::delete(&context, &model_manager, refresh_token_id).await?;
 
         // -- Check
-        let res = UserSessionModelController::get(&context, &model_manager, id).await;
+        let res = UserSessionModelController::get(&context, &model_manager, refresh_token_id).await;
         assert!(
             matches!(
                 res,
                 Err(Error::SessionNotFound {
                     session: "user_session",
-                    id
+                    id: refresh_token_id,
                 })
             ),
             "EntityNotFound not matching"
@@ -264,23 +288,33 @@ mod tests {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
+
+        let refresh_token_id1 = Uuid::new_v4();
+        let access_token_id1 = Uuid::new_v4();
+        
         let user_session_created1 = UserSessionForCreate {
-            id: Uuid::new_v4(),
+            refresh_token_id: refresh_token_id1,
+            access_token_id: access_token_id1,
             user_id: 1000,
         };
+
+        let refresh_token_id2 = Uuid::new_v4();
+        let access_token_id2 = Uuid::new_v4();
+
         let user_session_created2 = UserSessionForCreate {
-            id: Uuid::new_v4(),
+            refresh_token_id: refresh_token_id2,
+            access_token_id: access_token_id2,
             user_id: 1000,
         };
 
         // -- Exec
-        let id1 = UserSessionModelController::create(
+        UserSessionModelController::create(
             &context,
             &model_manager,
             user_session_created1,
         )
         .await?;
-        let id2 = UserSessionModelController::create(
+        UserSessionModelController::create(
             &context,
             &model_manager,
             user_session_created2,
@@ -289,7 +323,7 @@ mod tests {
         UserSessionModelController::delete_by_user_id(&context, &model_manager, 1000).await?;
 
         // -- Check
-        let res = UserSessionModelController::get(&context, &model_manager, id1).await;
+        let res = UserSessionModelController::get(&context, &model_manager, refresh_token_id1).await;
         assert!(
             matches!(
                 res,
@@ -300,7 +334,7 @@ mod tests {
             ),
             "EntityNotFound not matching"
         );
-        let res = UserSessionModelController::get(&context, &model_manager, id2).await;
+        let res = UserSessionModelController::get(&context, &model_manager, refresh_token_id2).await;
         assert!(
             matches!(
                 res,

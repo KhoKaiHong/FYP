@@ -7,13 +7,15 @@ use uuid::Uuid;
 // region:    --- Facility Session Types
 #[derive(Debug, FromRow)]
 pub struct FacilitySession {
-    pub id: Uuid,
+    pub refresh_token_id: Uuid,
+    pub access_token_id: Uuid,
     pub facility_id: i64,
 }
 
 #[derive(Deserialize)]
 pub struct FacilitySessionForCreate {
-    pub id: Uuid,
+    pub refresh_token_id: Uuid,
+    pub access_token_id: Uuid,
     pub facility_id: i64,
 }
 // endregion:    --- Facility Session Types
@@ -26,34 +28,37 @@ impl FacilitySessionModelController {
         context: &Context,
         model_manager: &ModelManager,
         facility_session_created: FacilitySessionForCreate,
-    ) -> Result<Uuid> {
+    ) -> Result<()> {
         let db = model_manager.db();
 
-        let (id,) = sqlx::query_as(
-            "INSERT INTO facility_sessions (id, facility_id) values ($1, $2) returning id",
+        sqlx::query(
+            "INSERT INTO facility_sessions (refresh_token_id, access_token_id, facility_id) values ($1, $2, $3)",
         )
-        .bind(facility_session_created.id)
+        .bind(facility_session_created.refresh_token_id)
+        .bind(facility_session_created.access_token_id)
         .bind(facility_session_created.facility_id)
-        .fetch_one(db)
+        .execute(db)
         .await?;
 
-        Ok(id)
+        Ok(())
     }
 
     pub async fn get(
         context: &Context,
         model_manager: &ModelManager,
-        id: Uuid,
+        refresh_token_id: Uuid,
     ) -> Result<FacilitySession> {
         let db = model_manager.db();
 
-        let facility_session = sqlx::query_as(
-            "SELECT * FROM facility_sessions WHERE id = $1",
-        )
-        .bind(id)
-        .fetch_optional(db)
-        .await?
-        .ok_or(Error::SessionNotFound { session: "facility_session", id })?;
+        let facility_session =
+            sqlx::query_as("SELECT * FROM facility_sessions WHERE refresh_token_id = $1")
+                .bind(refresh_token_id)
+                .fetch_optional(db)
+                .await?
+                .ok_or(Error::SessionNotFound {
+                    session: "facility_session",
+                    id: refresh_token_id,
+                })?;
 
         Ok(facility_session)
     }
@@ -65,27 +70,33 @@ impl FacilitySessionModelController {
     ) -> Result<Vec<FacilitySession>> {
         let db = model_manager.db();
 
-        let facility_sessions = sqlx::query_as(
-            "SELECT * FROM facility_sessions WHERE facility_id = $1",
-        )
-        .bind(facility_id)
-        .fetch_all(db)
-        .await?;
+        let facility_sessions =
+            sqlx::query_as("SELECT * FROM facility_sessions WHERE facility_id = $1")
+                .bind(facility_id)
+                .fetch_all(db)
+                .await?;
 
         Ok(facility_sessions)
     }
 
-    pub async fn delete(context: &Context, model_manager: &ModelManager, id: Uuid) -> Result<()> {
+    pub async fn delete(
+        context: &Context,
+        model_manager: &ModelManager,
+        refresh_token_id: Uuid,
+    ) -> Result<()> {
         let db = model_manager.db();
 
-        let count = sqlx::query("DELETE FROM facility_sessions WHERE id = $1")
-            .bind(id)
+        let count = sqlx::query("DELETE FROM facility_sessions WHERE refresh_token_id = $1")
+            .bind(refresh_token_id)
             .execute(db)
             .await?
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::SessionNotFound { session: "facility_session", id });
+            return Err(Error::SessionNotFound {
+                session: "facility_session",
+                id: refresh_token_id,
+            });
         }
 
         Ok(())
@@ -105,7 +116,10 @@ impl FacilitySessionModelController {
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::EntityNotFound { entity: "facility", id: facility_id });
+            return Err(Error::EntityNotFound {
+                entity: "facility",
+                id: facility_id,
+            });
         }
 
         Ok(())
@@ -127,13 +141,18 @@ mod tests {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
+
+        let refresh_token_id = Uuid::new_v4();
+        let access_token_id = Uuid::new_v4();
+
         let facility_session_created = FacilitySessionForCreate {
-            id: Uuid::new_v4(),
+            refresh_token_id,
+            access_token_id,
             facility_id: 1,
         };
 
         // -- Exec
-        let id = FacilitySessionModelController::create(
+        FacilitySessionModelController::create(
             &context,
             &model_manager,
             facility_session_created,
@@ -141,11 +160,13 @@ mod tests {
         .await?;
 
         // -- Check
-        let facility_session = FacilitySessionModelController::get(&context, &model_manager, id).await?;
+        let facility_session =
+            FacilitySessionModelController::get(&context, &model_manager, refresh_token_id).await?;
         assert_eq!(facility_session.facility_id, 1);
+        assert_eq!(facility_session.access_token_id, access_token_id);
 
         // Clean
-        FacilitySessionModelController::delete(&context, &model_manager, id).await?;
+        FacilitySessionModelController::delete(&context, &model_manager, refresh_token_id).await?;
 
         Ok(())
     }
@@ -182,23 +203,31 @@ mod tests {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
-        let facility_session_created1 = FacilitySessionForCreate {
-            id: Uuid::new_v4(),
+        
+        let refresh_token_id1 = Uuid::new_v4();
+        let access_token_id1 = Uuid::new_v4();
+        let facility_session_created1 = FacilitySessionForCreate { 
+            refresh_token_id: refresh_token_id1,
+            access_token_id: access_token_id1,
             facility_id: 1,
         };
-        let facility_session_created2 = FacilitySessionForCreate {
-            id: Uuid::new_v4(),
+        
+        let refresh_token_id2 = Uuid::new_v4();
+        let access_token_id2 = Uuid::new_v4();
+        let facility_session_created2 = FacilitySessionForCreate { 
+            refresh_token_id: refresh_token_id2,
+            access_token_id: access_token_id2,
             facility_id: 1,
         };
 
         // -- Exec
-        let id1 = FacilitySessionModelController::create(
+        FacilitySessionModelController::create(
             &context,
             &model_manager,
             facility_session_created1,
         )
         .await?;
-        let id2 = FacilitySessionModelController::create(
+        FacilitySessionModelController::create(
             &context,
             &model_manager,
             facility_session_created2,
@@ -214,11 +243,13 @@ mod tests {
             "number of seeded facility_sessions."
         );
         assert_eq!(facility_sessions[0].facility_id, 1);
+        assert_eq!(facility_sessions[0].access_token_id, access_token_id1);
         assert_eq!(facility_sessions[1].facility_id, 1);
+        assert_eq!(facility_sessions[1].access_token_id, access_token_id2);
 
         // Clean
-        FacilitySessionModelController::delete(&context, &model_manager, id1).await?;
-        FacilitySessionModelController::delete(&context, &model_manager, id2).await?;
+        FacilitySessionModelController::delete(&context, &model_manager, refresh_token_id1).await?;
+        FacilitySessionModelController::delete(&context, &model_manager, refresh_token_id2).await?;
 
         Ok(())
     }
@@ -229,28 +260,32 @@ mod tests {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
-        let facility_session_created = FacilitySessionForCreate {
-            id: Uuid::new_v4(),
+        
+        let refresh_token_id = Uuid::new_v4();
+        let access_token_id = Uuid::new_v4();
+        let facility_session_created = FacilitySessionForCreate { 
+            refresh_token_id,
+            access_token_id,
             facility_id: 1,
         };
 
         // -- Exec
-        let id = FacilitySessionModelController::create(
+        FacilitySessionModelController::create(
             &context,
             &model_manager,
             facility_session_created,
         )
         .await?;
-        FacilitySessionModelController::delete(&context, &model_manager, id).await?;
+        FacilitySessionModelController::delete(&context, &model_manager, refresh_token_id).await?;
 
         // -- Check
-        let res = FacilitySessionModelController::get(&context, &model_manager, id).await;
+        let res = FacilitySessionModelController::get(&context, &model_manager, refresh_token_id).await;
         assert!(
             matches!(
                 res,
                 Err(Error::SessionNotFound {
                     session: "facility_session",
-                    id
+                    id: refresh_token_id
                 })
             ),
             "EntityNotFound not matching"
@@ -265,12 +300,20 @@ mod tests {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
-        let facility_session_created1 = FacilitySessionForCreate {
-            id: Uuid::new_v4(),
+        
+        let refresh_token_id1 = Uuid::new_v4();
+        let access_token_id1 = Uuid::new_v4();
+        let facility_session_created1 = FacilitySessionForCreate { 
+            refresh_token_id: refresh_token_id1,
+            access_token_id: access_token_id1,
             facility_id: 1,
-        };
-        let facility_session_created2 = FacilitySessionForCreate {
-            id: Uuid::new_v4(),
+        }; 
+        
+        let refresh_token_id2 = Uuid::new_v4();
+        let access_token_id2 = Uuid::new_v4();
+        let facility_session_created2 = FacilitySessionForCreate { 
+            refresh_token_id: refresh_token_id2,
+            access_token_id: access_token_id2,
             facility_id: 1,
         };
 
@@ -290,24 +333,24 @@ mod tests {
         FacilitySessionModelController::delete_by_facility_id(&context, &model_manager, 1).await?;
 
         // -- Check
-        let res = FacilitySessionModelController::get(&context, &model_manager, id1).await;
+        let res = FacilitySessionModelController::get(&context, &model_manager, refresh_token_id1).await;
         assert!(
             matches!(
                 res,
                 Err(Error::SessionNotFound {
                     session: "facility_session",
-                    id: id1
+                    id: refresh_token_id1
                 })
             ),
             "EntityNotFound not matching"
         );
-        let res = FacilitySessionModelController::get(&context, &model_manager, id2).await;
+        let res = FacilitySessionModelController::get(&context, &model_manager, refresh_token_id2).await;
         assert!(
             matches!(
                 res,
                 Err(Error::SessionNotFound {
                     session: "facility_session",
-                    id: id2
+                    id: refresh_token_id2
                 })
             ),
             "EntityNotFound not matching"
@@ -325,12 +368,9 @@ mod tests {
         let id = 100;
 
         // -- Exec
-        let res = FacilitySessionModelController::delete_by_facility_id(
-            &context,
-            &model_manager,
-            id,
-        )
-        .await;
+        let res =
+            FacilitySessionModelController::delete_by_facility_id(&context, &model_manager, id)
+                .await;
 
         // -- Check
         assert!(

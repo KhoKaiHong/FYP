@@ -1,5 +1,6 @@
 use crate::auth::{
-    self, password::validate_password, token::generate_access_token, token::generate_refresh_token, Role,
+    self, password::validate_password, token::generate_access_token, token::generate_refresh_token,
+    Role,
 };
 use crate::context::Context;
 use crate::model;
@@ -47,8 +48,10 @@ async fn user_login_handler(
             _ => Error::AuthError(err),
         })?;
 
-    let access_token =
-        generate_access_token(user.id, &Role::User).map_err(|err| Error::AuthError(err))?;
+    let access_token_id = Uuid::new_v4();
+
+    let access_token = generate_access_token(&access_token_id.to_string(), user.id, &Role::User)
+        .map_err(|err| Error::AuthError(err))?;
 
     let refresh_token_id = Uuid::new_v4();
 
@@ -56,7 +59,8 @@ async fn user_login_handler(
         .map_err(|err| Error::AuthError(err))?;
 
     let user_session = UserSessionForCreate {
-        id: refresh_token_id,
+        refresh_token_id,
+        access_token_id,
         user_id: user.id,
     };
 
@@ -104,8 +108,14 @@ async fn facility_login_handler(
             _ => Error::AuthError(err),
         })?;
 
-    let access_token = generate_access_token(facility.id, &Role::BloodCollectionFacility)
-        .map_err(|err| Error::AuthError(err))?;
+    let access_token_id = Uuid::new_v4();
+
+    let access_token = generate_access_token(
+        &access_token_id.to_string(),
+        facility.id,
+        &Role::BloodCollectionFacility,
+    )
+    .map_err(|err| Error::AuthError(err))?;
 
     let refresh_token_id = Uuid::new_v4();
 
@@ -116,7 +126,8 @@ async fn facility_login_handler(
     .map_err(|err| Error::AuthError(err))?;
 
     let facility_session = FacilitySessionForCreate {
-        id: refresh_token_id,
+        refresh_token_id,
+        access_token_id,
         facility_id: facility.id,
     };
 
@@ -164,8 +175,11 @@ async fn organiser_login_handler(
             _ => Error::AuthError(err),
         })?;
 
-    let access_token = generate_access_token(organiser.id, &Role::Organiser)
-        .map_err(|err| Error::AuthError(err))?;
+    let access_token_id = Uuid::new_v4();
+
+    let access_token =
+        generate_access_token(&access_token_id.to_string(), organiser.id, &Role::Organiser)
+            .map_err(|err| Error::AuthError(err))?;
 
     let refresh_token_id = Uuid::new_v4();
 
@@ -173,7 +187,8 @@ async fn organiser_login_handler(
         .map_err(|err| Error::AuthError(err))?;
 
     let organiser_session = OrganiserSessionForCreate {
-        id: refresh_token_id,
+        refresh_token_id,
+        access_token_id,
         organiser_id: organiser.id,
     };
 
