@@ -49,14 +49,10 @@ async fn user_login_handler(
         })?;
 
     let access_token_id = Uuid::new_v4();
-
-    let access_token = generate_access_token(&access_token_id.to_string(), user.id, &Role::User)
-        .map_err(|err| Error::AuthError(err))?;
+    let access_token = generate_access_token(&access_token_id.to_string(), user.id, &Role::User)?;
 
     let refresh_token_id = Uuid::new_v4();
-
-    let refresh_token = generate_refresh_token(&refresh_token_id.to_string(), &Role::User)
-        .map_err(|err| Error::AuthError(err))?;
+    let refresh_token = generate_refresh_token(&refresh_token_id.to_string(), &Role::User)?;
 
     let user_session = UserSessionForCreate {
         refresh_token_id,
@@ -66,9 +62,7 @@ async fn user_login_handler(
 
     let context = Context::new(user.id, Role::User);
 
-    UserSessionModelController::create(&context, &app_state.model_manager, user_session)
-        .await
-        .map_err(|err| Error::ModelError(err))?;
+    UserSessionModelController::create(&context, &app_state.model_manager, user_session).await?;
 
     let body = Json(json!({
         "result": {
@@ -109,21 +103,17 @@ async fn facility_login_handler(
         })?;
 
     let access_token_id = Uuid::new_v4();
-
     let access_token = generate_access_token(
         &access_token_id.to_string(),
         facility.id,
         &Role::BloodCollectionFacility,
-    )
-    .map_err(|err| Error::AuthError(err))?;
+    )?;
 
     let refresh_token_id = Uuid::new_v4();
-
     let refresh_token = generate_refresh_token(
         &refresh_token_id.to_string(),
         &Role::BloodCollectionFacility,
-    )
-    .map_err(|err| Error::AuthError(err))?;
+    )?;
 
     let facility_session = FacilitySessionForCreate {
         refresh_token_id,
@@ -134,8 +124,7 @@ async fn facility_login_handler(
     let context = Context::new(facility.id, Role::BloodCollectionFacility);
 
     FacilitySessionModelController::create(&context, &app_state.model_manager, facility_session)
-        .await
-        .map_err(|err| Error::ModelError(err))?;
+        .await?;
 
     let body = Json(json!({
         "result": {
@@ -176,15 +165,11 @@ async fn organiser_login_handler(
         })?;
 
     let access_token_id = Uuid::new_v4();
-
     let access_token =
-        generate_access_token(&access_token_id.to_string(), organiser.id, &Role::Organiser)
-            .map_err(|err| Error::AuthError(err))?;
+        generate_access_token(&access_token_id.to_string(), organiser.id, &Role::Organiser)?;
 
     let refresh_token_id = Uuid::new_v4();
-
-    let refresh_token = generate_refresh_token(&refresh_token_id.to_string(), &Role::Organiser)
-        .map_err(|err| Error::AuthError(err))?;
+    let refresh_token = generate_refresh_token(&refresh_token_id.to_string(), &Role::Organiser)?;
 
     let organiser_session = OrganiserSessionForCreate {
         refresh_token_id,
@@ -195,8 +180,7 @@ async fn organiser_login_handler(
     let context = Context::new(organiser.id, Role::Organiser);
 
     OrganiserSessionModelController::create(&context, &app_state.model_manager, organiser_session)
-        .await
-        .map_err(|err| Error::ModelError(err))?;
+        .await?;
 
     let body = Json(json!({
         "result": {

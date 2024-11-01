@@ -39,6 +39,10 @@ impl AccessTokenClaims {
         }
     }
 
+    pub fn jti(&self) -> &str {
+        &self.jti
+    }
+
     pub fn id(&self) -> i64 {
         self.id
     }
@@ -67,6 +71,21 @@ pub fn validate_access_token(access_token: &str) -> Result<AccessTokenClaims> {
         ErrorKind::ExpiredSignature => Error::AccessTokenExpired,
         _ => Error::AccessTokenInvalidFormat,
     })?
+    .claims;
+
+    Ok(claims)
+}
+
+pub fn parse_access_token(access_token: &str) -> Result<AccessTokenClaims> {
+    let mut validation_strategy = Validation::new(Algorithm::HS512);
+    validation_strategy.validate_exp = false;
+
+    let claims = jsonwebtoken::decode::<AccessTokenClaims>(
+        access_token,
+        &DecodingKey::from_secret(&config().ACCESS_TOKEN_KEY),
+        &validation_strategy,
+    )
+    .map_err(|_|  Error::AccessTokenInvalidFormat)?
     .claims;
 
     Ok(claims)
@@ -101,6 +120,16 @@ impl RefreshTokenClaims {
         }
     }
 
+    fn new_with_duration(jti: &str, duration: i64) -> Self {
+        let jti = jti.to_string();
+
+        RefreshTokenClaims {
+            jti,
+            iat: now_utc().timestamp(),
+            exp: duration,
+        }
+    }
+
     pub fn jti(&self) -> &str {
         &self.jti
     }
@@ -110,6 +139,15 @@ pub fn generate_refresh_token(jti: &str, role: &Role) -> Result<String> {
     jsonwebtoken::encode(
         &Header::new(Algorithm::HS512),
         &RefreshTokenClaims::new(jti, role),
+        &EncodingKey::from_secret(&config().REFRESH_TOKEN_KEY),
+    )
+    .map_err(|_| Error::FailGenerateRefreshToken)
+}
+
+pub fn renew_refresh_token(jti: &str, duration: i64) -> Result<String> {
+    jsonwebtoken::encode(
+        &Header::new(Algorithm::HS512),
+        &RefreshTokenClaims::new_with_duration(jti, duration),
         &EncodingKey::from_secret(&config().REFRESH_TOKEN_KEY),
     )
     .map_err(|_| Error::FailGenerateRefreshToken)
@@ -125,6 +163,21 @@ pub fn validate_refresh_token(refresh_token: &str) -> Result<RefreshTokenClaims>
         ErrorKind::ExpiredSignature => Error::RefreshTokenExpired,
         _ => Error::RefreshTokenInvalidFormat,
     })?
+    .claims;
+
+    Ok(claims)
+}
+
+pub fn parse_refresh_token(access_token: &str) -> Result<RefreshTokenClaims> {
+    let mut validation_strategy = Validation::new(Algorithm::HS512);
+    validation_strategy.validate_exp = false;
+
+    let claims = jsonwebtoken::decode::<RefreshTokenClaims>(
+        access_token,
+        &DecodingKey::from_secret(&config().ACCESS_TOKEN_KEY),
+        &validation_strategy,
+    )
+    .map_err(|_|  Error::RefreshTokenInvalidFormat)?
     .claims;
 
     Ok(claims)

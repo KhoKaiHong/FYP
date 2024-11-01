@@ -1,9 +1,8 @@
-use crate::auth::token::{validate_access_token, validate_refresh_token};
+use crate::auth;
+use crate::auth::token::validate_access_token;
 use crate::context::Context;
-use crate::model::ModelManager;
 use crate::state::AppState;
 use crate::web::{Error, Result};
-use crate::{auth, model};
 use async_trait::async_trait;
 use axum::body::Body;
 use axum::extract::{FromRequestParts, State};
@@ -14,6 +13,7 @@ use axum::response::Response;
 use serde::Serialize;
 use tracing::debug;
 
+// Requires valid access token to continue
 pub async fn mw_require_auth(
     ctx: Result<Context>,
     req: Request<Body>,
@@ -26,32 +26,17 @@ pub async fn mw_require_auth(
     Ok(next.run(req).await)
 }
 
+// Converts access token claims to context
 pub async fn mw_ctx_resolver(
-    State(app_state): State<AppState>,
+    State(_app_state): State<AppState>,
     mut req: Request<Body>,
     next: Next,
 ) -> Response {
     debug!("{:<12} - mw_ctx_resolver", "MIDDLEWARE");
 
-    let model_manager = &app_state.model_manager;
-
     let header = req.headers();
 
     let context = context_from_token(header).await;
-
-    // if let Err(err) = context {
-    //     match err {
-    //         ContextExtractorError::AccessTokenExpired => {
-    //             return Err(Error::AccessTokenExpired);
-    //         }
-    //         ContextExtractorError::InvalidAccessToken => {
-    //             return Err(Error::InvalidAccessToken);
-    //         }
-    //         _ => {
-    //             return Err(Error::ContextExtractor(err));
-    //         }
-    //     }
-    // }
 
     // Store the ctx_result in the request extension.
     req.extensions_mut().insert(context);
@@ -100,14 +85,17 @@ impl<S: Send + Sync> FromRequestParts<S> for Context {
                 ContextExtractorError::ContextNotInRequestExtractor,
             ))?
             .clone()
-            .map_err(Error::ContextExtractor)
+            .map_err(|err| match err {
+                ContextExtractorError::AccessTokenExpired => Error::AccessTokenExpired,
+                _ => Error::ContextExtractor(err),
+            })
     }
 }
 
 // endregion: --- Context Extractor
 
 // region:    --- Context Extractor Result/Error
-type ContextExtractorResult = core::result::Result<Context, ContextExtractorError>;
+pub type ContextExtractorResult = core::result::Result<Context, ContextExtractorError>;
 
 #[derive(Clone, Serialize, Debug)]
 pub enum ContextExtractorError {

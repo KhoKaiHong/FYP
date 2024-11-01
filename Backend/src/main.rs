@@ -49,6 +49,7 @@ async fn main() -> Result<()> {
             Router::new()
                 .merge(web::routes_hello::routes())
                 // Add other protected routes here
+                .layer(middleware::from_fn(web::middleware_auth::mw_require_auth))
                 .layer(middleware::from_fn_with_state(
                     app_state.clone(),
                     web::middleware_auth::mw_ctx_resolver,

@@ -79,6 +79,33 @@ impl OrganiserSessionModelController {
         Ok(organiser_sessions)
     }
 
+    pub async fn update(
+        context: &Context,
+        model_manager: &ModelManager,
+        organiser_session_updated: OrganiserSessionForCreate,
+        refresh_token_id: Uuid,
+    ) -> Result<()> {
+        let db = model_manager.db();
+
+        let count = sqlx::query("UPDATE organiser_sessions SET refresh_token_id = $1, access_token_id = $2, organiser_id = $3 WHERE refresh_token_id = $4")
+            .bind(organiser_session_updated.refresh_token_id)
+            .bind(organiser_session_updated.access_token_id)
+            .bind(organiser_session_updated.organiser_id)
+            .bind(refresh_token_id)
+            .execute(db)
+            .await?
+            .rows_affected();
+
+        if count == 0 {
+            return Err(Error::SessionNotFound {
+                session: "organiser_id",
+                id: refresh_token_id,
+            });
+        }
+
+        Ok(())
+    }
+
     pub async fn delete(
         context: &Context,
         model_manager: &ModelManager,
@@ -248,8 +275,66 @@ mod tests {
         assert_eq!(organiser_sessions[1].access_token_id, access_token_id2);
 
         // Clean
-        OrganiserSessionModelController::delete(&context, &model_manager, refresh_token_id1).await?;
-        OrganiserSessionModelController::delete(&context, &model_manager, refresh_token_id2).await?;
+        OrganiserSessionModelController::delete(&context, &model_manager, refresh_token_id1)
+            .await?;
+        OrganiserSessionModelController::delete(&context, &model_manager, refresh_token_id2)
+            .await?;
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_update_ok() -> Result<()> {
+        // -- Setup & Fixtures
+        let model_manager = _dev_utils::init_test().await;
+        let context = Context::root_ctx();
+
+        let refresh_token_id = Uuid::new_v4();
+        let access_token_id = Uuid::new_v4();
+
+        let organiser_session_created = OrganiserSessionForCreate {
+            refresh_token_id,
+            access_token_id,
+            organiser_id: 1,
+        };
+
+        // -- Exec
+        OrganiserSessionModelController::create(
+            &context,
+            &model_manager,
+            organiser_session_created,
+        )
+        .await?;
+
+        let refresh_token_id_updated = Uuid::new_v4();
+        let access_token_id_updated = Uuid::new_v4();
+
+        let organiser_session_updated = OrganiserSessionForCreate {
+            refresh_token_id: refresh_token_id_updated,
+            access_token_id: access_token_id_updated,
+            organiser_id: 2,
+        };
+
+        OrganiserSessionModelController::update(
+            &context,
+            &model_manager,
+            organiser_session_updated,
+            refresh_token_id,
+        )
+        .await?;
+
+        let organiser_session = OrganiserSessionModelController::get(
+            &context,
+            &model_manager,
+            refresh_token_id_updated,
+        )
+        .await?;
+        assert_eq!(organiser_session.access_token_id, access_token_id_updated);
+        assert_eq!(organiser_session.organiser_id, 2);
+
+        OrganiserSessionModelController::delete(&context, &model_manager, refresh_token_id_updated)
+            .await?;
 
         Ok(())
     }
@@ -260,7 +345,7 @@ mod tests {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
-        
+
         let refresh_token_id = Uuid::new_v4();
         let access_token_id = Uuid::new_v4();
         let organiser_session_created = OrganiserSessionForCreate {
@@ -279,7 +364,8 @@ mod tests {
         OrganiserSessionModelController::delete(&context, &model_manager, refresh_token_id).await?;
 
         // -- Check
-        let res = OrganiserSessionModelController::get(&context, &model_manager, refresh_token_id).await;
+        let res =
+            OrganiserSessionModelController::get(&context, &model_manager, refresh_token_id).await;
         assert!(
             matches!(
                 res,
@@ -334,7 +420,8 @@ mod tests {
             .await?;
 
         // -- Check
-        let res = OrganiserSessionModelController::get(&context, &model_manager, refresh_token_id1).await;
+        let res =
+            OrganiserSessionModelController::get(&context, &model_manager, refresh_token_id1).await;
         assert!(
             matches!(
                 res,
@@ -345,7 +432,8 @@ mod tests {
             ),
             "EntityNotFound not matching"
         );
-        let res = OrganiserSessionModelController::get(&context, &model_manager, refresh_token_id2).await;
+        let res =
+            OrganiserSessionModelController::get(&context, &model_manager, refresh_token_id2).await;
         assert!(
             matches!(
                 res,

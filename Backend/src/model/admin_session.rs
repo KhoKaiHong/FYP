@@ -4,39 +4,39 @@ use serde::Deserialize;
 use sqlx::FromRow;
 use uuid::Uuid;
 
-// region:    --- User Session Types
+// region:    --- Admin Session Types
 #[derive(Debug, FromRow)]
-pub struct UserSession {
+pub struct AdminSession {
     pub refresh_token_id: Uuid,
     pub access_token_id: Uuid,
-    pub user_id: i64,
+    pub admin_id: i64,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct UserSessionForCreate {
+#[derive(Deserialize)]
+pub struct AdminSessionForCreate {
     pub refresh_token_id: Uuid,
     pub access_token_id: Uuid,
-    pub user_id: i64,
+    pub admin_id: i64,
 }
-// endregion:    --- User Session Types
+// endregion:    --- Admin Session Types
 
-// region:    --- User Session Model Controller
-pub struct UserSessionModelController;
+// region:    --- Admin Session Model Controller
+pub struct AdminSessionModelController;
 
-impl UserSessionModelController {
+impl AdminSessionModelController {
     pub async fn create(
         context: &Context,
         model_manager: &ModelManager,
-        user_session_created: UserSessionForCreate,
+        admin_session_created: AdminSessionForCreate,
     ) -> Result<()> {
         let db = model_manager.db();
 
         sqlx::query(
-            "INSERT INTO user_sessions (refresh_token_id, access_token_id, user_id) values ($1, $2, $3)",
+            "INSERT INTO admin_sessions (refresh_token_id, access_token_id, admin_id) values ($1, $2, $3)",
         )
-        .bind(user_session_created.refresh_token_id)
-        .bind(user_session_created.access_token_id)
-        .bind(user_session_created.user_id)
+        .bind(admin_session_created.refresh_token_id)
+        .bind(admin_session_created.access_token_id)
+        .bind(admin_session_created.admin_id)
         .execute(db)
         .await?;
 
@@ -47,49 +47,49 @@ impl UserSessionModelController {
         context: &Context,
         model_manager: &ModelManager,
         refresh_token_id: Uuid,
-    ) -> Result<UserSession> {
+    ) -> Result<AdminSession> {
         let db = model_manager.db();
 
-        let user_session =
-            sqlx::query_as("SELECT * FROM user_sessions WHERE refresh_token_id = $1")
+        let admin_session =
+            sqlx::query_as("SELECT * FROM admin_sessions WHERE refresh_token_id = $1")
                 .bind(refresh_token_id)
                 .fetch_optional(db)
                 .await?
                 .ok_or(Error::SessionNotFound {
-                    session: "user_session",
+                    session: "admin_session",
                     id: refresh_token_id,
                 })?;
 
-        Ok(user_session)
+        Ok(admin_session)
     }
 
-    pub async fn list_by_user_id(
+    pub async fn list_by_admin_id(
         context: &Context,
         model_manager: &ModelManager,
-        user_id: i64,
-    ) -> Result<Vec<UserSession>> {
+        admin_id: i64,
+    ) -> Result<Vec<AdminSession>> {
         let db = model_manager.db();
 
-        let user_sessions = sqlx::query_as("SELECT * FROM user_sessions WHERE user_id = $1")
-            .bind(user_id)
+        let admin_sessions = sqlx::query_as("SELECT * FROM admin_sessions WHERE admin_id = $1")
+            .bind(admin_id)
             .fetch_all(db)
             .await?;
 
-        Ok(user_sessions)
+        Ok(admin_sessions)
     }
 
     pub async fn update(
         context: &Context,
         model_manager: &ModelManager,
-        user_session_updated: UserSessionForCreate,
+        admin_session_updated: AdminSessionForCreate,
         refresh_token_id: Uuid,
     ) -> Result<()> {
         let db = model_manager.db();
 
-        let count = sqlx::query("UPDATE user_sessions SET refresh_token_id = $1, access_token_id = $2, user_id = $3 WHERE refresh_token_id = $4")
-            .bind(user_session_updated.refresh_token_id)
-            .bind(user_session_updated.access_token_id)
-            .bind(user_session_updated.user_id)
+        let count = sqlx::query("UPDATE admin_sessions SET refresh_token_id = $1, access_token_id = $2, admin_id = $3 WHERE refresh_token_id = $4")
+            .bind(admin_session_updated.refresh_token_id)
+            .bind(admin_session_updated.access_token_id)
+            .bind(admin_session_updated.admin_id)
             .bind(refresh_token_id)
             .execute(db)
             .await?
@@ -97,7 +97,7 @@ impl UserSessionModelController {
 
         if count == 0 {
             return Err(Error::SessionNotFound {
-                session: "user_session",
+                session: "admin_session",
                 id: refresh_token_id,
             });
         }
@@ -112,7 +112,7 @@ impl UserSessionModelController {
     ) -> Result<()> {
         let db = model_manager.db();
 
-        let count = sqlx::query("DELETE FROM user_sessions WHERE refresh_token_id = $1")
+        let count = sqlx::query("DELETE FROM admin_sessions WHERE refresh_token_id = $1")
             .bind(refresh_token_id)
             .execute(db)
             .await?
@@ -120,7 +120,7 @@ impl UserSessionModelController {
 
         if count == 0 {
             return Err(Error::SessionNotFound {
-                session: "user_session",
+                session: "admin_session",
                 id: refresh_token_id,
             });
         }
@@ -128,30 +128,30 @@ impl UserSessionModelController {
         Ok(())
     }
 
-    pub async fn delete_by_user_id(
+    pub async fn delete_by_admin_id(
         context: &Context,
         model_manager: &ModelManager,
-        user_id: i64,
+        admin_id: i64,
     ) -> Result<()> {
         let db = model_manager.db();
 
-        let count = sqlx::query("DELETE FROM user_sessions WHERE user_id = $1")
-            .bind(user_id)
+        let count = sqlx::query("DELETE FROM admin_sessions WHERE admin_id = $1")
+            .bind(admin_id)
             .execute(db)
             .await?
             .rows_affected();
 
         if count == 0 {
             return Err(Error::EntityNotFound {
-                entity: "user",
-                id: user_id,
+                entity: "admin_session",
+                id: admin_id,
             });
         }
 
         Ok(())
     }
 }
-// endregion:    --- User Session Model Controller
+// endregion:    --- Admin Session Model Controller
 
 // region:    --- Tests
 #[cfg(test)]
@@ -171,23 +171,24 @@ mod tests {
         let refresh_token_id = Uuid::new_v4();
         let access_token_id = Uuid::new_v4();
 
-        let user_session_created = UserSessionForCreate {
+        let admin_session_created = AdminSessionForCreate {
             refresh_token_id,
             access_token_id,
-            user_id: 1000,
+            admin_id: 1,
         };
 
         // -- Exec
-        UserSessionModelController::create(&context, &model_manager, user_session_created).await?;
+        AdminSessionModelController::create(&context, &model_manager, admin_session_created)
+            .await?;
 
         // -- Check
-        let user_session =
-            UserSessionModelController::get(&context, &model_manager, refresh_token_id).await?;
-        println!("\n\nuser_session: {:?}", user_session);
-        assert_eq!(user_session.user_id, 1000);
+        let admin_session =
+            AdminSessionModelController::get(&context, &model_manager, refresh_token_id).await?;
+        assert_eq!(admin_session.admin_id, 1);
+        assert_eq!(admin_session.access_token_id, access_token_id);
 
         // Clean
-        UserSessionModelController::delete(&context, &model_manager, refresh_token_id).await?;
+        AdminSessionModelController::delete(&context, &model_manager, refresh_token_id).await?;
 
         Ok(())
     }
@@ -201,16 +202,16 @@ mod tests {
         let id = Uuid::new_v4();
 
         // -- Exec
-        let res = UserSessionModelController::get(&context, &model_manager, id).await;
+        let res = AdminSessionModelController::get(&context, &model_manager, id).await;
 
         // -- Check
         assert!(
             matches!(
                 res,
                 Err(Error::SessionNotFound {
-                    session: "user_session",
-                    id,
-                })
+                    session: "admin_session",
+                    id
+                }) if id == id
             ),
             "SessionNotFound not matching"
         );
@@ -220,42 +221,44 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn test_list_by_user_id() -> Result<()> {
+    async fn test_list_by_admin_id() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
 
         let refresh_token_id1 = Uuid::new_v4();
         let access_token_id1 = Uuid::new_v4();
-
-        let user_session_created1 = UserSessionForCreate {
+        let admin_session_created1 = AdminSessionForCreate {
             refresh_token_id: refresh_token_id1,
             access_token_id: access_token_id1,
-            user_id: 1000,
+            admin_id: 1,
         };
 
         let refresh_token_id2 = Uuid::new_v4();
         let access_token_id2 = Uuid::new_v4();
-
-        let user_session_created2 = UserSessionForCreate {
+        let admin_session_created2 = AdminSessionForCreate {
             refresh_token_id: refresh_token_id2,
             access_token_id: access_token_id2,
-            user_id: 1000,
+            admin_id: 1,
         };
 
         // -- Exec
-        UserSessionModelController::create(&context, &model_manager, user_session_created1).await?;
-        UserSessionModelController::create(&context, &model_manager, user_session_created2).await?;
-        let user_sessions =
-            UserSessionModelController::list_by_user_id(&context, &model_manager, 1000).await?;
+        AdminSessionModelController::create(&context, &model_manager, admin_session_created1)
+            .await?;
+        AdminSessionModelController::create(&context, &model_manager, admin_session_created2)
+            .await?;
+        let admin_sessions =
+            AdminSessionModelController::list_by_admin_id(&context, &model_manager, 1).await?;
 
-        assert_eq!(user_sessions.len(), 2, "number of seeded user_sessions.");
-        assert_eq!(user_sessions[0].user_id, 1000);
-        assert_eq!(user_sessions[1].user_id, 1000);
+        assert_eq!(admin_sessions.len(), 2, "number of seeded admin sessions.");
+        assert_eq!(admin_sessions[0].admin_id, 1);
+        assert_eq!(admin_sessions[0].access_token_id, access_token_id1);
+        assert_eq!(admin_sessions[1].admin_id, 1);
+        assert_eq!(admin_sessions[1].access_token_id, access_token_id2);
 
         // Clean
-        UserSessionModelController::delete(&context, &model_manager, refresh_token_id1).await?;
-        UserSessionModelController::delete(&context, &model_manager, refresh_token_id2).await?;
+        AdminSessionModelController::delete(&context, &model_manager, refresh_token_id1).await?;
+        AdminSessionModelController::delete(&context, &model_manager, refresh_token_id2).await?;
 
         Ok(())
     }
@@ -270,39 +273,40 @@ mod tests {
         let refresh_token_id = Uuid::new_v4();
         let access_token_id = Uuid::new_v4();
 
-        let user_session_created = UserSessionForCreate {
+        let admin_session_created = AdminSessionForCreate {
             refresh_token_id,
             access_token_id,
-            user_id: 1000,
+            admin_id: 1,
         };
 
         // -- Exec
-        UserSessionModelController::create(&context, &model_manager, user_session_created).await?;
+        AdminSessionModelController::create(&context, &model_manager, admin_session_created)
+            .await?;
 
         let refresh_token_id_updated = Uuid::new_v4();
         let access_token_id_updated = Uuid::new_v4();
 
-        let user_session_updated = UserSessionForCreate {
+        let admin_session_updated = AdminSessionForCreate {
             refresh_token_id: refresh_token_id_updated,
             access_token_id: access_token_id_updated,
-            user_id: 1001,
+            admin_id: 2,
         };
 
-        UserSessionModelController::update(
+        AdminSessionModelController::update(
             &context,
             &model_manager,
-            user_session_updated,
+            admin_session_updated,
             refresh_token_id,
         )
         .await?;
 
-        let user_session =
-            UserSessionModelController::get(&context, &model_manager, refresh_token_id_updated)
+        let admin_session =
+            AdminSessionModelController::get(&context, &model_manager, refresh_token_id_updated)
                 .await?;
-        assert_eq!(user_session.access_token_id, access_token_id_updated);
-        assert_eq!(user_session.user_id, 1001);
+        assert_eq!(admin_session.access_token_id, access_token_id_updated);
+        assert_eq!(admin_session.admin_id, 2);
 
-        UserSessionModelController::delete(&context, &model_manager, refresh_token_id_updated)
+        AdminSessionModelController::delete(&context, &model_manager, refresh_token_id_updated)
             .await?;
 
         Ok(())
@@ -317,27 +321,27 @@ mod tests {
 
         let refresh_token_id = Uuid::new_v4();
         let access_token_id = Uuid::new_v4();
-
-        let user_session_created = UserSessionForCreate {
+        let admin_session_created = AdminSessionForCreate {
             refresh_token_id,
             access_token_id,
-            user_id: 1000,
+            admin_id: 1,
         };
 
         // -- Exec
-        let id = UserSessionModelController::create(&context, &model_manager, user_session_created)
+        AdminSessionModelController::create(&context, &model_manager, admin_session_created)
             .await?;
-        UserSessionModelController::delete(&context, &model_manager, refresh_token_id).await?;
+        AdminSessionModelController::delete(&context, &model_manager, refresh_token_id).await?;
 
         // -- Check
-        let res = UserSessionModelController::get(&context, &model_manager, refresh_token_id).await;
+        let res =
+            AdminSessionModelController::get(&context, &model_manager, refresh_token_id).await;
         assert!(
             matches!(
                 res,
                 Err(Error::SessionNotFound {
-                    session: "user_session",
-                    id: refresh_token_id,
-                })
+                    session: "admin_session",
+                    id
+                }) if id == refresh_token_id
             ),
             "EntityNotFound not matching"
         );
@@ -347,56 +351,58 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn test_delete_by_user_id_ok() -> Result<()> {
+    async fn test_delete_by_admin_id_ok() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
 
         let refresh_token_id1 = Uuid::new_v4();
         let access_token_id1 = Uuid::new_v4();
-
-        let user_session_created1 = UserSessionForCreate {
+        let admin_session_created1 = AdminSessionForCreate {
             refresh_token_id: refresh_token_id1,
             access_token_id: access_token_id1,
-            user_id: 1000,
+            admin_id: 1,
         };
 
         let refresh_token_id2 = Uuid::new_v4();
         let access_token_id2 = Uuid::new_v4();
-
-        let user_session_created2 = UserSessionForCreate {
+        let admin_session_created2 = AdminSessionForCreate {
             refresh_token_id: refresh_token_id2,
             access_token_id: access_token_id2,
-            user_id: 1000,
+            admin_id: 1,
         };
 
         // -- Exec
-        UserSessionModelController::create(&context, &model_manager, user_session_created1).await?;
-        UserSessionModelController::create(&context, &model_manager, user_session_created2).await?;
-        UserSessionModelController::delete_by_user_id(&context, &model_manager, 1000).await?;
+        AdminSessionModelController::create(&context, &model_manager, admin_session_created1)
+            .await?;
+
+        AdminSessionModelController::create(&context, &model_manager, admin_session_created2)
+            .await?;
+
+        AdminSessionModelController::delete_by_admin_id(&context, &model_manager, 1).await?;
 
         // -- Check
         let res =
-            UserSessionModelController::get(&context, &model_manager, refresh_token_id1).await;
+            AdminSessionModelController::get(&context, &model_manager, refresh_token_id1).await;
         assert!(
             matches!(
                 res,
                 Err(Error::SessionNotFound {
-                    session: "user_session",
-                    id: refresh_token_id1
-                })
+                    session: "admin_session",
+                    id
+                }) if id == refresh_token_id1
             ),
             "EntityNotFound not matching"
         );
         let res =
-            UserSessionModelController::get(&context, &model_manager, refresh_token_id2).await;
+            AdminSessionModelController::get(&context, &model_manager, refresh_token_id2).await;
         assert!(
             matches!(
                 res,
                 Err(Error::SessionNotFound {
-                    session: "user_session",
-                    id: refresh_token_id2
-                })
+                    session: "admin_session",
+                    id
+                }) if id == refresh_token_id2
             ),
             "EntityNotFound not matching"
         );
@@ -406,21 +412,22 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn test_delete_by_user_id_err_not_found() -> Result<()> {
+    async fn test_delete_by_admin_id_err_not_found() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
         let id = 100;
 
         // -- Exec
-        let res = UserSessionModelController::delete_by_user_id(&context, &model_manager, id).await;
+        let res =
+            AdminSessionModelController::delete_by_admin_id(&context, &model_manager, id).await;
 
         // -- Check
         assert!(
             matches!(
                 res,
                 Err(Error::EntityNotFound {
-                    entity: "user",
+                    entity: "admin_session",
                     id: 100
                 })
             ),

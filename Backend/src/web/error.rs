@@ -17,9 +17,9 @@ pub enum Error {
 
     // -- Access Token Errors
     AccessTokenExpired,
-    InvalidAccessToken,
 
     // -- Refresh Token Errors
+    InvalidRefreshAttempt,
     RefreshTokenExpired,
 
     // -- Context Errors
@@ -58,6 +58,26 @@ impl core::fmt::Display for Error {
 impl std::error::Error for Error {}
 // endregion: --- Error Boilerplate
 
+// region:    --- Froms
+impl From<model::Error> for Error {
+	fn from(val: model::Error) -> Self {
+		Self::ModelError(val)
+	}
+}
+
+impl From<auth::Error> for Error {
+	fn from(val: auth::Error) -> Self {
+		Self::AuthError(val)
+	}
+}
+
+impl From<web::middleware_auth::ContextExtractorError> for Error {
+	fn from(val: web::middleware_auth::ContextExtractorError) -> Self {
+		Self::ContextExtractor(val)
+	}
+}
+// endregion: --- Froms
+
 // region:    --- Client Error
 /// From the root error to the http status code and ClientError
 impl Error {
@@ -77,7 +97,6 @@ impl Error {
 
             // -- Access Token Errors
             AccessTokenExpired => (StatusCode::UNAUTHORIZED, ClientError::ACCESS_TOKEN_EXPIRED),
-            InvalidAccessToken => (StatusCode::UNAUTHORIZED, ClientError::INVALID_ACCESS_TOKEN),
 
             // -- Refresh Token Errors
             RefreshTokenExpired => (StatusCode::UNAUTHORIZED, ClientError::SESSION_EXPIRED),
@@ -97,7 +116,6 @@ pub enum ClientError {
     USERNAME_NOT_FOUND,
     INCORRECT_PASSWORD,
     ACCESS_TOKEN_EXPIRED,
-    INVALID_ACCESS_TOKEN,
     SESSION_EXPIRED,
     NO_AUTH,
     SERVICE_ERROR,

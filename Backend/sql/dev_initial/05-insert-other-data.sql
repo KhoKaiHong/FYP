@@ -10,6 +10,12 @@ INSERT INTO event_organisers (email, password, name, phone_number) VALUES
 ('organiser2@example.com', 'password123', 'Blood Organiser 2', '60123456796'),
 ('organiser3@example.com', 'password123', 'Blood Organiser 3', '60123456797');
 
+-- Insert data into admins
+INSERT INTO admins (email, password, name) VALUES
+('admin1@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Admin 1'),
+('admin2@example.com', 'password123', 'Admin 2'),
+('admin3@example.com', 'password123', 'Admin 3');
+
 -- Insert data into blood_donation_events
 INSERT INTO blood_donation_events (address, start_time, end_time, max_attendees, facility_id, state_id, district_id, organiser_id) VALUES
 ('Jalan Hospital, Johor Bahru', '2024-10-15 08:00:00', '2024-10-15 16:00:00', 100, 1, 1, 1, 1),
