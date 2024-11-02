@@ -1,3 +1,4 @@
+use crate::auth::Role;
 use crate::context::Context;
 use crate::web::{self, ClientError};
 use crate::Result;
@@ -35,7 +36,8 @@ pub async fn log_request(
         http_path: uri.to_string(),
         http_method: req_method.to_string(),
 
-        user_id: ctx.map(|c| c.user_id()),
+        user_id: ctx.as_ref().map(|c| c.user_id()),
+        role: ctx.as_ref().map(|c| c.role().to_string()),
 
         client_error_type: client_error.map(|e| e.as_ref().to_string()),
 
@@ -56,6 +58,7 @@ struct RequestLogLine {
 
     // -- User and context attributes.
     user_id: Option<i64>,
+    role: Option<String>,
 
     // -- http request attributes.
     http_path: String,

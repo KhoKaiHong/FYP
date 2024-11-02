@@ -41,23 +41,20 @@ async fn main() -> Result<()> {
     };
 
     let routes_all = Router::new()
-        // First merge login routes WITHOUT auth middleware
         .merge(web::routes_login::routes(app_state.clone()))
-        // Create a nested router for protected routes WITH auth middleware
         .nest(
             "/api",
             Router::new()
                 .merge(web::routes_hello::routes())
                 // Add other protected routes here
-                .layer(middleware::from_fn(web::middleware_auth::mw_require_auth))
-                .layer(middleware::from_fn_with_state(
-                    app_state.clone(),
-                    web::middleware_auth::mw_ctx_resolver,
-                )),
+                .layer(middleware::from_fn(web::middleware_auth::mw_require_auth)),
         )
-        // Global middleware that applies to all routes
         .layer(middleware::map_response(
             web::response_map::main_response_mapper,
+        ))
+        .layer(middleware::from_fn_with_state(
+            app_state.clone(),
+            web::middleware_auth::mw_ctx_resolver,
         ))
         .layer(CookieManagerLayer::new())
         .fallback_service(web::routes_static::serve_dir());

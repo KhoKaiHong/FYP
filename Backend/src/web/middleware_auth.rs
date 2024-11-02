@@ -38,6 +38,8 @@ pub async fn mw_ctx_resolver(
 
     let context = context_from_token(header).await;
 
+    debug!("{:?}", context);
+
     // Store the ctx_result in the request extension.
     req.extensions_mut().insert(context);
 

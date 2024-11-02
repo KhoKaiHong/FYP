@@ -59,7 +59,7 @@ mod tests {
         let password = "test_password";
         let password_hashed = encrypt_password(password).await?;
 
-        let validate_result = validate_password("test_password", &password_hashed).await?;
+        validate_password("test_password", &password_hashed).await?;
         Ok(())
     }
 }
