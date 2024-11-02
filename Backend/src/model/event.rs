@@ -1,6 +1,6 @@
 use crate::context::Context;
 use crate::model::{Error, ModelManager, Result};
-use crate::model::error::EntityErrorField::IntError;
+use crate::model::EntityErrorField::I64Error;
 use serde::Deserialize;
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
@@ -132,7 +132,7 @@ impl EventModelController {
         .await?
         .ok_or(Error::EntityNotFound {
             entity: "event",
-            field: IntError(id),
+            field: I64Error(id),
         })?;
         
         Ok(event)
@@ -229,7 +229,7 @@ impl EventModelController {
         if count == 0 {
             return Err(Error::EntityNotFound {
                 entity: "event",
-                field: IntError(id),
+                field: I64Error(id),
             });
         }
 
@@ -306,7 +306,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "event",
-                    field: IntError(100),
+                    field: I64Error(100),
                 })
             ),
             "EntityNotFound not matching"
@@ -425,7 +425,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "event",
-                    field: IntError(100),
+                    field: I64Error(100),
                 })
             ),
             "EntityNotFound not matching"

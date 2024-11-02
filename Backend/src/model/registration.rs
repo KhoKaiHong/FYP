@@ -1,5 +1,5 @@
 use crate::context::Context;
-use crate::model::error::EntityErrorField::IntError;
+use crate::model::EntityErrorField::I64Error;
 use crate::model::{Error, ModelManager, Result};
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -114,7 +114,7 @@ impl RegistrationModelController {
         .await?
         .ok_or(Error::EntityNotFound {
             entity: "registration",
-            field: IntError(id),
+            field: I64Error(id),
         })?;
 
         Ok(registration)
@@ -148,7 +148,7 @@ impl RegistrationModelController {
             .await?
             .ok_or(Error::EntityNotFound {
                 entity: "event",
-                field: IntError(event_id),
+                field: I64Error(event_id),
             })?;
 
         let registrations = sqlx::query_as(
@@ -208,7 +208,7 @@ impl RegistrationModelController {
         if count == 0 {
             return Err(Error::EntityNotFound {
                 entity: "registration",
-                field: IntError(id),
+                field: I64Error(id),
             });
         }
 
@@ -229,7 +229,7 @@ impl RegistrationModelController {
             .await?
             .ok_or(Error::EntityNotFound {
                 entity: "event",
-                field: IntError(event_id),
+                field: I64Error(event_id),
             })?;
 
         let (count,): (i64,) =
@@ -298,7 +298,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "registration",
-                    field: IntError(100),
+                    field: I64Error(100),
                 })
             ),
             "EntityNotFound not matching"
@@ -401,7 +401,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "event",
-                    field: IntError(100),
+                    field: I64Error(100),
                 })
             ),
             "Expected EntityNotFound error, got: {:?}",
@@ -464,7 +464,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "registration",
-                    field: IntError(100),
+                    field: I64Error(100),
                 })
             ),
             "Expected EntityNotFound error, got: {:?}",
@@ -529,7 +529,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "event",
-                    field: IntError(100),
+                    field: I64Error(100),
                 })
             ),
             "Expected EntityNotFound error, got: {:?}",

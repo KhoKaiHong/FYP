@@ -1,5 +1,4 @@
 use crate::model::store;
-use erased_serde::serialize_trait_object;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
 use uuid::Uuid;
@@ -8,15 +7,15 @@ pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Debug, Serialize)]
 pub enum EntityErrorField {
-	IntError(i64),
-	StringError(String),
-	UuidError(Uuid),
+    I64Error(i64),
+    StringError(String),
+    UuidError(Uuid),
 }
-
 
 #[serde_as]
 #[derive(Debug, Serialize)]
 pub enum Error {
+    // -- Entity Not Found
     EntityNotFound {
         entity: &'static str,
         field: EntityErrorField,

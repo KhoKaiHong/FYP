@@ -10,6 +10,7 @@ use crate::model::organiser::OrganiserModelController;
 use crate::model::organiser_session::{OrganiserSessionForCreate, OrganiserSessionModelController};
 use crate::model::user::UserModelController;
 use crate::model::user_session::{UserSessionForCreate, UserSessionModelController};
+use crate::model::EntityErrorField::StringError;
 use crate::state::AppState;
 use crate::web::{Error, Result};
 use axum::extract::State;
@@ -37,7 +38,10 @@ async fn user_login_handler(
     let user = UserModelController::get_by_ic_number(&app_state.model_manager, &payload.ic_number)
         .await
         .map_err(|err| match err {
-            model::Error::EntityNotFound { entity: _, field: _ } => Error::LoginFailUsernameNotFound,
+            model::Error::EntityNotFound {
+                entity: "user",
+                field: StringError(ref ic_number),
+            } if ic_number == &payload.ic_number => Error::LoginFailUsernameNotFound,
             _ => Error::ModelError(err),
         })?;
 
@@ -91,7 +95,10 @@ async fn facility_login_handler(
     let facility = FacilityModelController::get_by_email(&app_state.model_manager, &payload.email)
         .await
         .map_err(|err| match err {
-            model::Error::EntityNotFound { entity: _, field: _ } => Error::LoginFailUsernameNotFound,
+            model::Error::EntityNotFound {
+                entity: "facility",
+                field: StringError(ref email),
+            } if email == &payload.email => Error::LoginFailUsernameNotFound,
             _ => Error::ModelError(err),
         })?;
 
@@ -150,12 +157,16 @@ async fn organiser_login_handler(
 ) -> Result<Json<Value>> {
     debug!("{:<12} - organiser_login_api", "HANDLER");
 
-    let organiser = OrganiserModelController::get_by_email(&app_state.model_manager, &payload.email)
-        .await
-        .map_err(|err| match err {
-            model::Error::EntityNotFound { entity: _, field: _ } => Error::LoginFailUsernameNotFound,
-            _ => Error::ModelError(err),
-        })?;
+    let organiser =
+        OrganiserModelController::get_by_email(&app_state.model_manager, &payload.email)
+            .await
+            .map_err(|err| match err {
+                model::Error::EntityNotFound {
+                    entity: "organiser",
+                    field: StringError(ref email),
+                } if email == &payload.email => Error::LoginFailUsernameNotFound,
+                _ => Error::ModelError(err),
+            })?;
 
     validate_password(&payload.password, &organiser.password)
         .await

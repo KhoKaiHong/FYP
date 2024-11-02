@@ -1,5 +1,5 @@
 use crate::context::Context;
-use crate::model::error::EntityErrorField::IntError;
+use crate::model::EntityErrorField::I64Error;
 use crate::model::{Error, ModelManager, Result};
 use chrono::prelude::*;
 use serde::Deserialize;
@@ -91,7 +91,7 @@ impl DonationHistoryModelController {
         .await?
         .ok_or(Error::EntityNotFound {
             entity: "donation_history",
-            field: IntError(id),
+            field: I64Error(id),
         })?;
 
         Ok(donation_history)
@@ -125,7 +125,7 @@ impl DonationHistoryModelController {
             .await?
             .ok_or(Error::EntityNotFound {
                 entity: "user",
-                field: IntError(user_id),
+                field: I64Error(user_id),
             })?;
 
         let donation_histories = sqlx::query_as(
@@ -201,7 +201,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "donation_history",
-                    field: IntError(100),
+                    field: I64Error(100),
                 })
             ),
             "Expected EntityNotFound error, got: {:?}",
@@ -351,7 +351,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "user",
-                    field: IntError(100)
+                    field: I64Error(100)
                 })
             ),
             "Expected EntityNotFound error, got: {:?}",

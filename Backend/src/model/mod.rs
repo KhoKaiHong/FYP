@@ -37,6 +37,7 @@ pub mod organiser_session;
 pub mod admin_session;
 
 pub use self::error::{Error, Result};
+pub use self::error::EntityErrorField;
 
 use store::{new_db_pool, Db};
 

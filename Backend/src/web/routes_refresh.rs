@@ -12,6 +12,7 @@ use crate::model::organiser::OrganiserModelController;
 use crate::model::organiser_session::{OrganiserSessionForCreate, OrganiserSessionModelController};
 use crate::model::user::UserModelController;
 use crate::model::user_session::{UserSessionForCreate, UserSessionModelController};
+use crate::model::EntityErrorField::UuidError;
 use crate::model::{self, ModelManager};
 use crate::state::AppState;
 use crate::web::middleware_auth::{ContextExtractorError, ContextExtractorResult};
@@ -71,9 +72,8 @@ async fn refresh_handler(
                     .await;
             }
             Role::Admin => {
-                refresh_admin_token(&context, model_manager, &access_token_claims, &payload)
-                    .await;
-            },
+                refresh_admin_token(&context, model_manager, &access_token_claims, &payload).await;
+            }
         }
 
         let refresh_token_claims =
@@ -92,9 +92,10 @@ async fn refresh_handler(
             UserSessionModelController::get(&context, model_manager, refresh_token_jti)
                 .await
                 .map_err(|err| match err {
-                    model::Error::EntityNotFound { entity: _, field: _ } => {
-                        Error::InvalidRefreshAttempt
-                    }
+                    model::Error::EntityNotFound {
+                        entity: "user_session",
+                        field: UuidError(refresh_token_jti),
+                    } if refresh_token_jti == refresh_token_jti => Error::InvalidRefreshAttempt,
                     _ => Error::ModelError(err),
                 })?;
 

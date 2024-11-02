@@ -1,5 +1,5 @@
 use crate::context::Context;
-use crate::model::error::EntityErrorField::{IntError, UuidError};
+use crate::model::EntityErrorField::{I64Error, UuidError};
 use crate::model::{Error, ModelManager, Result};
 use serde::Deserialize;
 use sqlx::FromRow;
@@ -145,7 +145,7 @@ impl AdminSessionModelController {
         if count == 0 {
             return Err(Error::EntityNotFound {
                 entity: "admin_session",
-                field: IntError(admin_id),
+                field: I64Error(admin_id),
             });
         }
 
@@ -433,7 +433,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "admin_session",
-                    field: IntError(100)
+                    field: I64Error(100)
                 })
             ),
             "EntityNotFound not matching"

@@ -1,6 +1,6 @@
 use crate::context::Context;
+use crate::model::EntityErrorField::{I64Error, StringError};
 use crate::model::{Error, ModelManager, Result};
-use crate::model::error::EntityErrorField::{IntError, StringError};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
@@ -63,7 +63,7 @@ impl AdminModelController {
             .await?
             .ok_or(Error::EntityNotFound {
                 entity: "admin",
-                field: IntError(id),
+                field: I64Error(id),
             })?;
 
         Ok(admin)
@@ -148,7 +148,7 @@ impl AdminModelController {
         if count == 0 {
             return Err(Error::EntityNotFound {
                 entity: "admin",
-                field: IntError(id),
+                field: I64Error(id),
             });
         };
 
@@ -167,14 +167,13 @@ impl AdminModelController {
         if count == 0 {
             return Err(Error::EntityNotFound {
                 entity: "admin",
-                field: IntError(id),
+                field: I64Error(id),
             });
         }
 
         Ok(())
     }
 }
-
 
 // region:    --- Tests
 #[cfg(test)]
@@ -227,7 +226,9 @@ mod tests {
 
         // -- Exec
         let id = AdminModelController::create(&context, &model_manager, admin_created).await?;
-        let admin = AdminModelController::get_by_email(&context, &model_manager, "admin@example.com").await?;
+        let admin =
+            AdminModelController::get_by_email(&context, &model_manager, "admin@example.com")
+                .await?;
 
         // -- Check
         assert_eq!(admin.email, "admin@example.com");
@@ -259,7 +260,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "admin",
-                    field: IntError(100),
+                    field: I64Error(100),
                 })
             ),
             "Expected EntityNotFound error, got: {:?}",

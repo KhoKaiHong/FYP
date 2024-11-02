@@ -1,5 +1,5 @@
 use crate::context::Context;
-use crate::model::error::EntityErrorField::{IntError, StringError};
+use crate::model::EntityErrorField::{I64Error, StringError};
 use crate::model::{Error, ModelManager, Result};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
@@ -71,7 +71,7 @@ impl OrganiserModelController {
             .await?
             .ok_or(Error::EntityNotFound {
                 entity: "organiser",
-                field: IntError(id),
+                field: I64Error(id),
             })?;
 
         Ok(organiser)
@@ -227,7 +227,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "organiser",
-                    field: IntError(100),
+                    field: I64Error(100),
                 })
             ),
             "EntityNotFound not matching"

@@ -1,6 +1,6 @@
 use crate::context::Context;
 use crate::model::{Error, ModelManager, Result};
-use crate::model::error::EntityErrorField::IntError;
+use crate::model::EntityErrorField::I64Error;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
@@ -50,7 +50,7 @@ impl TaskBmc {
             .await?
             .ok_or(Error::EntityNotFound {
                 entity: "task",
-                field: IntError(id),
+                field: I64Error(id),
             })?;
 
         Ok(task)
@@ -84,7 +84,7 @@ impl TaskBmc {
         if count == 0 {
             return Err(Error::EntityNotFound {
                 entity: "task",
-                field: IntError(id),
+                field: I64Error(id),
             });
         }
 
@@ -103,7 +103,7 @@ impl TaskBmc {
         if count == 0 {
             return Err(Error::EntityNotFound {
                 entity: "task",
-                field: IntError(id),
+                field: I64Error(id),
             });
         }
 
@@ -161,7 +161,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "task",
-                    field: IntError(100),
+                    field: I64Error(100),
                 })
             ),
             "EntityNotFound not matching"
@@ -249,7 +249,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "task",
-                    field: IntError(100),
+                    field: I64Error(100),
                 })
             ),
             "EntityNotFound not matching"

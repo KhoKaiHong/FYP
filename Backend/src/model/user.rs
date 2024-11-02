@@ -1,5 +1,5 @@
 use crate::context::Context;
-use crate::model::error::EntityErrorField::{IntError, StringError};
+use crate::model::EntityErrorField::{I64Error, StringError};
 use crate::model::{Error, ModelManager, Result};
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, Type};
@@ -110,7 +110,7 @@ impl UserModelController {
             .await?
             .ok_or(Error::EntityNotFound {
                 entity: "user",
-                field: IntError(id),
+                field: I64Error(id),
             })?;
 
         Ok(user)
@@ -285,7 +285,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "user",
-                    field: IntError(100),
+                    field: I64Error(100),
                 })
             ),
             "Expected EntityNotFound error, got: {:?}",
@@ -420,8 +420,7 @@ mod tests {
             district_id: 1,
         };
 
-        let id =
-            UserModelController::create(&context, &model_manager, user_created).await?;
+        let id = UserModelController::create(&context, &model_manager, user_created).await?;
 
         // -- Exec
         let user = UserModelController::get_by_ic_number(&model_manager, "1234567890").await?;

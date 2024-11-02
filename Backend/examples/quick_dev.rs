@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
     let req_login = hc.do_post(
         "/api/userlogin",
         json!({
-            "ic_number": "900101-01-1234",
+            "ic_number": "grfgbrfgvrfgrfgr",
             "password": "htrghtghn"
         }),
     );
@@ -76,8 +76,8 @@ async fn main() -> Result<()> {
     let req_login = hc.do_post(
         "/api/facilitylogin",
         json!({
-            "email": "sultanah.aminah@example.com",
-            "password": "welcome"
+            "email": "htrhgrhhrthghgr",
+            "password": "wrong pw"
         }),
     );
     req_login.await?.print().await?;
