@@ -1,4 +1,5 @@
 use crate::context::Context;
+use crate::model::error::EntityErrorField::{IntError, UuidError};
 use crate::model::{Error, ModelManager, Result};
 use serde::Deserialize;
 use sqlx::FromRow;
@@ -55,9 +56,9 @@ impl OrganiserSessionModelController {
                 .bind(refresh_token_id)
                 .fetch_optional(db)
                 .await?
-                .ok_or(Error::SessionNotFound {
-                    session: "organiser_session",
-                    id: refresh_token_id,
+                .ok_or(Error::EntityNotFound {
+                    entity: "organiser_session",
+                    field: UuidError(refresh_token_id),
                 })?;
 
         Ok(organiser_session)
@@ -97,9 +98,9 @@ impl OrganiserSessionModelController {
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::SessionNotFound {
-                session: "organiser_id",
-                id: refresh_token_id,
+            return Err(Error::EntityNotFound {
+                entity: "organiser_session",
+                field: UuidError(refresh_token_id),
             });
         }
 
@@ -120,9 +121,9 @@ impl OrganiserSessionModelController {
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::SessionNotFound {
-                session: "organiser_session",
-                id: refresh_token_id,
+            return Err(Error::EntityNotFound {
+                entity: "organiser_session",
+                field: UuidError(refresh_token_id),
             });
         }
 
@@ -144,8 +145,8 @@ impl OrganiserSessionModelController {
 
         if count == 0 {
             return Err(Error::EntityNotFound {
-                entity: "organiser",
-                id: organiser_id,
+                entity: "organiser_session",
+                field: IntError(organiser_id),
             });
         }
 
@@ -213,12 +214,12 @@ mod tests {
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "organiser_session",
-                    id,
-                })
+                Err(Error::EntityNotFound {
+                    entity: "organiser_session",
+                    field: UuidError(id),
+                }) if id == id
             ),
-            "SessionNotFound not matching"
+            "EntityNotFound not matching"
         );
 
         Ok(())
@@ -366,13 +367,14 @@ mod tests {
         // -- Check
         let res =
             OrganiserSessionModelController::get(&context, &model_manager, refresh_token_id).await;
+
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "organiser_session",
-                    id: refresh_token_id
-                })
+                Err(Error::EntityNotFound {
+                    entity: "organiser_session",
+                    field: UuidError(id),
+                }) if id == refresh_token_id
             ),
             "EntityNotFound not matching"
         );
@@ -422,25 +424,28 @@ mod tests {
         // -- Check
         let res =
             OrganiserSessionModelController::get(&context, &model_manager, refresh_token_id1).await;
+
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "organiser_session",
-                    id: refresh_token_id1
-                })
+                Err(Error::EntityNotFound {
+                    entity: "organiser_session",
+                    field: UuidError(id),
+                }) if id == refresh_token_id1
             ),
             "EntityNotFound not matching"
         );
+
         let res =
             OrganiserSessionModelController::get(&context, &model_manager, refresh_token_id2).await;
+
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "organiser_session",
-                    id: refresh_token_id2
-                })
+                Err(Error::EntityNotFound {
+                    entity: "organiser_session",
+                    field: UuidError(id),
+                }) if id == refresh_token_id2
             ),
             "EntityNotFound not matching"
         );
@@ -466,8 +471,8 @@ mod tests {
             matches!(
                 res,
                 Err(Error::EntityNotFound {
-                    entity: "organiser",
-                    id: 100
+                    entity: "organiser_session",
+                    field: IntError(100),
                 })
             ),
             "EntityNotFound not matching"

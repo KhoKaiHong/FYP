@@ -1,4 +1,5 @@
 use crate::context::Context;
+use crate::model::error::EntityErrorField::{IntError, UuidError};
 use crate::model::{Error, ModelManager, Result};
 use serde::Deserialize;
 use sqlx::FromRow;
@@ -55,9 +56,9 @@ impl FacilitySessionModelController {
                 .bind(refresh_token_id)
                 .fetch_optional(db)
                 .await?
-                .ok_or(Error::SessionNotFound {
-                    session: "facility_session",
-                    id: refresh_token_id,
+                .ok_or(Error::EntityNotFound {
+                    entity: "facility_session",
+                    field: UuidError(refresh_token_id),
                 })?;
 
         Ok(facility_session)
@@ -97,9 +98,9 @@ impl FacilitySessionModelController {
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::SessionNotFound {
-                session: "facility_session",
-                id: refresh_token_id,
+            return Err(Error::EntityNotFound {
+                entity: "facility_session",
+                field: UuidError(refresh_token_id),
             });
         }
 
@@ -120,9 +121,9 @@ impl FacilitySessionModelController {
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::SessionNotFound {
-                session: "facility_session",
-                id: refresh_token_id,
+            return Err(Error::EntityNotFound {
+                entity: "facility_session",
+                field: UuidError(refresh_token_id),
             });
         }
 
@@ -145,7 +146,7 @@ impl FacilitySessionModelController {
         if count == 0 {
             return Err(Error::EntityNotFound {
                 entity: "facility_session",
-                id: facility_id,
+                field: IntError(facility_id),
             });
         }
 
@@ -209,12 +210,12 @@ mod tests {
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "facility_session",
-                    id,
-                })
+                Err(Error::EntityNotFound {
+                    entity: "facility_session",
+                    field: UuidError(id),
+                }) if id == id
             ),
-            "SessionNotFound not matching"
+            "EntityNotFound not matching"
         );
 
         Ok(())
@@ -341,13 +342,14 @@ mod tests {
         // -- Check
         let res =
             FacilitySessionModelController::get(&context, &model_manager, refresh_token_id).await;
+
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "facility_session",
-                    id: refresh_token_id
-                })
+                Err(Error::EntityNotFound {
+                    entity: "facility_session",
+                    field: UuidError(id),
+                }) if id == refresh_token_id
             ),
             "EntityNotFound not matching"
         );
@@ -396,25 +398,27 @@ mod tests {
         // -- Check
         let res =
             FacilitySessionModelController::get(&context, &model_manager, refresh_token_id1).await;
+
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "facility_session",
-                    id: refresh_token_id1
-                })
+                Err(Error::EntityNotFound {
+                    entity: "facility_session",
+                    field: UuidError(id),
+                }) if id == refresh_token_id1
             ),
             "EntityNotFound not matching"
         );
         let res =
             FacilitySessionModelController::get(&context, &model_manager, refresh_token_id2).await;
+
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "facility_session",
-                    id: refresh_token_id2
-                })
+                Err(Error::EntityNotFound {
+                    entity: "facility_session",
+                    field: UuidError(id),
+                }) if id == refresh_token_id2
             ),
             "EntityNotFound not matching"
         );
@@ -441,7 +445,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "facility_session",
-                    id: 100
+                    field: IntError(100),
                 })
             ),
             "EntityNotFound not matching"

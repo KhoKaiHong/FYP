@@ -1,4 +1,5 @@
 use crate::context::Context;
+use crate::model::error::EntityErrorField::IntError;
 use crate::model::{Error, ModelManager, Result};
 use chrono::prelude::*;
 use serde::Deserialize;
@@ -82,13 +83,16 @@ impl DonationHistoryModelController {
     ) -> Result<DonationHistoryWithInformation> {
         let db = model_manager.db();
 
-        let donation_history = sqlx::query_as(
+        let donation_history: DonationHistoryWithInformation = sqlx::query_as(
             "SELECT donation_history.*, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time FROM donation_history JOIN users ON donation_history.user_id = users.id LEFT JOIN blood_donation_events ON donation_history.event_id = blood_donation_events.id WHERE donation_history.id = $1",
         )
         .bind(id)
         .fetch_optional(db)
         .await?
-        .ok_or(Error::EntityNotFound { entity: "donation_history", id })?;
+        .ok_or(Error::EntityNotFound {
+            entity: "donation_history",
+            field: IntError(id),
+        })?;
 
         Ok(donation_history)
     }
@@ -121,7 +125,7 @@ impl DonationHistoryModelController {
             .await?
             .ok_or(Error::EntityNotFound {
                 entity: "user",
-                id: user_id,
+                field: IntError(user_id),
             })?;
 
         let donation_histories = sqlx::query_as(
@@ -197,7 +201,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "donation_history",
-                    id: 100
+                    field: IntError(100),
                 })
             ),
             "Expected EntityNotFound error, got: {:?}",
@@ -347,7 +351,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "user",
-                    id: 100
+                    field: IntError(100)
                 })
             ),
             "Expected EntityNotFound error, got: {:?}",

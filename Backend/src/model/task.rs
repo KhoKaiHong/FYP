@@ -1,5 +1,6 @@
 use crate::context::Context;
 use crate::model::{Error, ModelManager, Result};
+use crate::model::error::EntityErrorField::IntError;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
@@ -47,7 +48,10 @@ impl TaskBmc {
             .bind(id)
             .fetch_optional(db)
             .await?
-            .ok_or(Error::EntityNotFound { entity: "task", id })?;
+            .ok_or(Error::EntityNotFound {
+                entity: "task",
+                field: IntError(id),
+            })?;
 
         Ok(task)
     }
@@ -78,7 +82,10 @@ impl TaskBmc {
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::EntityNotFound { entity: "task", id });
+            return Err(Error::EntityNotFound {
+                entity: "task",
+                field: IntError(id),
+            });
         }
 
         Ok(())
@@ -94,7 +101,10 @@ impl TaskBmc {
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::EntityNotFound { entity: "task", id });
+            return Err(Error::EntityNotFound {
+                entity: "task",
+                field: IntError(id),
+            });
         }
 
         Ok(())
@@ -151,7 +161,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "task",
-                    id: 100
+                    field: IntError(100),
                 })
             ),
             "EntityNotFound not matching"
@@ -239,7 +249,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "task",
-                    id: 100
+                    field: IntError(100),
                 })
             ),
             "EntityNotFound not matching"

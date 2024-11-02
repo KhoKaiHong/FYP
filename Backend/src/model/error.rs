@@ -1,22 +1,32 @@
+use crate::model::store;
+use erased_serde::serialize_trait_object;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
 use uuid::Uuid;
-use crate::model::store;
 
 pub type Result<T> = core::result::Result<T, Error>;
+
+#[derive(Debug, Serialize)]
+pub enum EntityErrorField {
+	IntError(i64),
+	StringError(String),
+	UuidError(Uuid),
+}
+
 
 #[serde_as]
 #[derive(Debug, Serialize)]
 pub enum Error {
-	EntityNotFound { entity: &'static str, id: i64 },
-	UserNotFound,
-	SessionNotFound { session: &'static str, id: Uuid },
-	
-	// -- Modules
-	Store(store::Error),
+    EntityNotFound {
+        entity: &'static str,
+        field: EntityErrorField,
+    },
 
-	// -- Externals
-	Sqlx(#[serde_as(as = "DisplayFromStr")] sqlx::Error),
+    // -- Modules
+    Store(store::Error),
+
+    // -- Externals
+    Sqlx(#[serde_as(as = "DisplayFromStr")] sqlx::Error),
 }
 
 // region:    --- Error Boilerplate
@@ -31,14 +41,14 @@ impl std::error::Error for Error {}
 
 // region:    --- Froms
 impl From<store::Error> for Error {
-	fn from(val: store::Error) -> Self {
-		Self::Store(val)
-	}
+    fn from(val: store::Error) -> Self {
+        Self::Store(val)
+    }
 }
 
 impl From<sqlx::Error> for Error {
-	fn from(val: sqlx::Error) -> Self {
-		Self::Sqlx(val)
-	}
+    fn from(val: sqlx::Error) -> Self {
+        Self::Sqlx(val)
+    }
 }
 // endregion: --- Froms

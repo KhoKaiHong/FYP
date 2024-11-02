@@ -1,5 +1,6 @@
 use crate::context::Context;
 use crate::model::{Error, ModelManager, Result};
+use crate::model::error::EntityErrorField::{IntError, UuidError};
 use serde::Deserialize;
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -55,9 +56,9 @@ impl UserSessionModelController {
                 .bind(refresh_token_id)
                 .fetch_optional(db)
                 .await?
-                .ok_or(Error::SessionNotFound {
-                    session: "user_session",
-                    id: refresh_token_id,
+                .ok_or(Error::EntityNotFound {
+                    entity: "user_session",
+                    field: UuidError(refresh_token_id),
                 })?;
 
         Ok(user_session)
@@ -96,9 +97,9 @@ impl UserSessionModelController {
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::SessionNotFound {
-                session: "user_session",
-                id: refresh_token_id,
+            return Err(Error::EntityNotFound {
+                entity: "user_session",
+                field: UuidError(refresh_token_id),
             });
         }
 
@@ -119,9 +120,9 @@ impl UserSessionModelController {
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::SessionNotFound {
-                session: "user_session",
-                id: refresh_token_id,
+            return Err(Error::EntityNotFound {
+                entity: "user_session",
+                field: UuidError(refresh_token_id),
             });
         }
 
@@ -143,8 +144,8 @@ impl UserSessionModelController {
 
         if count == 0 {
             return Err(Error::EntityNotFound {
-                entity: "user",
-                id: user_id,
+                entity: "user_session",
+                field: IntError(user_id),
             });
         }
 
@@ -207,12 +208,12 @@ mod tests {
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "user_session",
-                    id,
-                })
+                Err(Error::EntityNotFound {
+                    entity: "user_session",
+                    field: UuidError(id),
+                }) if id == id
             ),
-            "SessionNotFound not matching"
+            "EntityNotFound not matching"
         );
 
         Ok(())
@@ -334,10 +335,10 @@ mod tests {
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "user_session",
-                    id: refresh_token_id,
-                })
+                Err(Error::EntityNotFound {
+                    entity: "user_session",
+                    field: UuidError(id),
+                }) if id == refresh_token_id
             ),
             "EntityNotFound not matching"
         );
@@ -378,25 +379,28 @@ mod tests {
         // -- Check
         let res =
             UserSessionModelController::get(&context, &model_manager, refresh_token_id1).await;
+
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "user_session",
-                    id: refresh_token_id1
-                })
+                Err(Error::EntityNotFound {
+                    entity: "user_session",
+                    field: UuidError(id),
+                }) if id == refresh_token_id1
             ),
             "EntityNotFound not matching"
         );
+
         let res =
             UserSessionModelController::get(&context, &model_manager, refresh_token_id2).await;
+
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "user_session",
-                    id: refresh_token_id2
-                })
+                Err(Error::EntityNotFound {
+                    entity: "user_session",
+                    field: UuidError(id),
+                }) if id == refresh_token_id2
             ),
             "EntityNotFound not matching"
         );
@@ -420,8 +424,8 @@ mod tests {
             matches!(
                 res,
                 Err(Error::EntityNotFound {
-                    entity: "user",
-                    id: 100
+                    entity: "user_session",
+                    field: IntError(100),
                 })
             ),
             "EntityNotFound not matching"

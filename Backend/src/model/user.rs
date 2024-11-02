@@ -1,4 +1,5 @@
 use crate::context::Context;
+use crate::model::error::EntityErrorField::{IntError, StringError};
 use crate::model::{Error, ModelManager, Result};
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, Type};
@@ -107,14 +108,17 @@ impl UserModelController {
             .bind(id)
             .fetch_optional(db)
             .await?
-            .ok_or(Error::EntityNotFound { entity: "user", id })?;
+            .ok_or(Error::EntityNotFound {
+                entity: "user",
+                field: IntError(id),
+            })?;
 
         Ok(user)
     }
 
     pub async fn get_by_ic_number(
         model_manager: &ModelManager,
-        ic_number: String,
+        ic_number: &str,
     ) -> Result<UserWithLocation> {
         let db = model_manager.db();
 
@@ -122,12 +126,18 @@ impl UserModelController {
             .bind(ic_number)
             .fetch_optional(db)
             .await?
-            .ok_or(Error::UserNotFound)?;
+            .ok_or(Error::EntityNotFound {
+                entity: "user",
+                field: StringError(ic_number.to_string()),
+            })?;
 
         Ok(user)
     }
 
-    pub async fn list(context: &Context, model_manager: &ModelManager) -> Result<Vec<UserWithLocation>> {
+    pub async fn list(
+        context: &Context,
+        model_manager: &ModelManager,
+    ) -> Result<Vec<UserWithLocation>> {
         let db = model_manager.db();
 
         let users = sqlx::query_as("SELECT users.*, states.name AS state_name, districts.name AS district_name FROM users JOIN states ON users.state_id = states.id JOIN districts ON users.district_id = districts.id")
@@ -275,7 +285,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "user",
-                    id: 100
+                    field: IntError(100),
                 })
             ),
             "Expected EntityNotFound error, got: {:?}",
@@ -389,6 +399,74 @@ mod tests {
             .bind(id)
             .execute(model_manager.db())
             .await?;
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn get_by_email_ok() -> Result<()> {
+        // -- Setup & Fixtures
+        let model_manager = _dev_utils::init_test().await;
+        let context = Context::root_ctx();
+        let user_created = UserForCreate {
+            ic_number: "1234567890".to_string(),
+            password: "password".to_string(),
+            name: "John Doe".to_string(),
+            email: "john@example.com".to_string(),
+            phone_number: "1234567890".to_string(),
+            blood_type: "A+".to_string(),
+            state_id: 1,
+            district_id: 1,
+        };
+
+        let id =
+            UserModelController::create(&context, &model_manager, user_created).await?;
+
+        // -- Exec
+        let user = UserModelController::get_by_ic_number(&model_manager, "1234567890").await?;
+
+        // -- Check
+        assert_eq!(user.email, "john@example.com");
+        assert_eq!(user.password, "password");
+        assert_eq!(user.name, "John Doe");
+        assert_eq!(user.phone_number, "1234567890");
+        assert_eq!(user.blood_type, "A+");
+        assert_eq!(user.state_id, 1);
+        assert_eq!(user.district_id, 1);
+
+        println!("\n\nuser: {:?}", user);
+
+        // Clean
+        sqlx::query("DELETE FROM users WHERE id = $1")
+            .bind(id)
+            .execute(model_manager.db())
+            .await?;
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn get_by_email_err_not_found() -> Result<()> {
+        // -- Setup & Fixtures
+        let model_manager = _dev_utils::init_test().await;
+
+        // -- Exec
+        let res = UserModelController::get_by_ic_number(&model_manager, "invalidic").await;
+
+        // -- Check
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "user",
+                    field: StringError(ref e)
+                }) if e == "invalidic"
+            ),
+            "Expected EntityNotFound error, got: {:?}",
+            res
+        );
 
         Ok(())
     }

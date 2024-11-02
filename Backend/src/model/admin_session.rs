@@ -1,4 +1,5 @@
 use crate::context::Context;
+use crate::model::error::EntityErrorField::{IntError, UuidError};
 use crate::model::{Error, ModelManager, Result};
 use serde::Deserialize;
 use sqlx::FromRow;
@@ -55,9 +56,9 @@ impl AdminSessionModelController {
                 .bind(refresh_token_id)
                 .fetch_optional(db)
                 .await?
-                .ok_or(Error::SessionNotFound {
-                    session: "admin_session",
-                    id: refresh_token_id,
+                .ok_or(Error::EntityNotFound {
+                    entity: "admin_session",
+                    field: UuidError(refresh_token_id),
                 })?;
 
         Ok(admin_session)
@@ -96,9 +97,9 @@ impl AdminSessionModelController {
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::SessionNotFound {
-                session: "admin_session",
-                id: refresh_token_id,
+            return Err(Error::EntityNotFound {
+                entity: "admin_session",
+                field: UuidError(refresh_token_id),
             });
         }
 
@@ -119,9 +120,9 @@ impl AdminSessionModelController {
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::SessionNotFound {
-                session: "admin_session",
-                id: refresh_token_id,
+            return Err(Error::EntityNotFound {
+                entity: "admin_session",
+                field: UuidError(refresh_token_id),
             });
         }
 
@@ -144,7 +145,7 @@ impl AdminSessionModelController {
         if count == 0 {
             return Err(Error::EntityNotFound {
                 entity: "admin_session",
-                id: admin_id,
+                field: IntError(admin_id),
             });
         }
 
@@ -208,12 +209,12 @@ mod tests {
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "admin_session",
-                    id
+                Err(Error::EntityNotFound {
+                    entity: "admin_session",
+                    field: UuidError(id)
                 }) if id == id
             ),
-            "SessionNotFound not matching"
+            "EntityNotFound not matching"
         );
 
         Ok(())
@@ -335,12 +336,13 @@ mod tests {
         // -- Check
         let res =
             AdminSessionModelController::get(&context, &model_manager, refresh_token_id).await;
+
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "admin_session",
-                    id
+                Err(Error::EntityNotFound {
+                    entity: "admin_session",
+                    field: UuidError(id)
                 }) if id == refresh_token_id
             ),
             "EntityNotFound not matching"
@@ -384,24 +386,27 @@ mod tests {
         // -- Check
         let res =
             AdminSessionModelController::get(&context, &model_manager, refresh_token_id1).await;
+
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "admin_session",
-                    id
+                Err(Error::EntityNotFound {
+                    entity: "admin_session",
+                    field: UuidError(id)
                 }) if id == refresh_token_id1
             ),
             "EntityNotFound not matching"
         );
+
         let res =
             AdminSessionModelController::get(&context, &model_manager, refresh_token_id2).await;
+
         assert!(
             matches!(
                 res,
-                Err(Error::SessionNotFound {
-                    session: "admin_session",
-                    id
+                Err(Error::EntityNotFound {
+                    entity: "admin_session",
+                    field: UuidError(id)
                 }) if id == refresh_token_id2
             ),
             "EntityNotFound not matching"
@@ -428,7 +433,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "admin_session",
-                    id: 100
+                    field: IntError(100)
                 })
             ),
             "EntityNotFound not matching"

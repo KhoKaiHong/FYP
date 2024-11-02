@@ -70,7 +70,10 @@ async fn refresh_handler(
                 refresh_organiser_token(&context, model_manager, &access_token_claims, &payload)
                     .await;
             }
-            Role::Admin => todo!(),
+            Role::Admin => {
+                refresh_admin_token(&context, model_manager, &access_token_claims, &payload)
+                    .await;
+            },
         }
 
         let refresh_token_claims =
@@ -89,7 +92,7 @@ async fn refresh_handler(
             UserSessionModelController::get(&context, model_manager, refresh_token_jti)
                 .await
                 .map_err(|err| match err {
-                    model::Error::SessionNotFound { session: _, id: _ } => {
+                    model::Error::EntityNotFound { entity: _, field: _ } => {
                         Error::InvalidRefreshAttempt
                     }
                     _ => Error::ModelError(err),
@@ -136,6 +139,15 @@ async fn refresh_facility_token(
 }
 
 async fn refresh_organiser_token(
+    context: &Context,
+    model_manager: &ModelManager,
+    access_token_claims: &AccessTokenClaims,
+    payload: &RefreshRequestPayload,
+) -> Result<()> {
+    Ok(())
+}
+
+async fn refresh_admin_token(
     context: &Context,
     model_manager: &ModelManager,
     access_token_claims: &AccessTokenClaims,

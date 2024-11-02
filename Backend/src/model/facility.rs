@@ -1,4 +1,5 @@
 use crate::context::Context;
+use crate::model::error::EntityErrorField::{IntError, StringError};
 use crate::model::{Error, ModelManager, Result};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
@@ -90,14 +91,17 @@ impl FacilityModelController {
         .bind(id)
         .fetch_optional(db)
         .await?
-        .ok_or(Error::EntityNotFound { entity: "facility", id })?;
+        .ok_or(Error::EntityNotFound {
+            entity: "facility",
+            field: IntError(id),
+        })?;
 
         Ok(facility)
     }
 
     pub async fn get_by_email(
         model_manager: &ModelManager,
-        email: String,
+        email: &str,
     ) -> Result<FacilityWithLocation> {
         let db = model_manager.db();
 
@@ -107,7 +111,10 @@ impl FacilityModelController {
         .bind(email)
         .fetch_optional(db)
         .await?
-        .ok_or(Error::UserNotFound)?;
+        .ok_or(Error::EntityNotFound {
+            entity: "facility",
+            field: StringError(email.to_string()),
+        })?;
 
         Ok(facility)
     }
@@ -263,7 +270,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "facility",
-                    id: 100
+                    field: IntError(100),
                 })
             ),
             "EntityNotFound not matching"
@@ -372,11 +379,75 @@ mod tests {
 
         println!("\n\nfacility: {:?}", facility);
 
-       // Clean
-       sqlx::query("DELETE FROM blood_collection_facilities WHERE id = $1")
-       .bind(id)
-       .execute(model_manager.db())
-       .await?;
+        // Clean
+        sqlx::query("DELETE FROM blood_collection_facilities WHERE id = $1")
+            .bind(id)
+            .execute(model_manager.db())
+            .await?;
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn get_by_email_ok() -> Result<()> {
+        // -- Setup & Fixtures
+        let model_manager = _dev_utils::init_test().await;
+        let context = Context::root_ctx();
+        let facility_created = FacilityForCreate {
+            email: "test_email@example.com".to_string(),
+            password: "welcome".to_string(),
+            name: "Test Facility 01".to_string(),
+            address: "123 Fake St".to_string(),
+            phone_number: "1234567890".to_string(),
+            state_id: 1,
+        };
+
+        let id =
+            FacilityModelController::create(&context, &model_manager, facility_created).await?;
+
+        // -- Exec
+        let facility = FacilityModelController::get_by_email(&model_manager, "test_email@example.com").await?;
+
+        // -- Check
+        assert_eq!(facility.password, "welcome");
+        assert_eq!(facility.name, "Test Facility 01");
+        assert_eq!(facility.address, "123 Fake St");
+        assert_eq!(facility.phone_number, "1234567890");
+        assert_eq!(facility.state_id, 1);
+
+        println!("\n\nfacility: {:?}", facility);
+
+        // Clean
+        sqlx::query("DELETE FROM blood_collection_facilities WHERE id = $1")
+            .bind(id)
+            .execute(model_manager.db())
+            .await?;
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn get_by_email_err_not_found() -> Result<()> {
+        // -- Setup & Fixtures
+        let model_manager = _dev_utils::init_test().await;
+
+        // -- Exec
+        let res = FacilityModelController::get_by_email(&model_manager, "test_list_ok@example.com").await;
+
+        // -- Check
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "facility",
+                    field: StringError(ref e)
+                }) if e == "test_list_ok@example.com"
+            ),
+            "Expected EntityNotFound error, got: {:?}",
+            res
+        );
 
         Ok(())
     }

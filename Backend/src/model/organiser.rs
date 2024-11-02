@@ -1,4 +1,5 @@
 use crate::context::Context;
+use crate::model::error::EntityErrorField::{IntError, StringError};
 use crate::model::{Error, ModelManager, Result};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
@@ -64,38 +65,34 @@ impl OrganiserModelController {
     ) -> Result<Organiser> {
         let db = model_manager.db();
 
-        let organiser = sqlx::query_as(
-            "SELECT * FROM event_organisers WHERE id = $1",
-        )
-        .bind(id)
-        .fetch_optional(db)
-        .await?
-        .ok_or(Error::EntityNotFound { entity: "organiser", id })?;
+        let organiser = sqlx::query_as("SELECT * FROM event_organisers WHERE id = $1")
+            .bind(id)
+            .fetch_optional(db)
+            .await?
+            .ok_or(Error::EntityNotFound {
+                entity: "organiser",
+                field: IntError(id),
+            })?;
 
         Ok(organiser)
     }
 
-    pub async fn get_by_email(
-        model_manager: &ModelManager,
-        email: String,
-    ) -> Result<Organiser> {
+    pub async fn get_by_email(model_manager: &ModelManager, email: &str) -> Result<Organiser> {
         let db = model_manager.db();
 
-        let organiser = sqlx::query_as(
-            "SELECT * FROM event_organisers WHERE email = $1",
-        )
-        .bind(email)
-        .fetch_optional(db)
-        .await?
-        .ok_or(Error::UserNotFound)?;
+        let organiser = sqlx::query_as("SELECT * FROM event_organisers WHERE email = $1")
+            .bind(email)
+            .fetch_optional(db)
+            .await?
+            .ok_or(Error::EntityNotFound {
+                entity: "organiser",
+                field: StringError(email.to_string()),
+            })?;
 
         Ok(organiser)
     }
 
-    pub async fn list(
-        context: &Context,
-        model_manager: &ModelManager,
-    ) -> Result<Vec<Organiser>> {
+    pub async fn list(context: &Context, model_manager: &ModelManager) -> Result<Vec<Organiser>> {
         let db = model_manager.db();
 
         let organisers = sqlx::query_as("SELECT * FROM event_organisers ORDER BY id")
@@ -230,7 +227,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "organiser",
-                    id: 100
+                    field: IntError(100),
                 })
             ),
             "EntityNotFound not matching"
@@ -334,6 +331,68 @@ mod tests {
             .bind(id)
             .execute(model_manager.db())
             .await?;
+
+        Ok(())
+    }
+
+    
+    #[tokio::test]
+    #[serial]
+    async fn get_by_email_ok() -> Result<()> {
+        // -- Setup & Fixtures
+        let model_manager = _dev_utils::init_test().await;
+        let context = Context::root_ctx();
+        let organiser_created = OrganiserForCreate {
+            email: "test_create_ok@example.com".to_string(),
+            password: "welcome".to_string(),
+            name: "Test Organiser".to_string(),
+            phone_number: "1234567890".to_string(),
+        };
+
+        let id =
+            OrganiserModelController::create(&context, &model_manager, organiser_created).await?;
+
+        // -- Exec
+        let organiser = OrganiserModelController::get_by_email(&model_manager, "test_create_ok@example.com").await?;
+
+        // -- Check
+        assert_eq!(organiser.email, "test_create_ok@example.com");
+        assert_eq!(organiser.password, "welcome");
+        assert_eq!(organiser.name, "Test Organiser");
+        assert_eq!(organiser.phone_number, "1234567890");
+
+        println!("\n\norganiser: {:?}", organiser);
+
+        // Clean
+        sqlx::query("DELETE FROM event_organisers WHERE id = $1")
+            .bind(id)
+            .execute(model_manager.db())
+            .await?;
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn get_by_email_err_not_found() -> Result<()> {
+        // -- Setup & Fixtures
+        let model_manager = _dev_utils::init_test().await;
+
+        // -- Exec
+        let res = OrganiserModelController::get_by_email(&model_manager, "test_list_ok@example.com").await;
+
+        // -- Check
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "organiser",
+                    field: StringError(ref e)
+                }) if e == "test_list_ok@example.com"
+            ),
+            "Expected EntityNotFound error, got: {:?}",
+            res
+        );
 
         Ok(())
     }

@@ -1,5 +1,6 @@
 use crate::context::Context;
 use crate::model::{Error, ModelManager, Result};
+use crate::model::error::EntityErrorField::{IntError, StringError};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
@@ -62,7 +63,7 @@ impl AdminModelController {
             .await?
             .ok_or(Error::EntityNotFound {
                 entity: "admin",
-                id,
+                field: IntError(id),
             })?;
 
         Ok(admin)
@@ -71,7 +72,7 @@ impl AdminModelController {
     pub async fn get_by_email(
         context: &Context,
         model_manager: &ModelManager,
-        email: String,
+        email: &str,
     ) -> Result<Admin> {
         let db = model_manager.db();
 
@@ -79,7 +80,10 @@ impl AdminModelController {
             .bind(email)
             .fetch_optional(db)
             .await?
-            .ok_or(Error::UserNotFound)?;
+            .ok_or(Error::EntityNotFound {
+                entity: "admin",
+                field: StringError(email.to_string()),
+            })?;
 
         Ok(admin)
     }
@@ -142,7 +146,10 @@ impl AdminModelController {
         let count = query.execute(db).await?.rows_affected();
 
         if count == 0 {
-            return Err(Error::EntityNotFound { entity: "admin", id });
+            return Err(Error::EntityNotFound {
+                entity: "admin",
+                field: IntError(id),
+            });
         };
 
         Ok(())
@@ -158,7 +165,10 @@ impl AdminModelController {
             .rows_affected();
 
         if count == 0 {
-            return Err(Error::EntityNotFound { entity: "admin", id });
+            return Err(Error::EntityNotFound {
+                entity: "admin",
+                field: IntError(id),
+            });
         }
 
         Ok(())
@@ -217,7 +227,7 @@ mod tests {
 
         // -- Exec
         let id = AdminModelController::create(&context, &model_manager, admin_created).await?;
-        let admin = AdminModelController::get_by_email(&context, &model_manager, "admin@example.com".to_string()).await?;
+        let admin = AdminModelController::get_by_email(&context, &model_manager, "admin@example.com").await?;
 
         // -- Check
         assert_eq!(admin.email, "admin@example.com");
@@ -249,7 +259,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "admin",
-                    id: 100
+                    field: IntError(100),
                 })
             ),
             "Expected EntityNotFound error, got: {:?}",
@@ -268,15 +278,18 @@ mod tests {
         let email = "admin@example.com".to_string();
 
         // -- Exec
-        let res = AdminModelController::get_by_email(&context, &model_manager, email).await;
+        let res = AdminModelController::get_by_email(&context, &model_manager, &email).await;
 
         // -- Check
         assert!(
             matches!(
                 res,
-                Err(Error::UserNotFound)
+                Err(Error::EntityNotFound {
+                    entity: "admin",
+                    field: StringError(ref e)
+                }) if e == &email
             ),
-            "Expected UserNotFound error, got: {:?}",
+            "Expected EntityNotFound error, got: {:?}",
             res
         );
 

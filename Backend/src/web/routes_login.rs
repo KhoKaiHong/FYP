@@ -34,10 +34,10 @@ async fn user_login_handler(
 ) -> Result<Json<Value>> {
     debug!("{:<12} - user_login_api", "HANDLER");
 
-    let user = UserModelController::get_by_ic_number(&app_state.model_manager, payload.ic_number)
+    let user = UserModelController::get_by_ic_number(&app_state.model_manager, &payload.ic_number)
         .await
         .map_err(|err| match err {
-            model::Error::UserNotFound => Error::LoginFailUsernameNotFound,
+            model::Error::EntityNotFound { entity: _, field: _ } => Error::LoginFailUsernameNotFound,
             _ => Error::ModelError(err),
         })?;
 
@@ -88,10 +88,10 @@ async fn facility_login_handler(
 ) -> Result<Json<Value>> {
     debug!("{:<12} - facility_login_api", "HANDLER");
 
-    let facility = FacilityModelController::get_by_email(&app_state.model_manager, payload.email)
+    let facility = FacilityModelController::get_by_email(&app_state.model_manager, &payload.email)
         .await
         .map_err(|err| match err {
-            model::Error::UserNotFound => Error::LoginFailUsernameNotFound,
+            model::Error::EntityNotFound { entity: _, field: _ } => Error::LoginFailUsernameNotFound,
             _ => Error::ModelError(err),
         })?;
 
@@ -150,10 +150,10 @@ async fn organiser_login_handler(
 ) -> Result<Json<Value>> {
     debug!("{:<12} - organiser_login_api", "HANDLER");
 
-    let organiser = OrganiserModelController::get_by_email(&app_state.model_manager, payload.email)
+    let organiser = OrganiserModelController::get_by_email(&app_state.model_manager, &payload.email)
         .await
         .map_err(|err| match err {
-            model::Error::UserNotFound => Error::LoginFailUsernameNotFound,
+            model::Error::EntityNotFound { entity: _, field: _ } => Error::LoginFailUsernameNotFound,
             _ => Error::ModelError(err),
         })?;
 

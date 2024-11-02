@@ -1,4 +1,5 @@
 use crate::context::Context;
+use crate::model::error::EntityErrorField::IntError;
 use crate::model::{Error, ModelManager, Result};
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -111,7 +112,10 @@ impl RegistrationModelController {
         .bind(id)
         .fetch_optional(db)
         .await?
-        .ok_or(Error::EntityNotFound { entity: "registration", id })?;
+        .ok_or(Error::EntityNotFound {
+            entity: "registration",
+            field: IntError(id),
+        })?;
 
         Ok(registration)
     }
@@ -144,7 +148,7 @@ impl RegistrationModelController {
             .await?
             .ok_or(Error::EntityNotFound {
                 entity: "event",
-                id: event_id,
+                field: IntError(event_id),
             })?;
 
         let registrations = sqlx::query_as(
@@ -204,7 +208,7 @@ impl RegistrationModelController {
         if count == 0 {
             return Err(Error::EntityNotFound {
                 entity: "registration",
-                id,
+                field: IntError(id),
             });
         }
 
@@ -225,7 +229,7 @@ impl RegistrationModelController {
             .await?
             .ok_or(Error::EntityNotFound {
                 entity: "event",
-                id: event_id,
+                field: IntError(event_id),
             })?;
 
         let (count,): (i64,) =
@@ -238,7 +242,7 @@ impl RegistrationModelController {
     }
 }
 
-// region:    --- Tests 
+// region:    --- Tests
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -258,7 +262,9 @@ mod tests {
         };
 
         // -- Exec
-        let id = RegistrationModelController::create(&context, &model_manager, registration_created).await?;
+        let id =
+            RegistrationModelController::create(&context, &model_manager, registration_created)
+                .await?;
 
         // -- Check
         let registration = RegistrationModelController::get(&context, &model_manager, id).await?;
@@ -292,7 +298,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "registration",
-                    id: 100
+                    field: IntError(100),
                 })
             ),
             "EntityNotFound not matching"
@@ -317,8 +323,12 @@ mod tests {
         };
 
         // -- Exec
-        let id1 = RegistrationModelController::create(&context, &model_manager, registration_created1).await?;
-        let id2 = RegistrationModelController::create(&context, &model_manager, registration_created2).await?;
+        let id1 =
+            RegistrationModelController::create(&context, &model_manager, registration_created1)
+                .await?;
+        let id2 =
+            RegistrationModelController::create(&context, &model_manager, registration_created2)
+                .await?;
         let registrations = RegistrationModelController::list(&context, &model_manager).await?;
 
         assert_eq!(registrations.len(), 5, "number of seeded registrations.");
@@ -335,7 +345,7 @@ mod tests {
         Ok(())
     }
 
-    #[tokio::test]    
+    #[tokio::test]
     #[serial]
     async fn test_list_by_event_id() -> Result<()> {
         // -- Setup & Fixtures
@@ -351,9 +361,14 @@ mod tests {
         };
 
         // -- Exec
-        let id1 = RegistrationModelController::create(&context, &model_manager, registration_created1).await?;
-        let id2 = RegistrationModelController::create(&context, &model_manager, registration_created2).await?;
-        let registrations = RegistrationModelController::list_by_event_id(&context, &model_manager, 1).await?;
+        let id1 =
+            RegistrationModelController::create(&context, &model_manager, registration_created1)
+                .await?;
+        let id2 =
+            RegistrationModelController::create(&context, &model_manager, registration_created2)
+                .await?;
+        let registrations =
+            RegistrationModelController::list_by_event_id(&context, &model_manager, 1).await?;
 
         assert_eq!(registrations.len(), 3, "number of seeded registrations.");
         assert_eq!(registrations[1].event_id, 1);
@@ -369,7 +384,7 @@ mod tests {
         Ok(())
     }
 
-    #[tokio::test]    
+    #[tokio::test]
     #[serial]
     async fn test_list_by_event_id_err_not_found() -> Result<()> {
         // -- Setup & Fixtures
@@ -386,7 +401,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "event",
-                    id: 100
+                    field: IntError(100),
                 })
             ),
             "Expected EntityNotFound error, got: {:?}",
@@ -408,13 +423,16 @@ mod tests {
         };
 
         // -- Exec
-        let id = RegistrationModelController::create(&context, &model_manager, registration_created).await?;
+        let id =
+            RegistrationModelController::create(&context, &model_manager, registration_created)
+                .await?;
 
         let registration_updated = RegistrationForUpdate {
             status: Some(RegistrationStatus::Attended),
         };
 
-        RegistrationModelController::update(&context, &model_manager, id, registration_updated).await?;
+        RegistrationModelController::update(&context, &model_manager, id, registration_updated)
+            .await?;
 
         // -- Check
         let registration = RegistrationModelController::get(&context, &model_manager, id).await?;
@@ -429,7 +447,7 @@ mod tests {
         Ok(())
     }
 
-    #[tokio::test]    
+    #[tokio::test]
     #[serial]
     async fn test_delete_err_not_found() -> Result<()> {
         // -- Setup & Fixtures
@@ -446,7 +464,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "registration",
-                    id: 100
+                    field: IntError(100),
                 })
             ),
             "Expected EntityNotFound error, got: {:?}",
@@ -472,9 +490,15 @@ mod tests {
         };
 
         // -- Exec
-        let id1 = RegistrationModelController::create(&context, &model_manager, registration_created1).await?;
-        let id2 = RegistrationModelController::create(&context, &model_manager, registration_created2).await?;
-        let num_of_registrations = RegistrationModelController::get_num_of_registrations(&context, &model_manager, 1).await?;
+        let id1 =
+            RegistrationModelController::create(&context, &model_manager, registration_created1)
+                .await?;
+        let id2 =
+            RegistrationModelController::create(&context, &model_manager, registration_created2)
+                .await?;
+        let num_of_registrations =
+            RegistrationModelController::get_num_of_registrations(&context, &model_manager, 1)
+                .await?;
 
         // -- Check
         assert_eq!(num_of_registrations, 3);
@@ -487,7 +511,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[serial]    
+    #[serial]
     async fn test_get_num_of_registrations_err_not_found() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
@@ -495,7 +519,9 @@ mod tests {
         let id = 100;
 
         // -- Exec
-        let res = RegistrationModelController::get_num_of_registrations(&context, &model_manager, id).await;
+        let res =
+            RegistrationModelController::get_num_of_registrations(&context, &model_manager, id)
+                .await;
 
         // -- Check
         assert!(
@@ -503,7 +529,7 @@ mod tests {
                 res,
                 Err(Error::EntityNotFound {
                     entity: "event",
-                    id: 100
+                    field: IntError(100),
                 })
             ),
             "Expected EntityNotFound error, got: {:?}",
