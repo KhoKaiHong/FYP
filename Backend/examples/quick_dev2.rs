@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use anyhow::Result;
 use serde_json::json;
 
@@ -13,14 +15,19 @@ async fn main() -> Result<()> {
             "password": "password123"
         }),
     );
-    
+
     let res = req_login.await?.json_body()?;
-    let token = res["result"]["access_token"].as_str().unwrap();
+    let access_token = res["result"]["access_token"].as_str().unwrap();
+    let refresh_token = res["result"]["refresh_token"].as_str().unwrap();
+
+    let mut map = HashMap::new();
+    map.insert("refresh_token", refresh_token);
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:3001/api/hello?name=John")
-        .bearer_auth(token);
+        .post("http://localhost:3001/api/refresh")
+        .json(&map)
+        .bearer_auth(access_token);
 
     let res = req.send().await?;
 
@@ -42,7 +49,6 @@ async fn main() -> Result<()> {
 
     // let req_login = hc.do_get("/api/hello2/Mike");
     // req_login.await?.print().await?;
-
 
     // Login tests
     // let req_login = hc.do_post(

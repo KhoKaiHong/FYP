@@ -1,6 +1,6 @@
 use super::Role;
-use crate::config;
 use crate::auth::{Error, Result};
+use crate::config;
 use crate::utils::{
     format_time, now_add_sec, now_utc, parse_utc_from_str, parse_utc_from_timestamp,
 };
@@ -48,7 +48,7 @@ impl AccessTokenClaims {
     }
 
     pub fn role(&self) -> Result<Role> {
-        Role::from_str(&self.role).map_err(|_|Error::AccessTokenInvalidFormat)
+        Role::from_str(&self.role).map_err(|_| Error::AccessTokenInvalidFormat)
     }
 }
 
@@ -85,7 +85,7 @@ pub fn parse_access_token(access_token: &str) -> Result<AccessTokenClaims> {
         &DecodingKey::from_secret(&config().ACCESS_TOKEN_KEY),
         &validation_strategy,
     )
-    .map_err(|_|  Error::AccessTokenInvalidFormat)?
+    .map_err(|_| Error::AccessTokenInvalidFormat)?
     .claims;
 
     Ok(claims)
@@ -133,6 +133,10 @@ impl RefreshTokenClaims {
     pub fn jti(&self) -> &str {
         &self.jti
     }
+
+    pub fn exp(&self) -> i64 {
+        self.exp
+    }
 }
 
 pub fn generate_refresh_token(jti: &str, role: &Role) -> Result<String> {
@@ -177,7 +181,7 @@ pub fn parse_refresh_token(access_token: &str) -> Result<RefreshTokenClaims> {
         &DecodingKey::from_secret(&config().ACCESS_TOKEN_KEY),
         &validation_strategy,
     )
-    .map_err(|_|  Error::RefreshTokenInvalidFormat)?
+    .map_err(|_| Error::RefreshTokenInvalidFormat)?
     .claims;
 
     Ok(claims)
@@ -188,8 +192,8 @@ mod tests {
     use super::*;
     use anyhow::Result;
     use chrono::TimeDelta;
-    use uuid::Uuid;
     use serial_test::serial;
+    use uuid::Uuid;
 
     #[test]
     #[serial]
@@ -204,7 +208,8 @@ mod tests {
         assert_eq!(validation_result.role, role.to_string());
         assert_eq!(validation_result.id, id);
         assert_eq!(
-            parse_utc_from_timestamp(validation_result.iat).unwrap() + TimeDelta::try_seconds(600).unwrap(), 
+            parse_utc_from_timestamp(validation_result.iat).unwrap()
+                + TimeDelta::try_seconds(600).unwrap(),
             parse_utc_from_timestamp(validation_result.exp).unwrap()
         );
 
@@ -221,7 +226,8 @@ mod tests {
         let validation_result = validate_refresh_token(&refresh_token)?;
 
         assert_eq!(
-            parse_utc_from_timestamp(validation_result.iat).unwrap() + TimeDelta::try_seconds(1296000).unwrap(), 
+            parse_utc_from_timestamp(validation_result.iat).unwrap()
+                + TimeDelta::try_seconds(1296000).unwrap(),
             parse_utc_from_timestamp(validation_result.exp).unwrap()
         );
         assert_eq!(jti, validation_result.jti);

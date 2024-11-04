@@ -101,6 +101,9 @@ impl Error {
             // -- Refresh Token Errors
             RefreshTokenExpired => (StatusCode::UNAUTHORIZED, ClientError::SESSION_EXPIRED),
 
+            // -- Refresh Request Errors
+            InvalidRefreshAttempt => (StatusCode::BAD_REQUEST, ClientError::UNABLE_TO_REFRESH),
+
             // -- Fallback.
             _ => (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -117,6 +120,7 @@ pub enum ClientError {
     INCORRECT_PASSWORD,
     ACCESS_TOKEN_EXPIRED,
     SESSION_EXPIRED,
+    UNABLE_TO_REFRESH,
     NO_AUTH,
     SERVICE_ERROR,
 }
