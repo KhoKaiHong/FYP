@@ -40,21 +40,21 @@ async fn refresh_handler(
 
         let auth_header = headers
             .get(header::AUTHORIZATION)
-            .ok_or(Error::InvalidRefreshAttempt)?
+            .ok_or(Error::RefreshFailAccessTokenNotFound)?
             .to_str()
-            .map_err(|_| Error::InvalidRefreshAttempt)?;
+            .map_err(|_| Error::RefreshFailInvalidAccessToken)?;
 
         let access_token = auth_header
             .strip_prefix("Bearer ")
-            .ok_or(Error::InvalidRefreshAttempt)?
+            .ok_or(Error::RefreshFailInvalidAccessToken)?
             .to_string();
 
         let access_token_claims =
-            parse_access_token(&access_token).map_err(|err| Error::AuthError(err))?;
+            parse_access_token(&access_token)?;
 
         let role = access_token_claims
             .role()
-            .map_err(|_| Error::InvalidRefreshAttempt)?;
+            .map_err(|_| Error::RefreshFailInvalidAccessToken)?;
 
         let updated_access_token: String;
         let updated_refresh_token: String;
@@ -96,7 +96,7 @@ async fn refresh_handler(
 
         Ok(body)
     } else {
-        Err(Error::InvalidRefreshAttempt)
+        Err(Error::RefreshFailInvalidAccessToken)
     }
 }
 
@@ -113,10 +113,10 @@ async fn refresh_user_token(
         })?;
 
     let access_token_jti =
-        Uuid::try_parse(access_token_claims.jti()).map_err(|_| Error::InvalidRefreshAttempt)?;
+        Uuid::try_parse(access_token_claims.jti()).map_err(|_| Error::RefreshFailInvalidAccessToken)?;
 
     let refresh_token_jti =
-        Uuid::try_parse(refresh_token_claims.jti()).map_err(|_| Error::InvalidRefreshAttempt)?;
+        Uuid::try_parse(refresh_token_claims.jti()).map_err(|_| Error::RefreshFailInvalidRefreshToken)?;
 
     let user_session = UserSessionModelController::get(&context, model_manager, refresh_token_jti)
         .await
@@ -124,7 +124,7 @@ async fn refresh_user_token(
             model::Error::EntityNotFound {
                 entity: "user_session",
                 field: UuidError(refresh_token_jti),
-            } if refresh_token_jti == refresh_token_jti => Error::InvalidRefreshAttempt,
+            } if refresh_token_jti == refresh_token_jti => Error::RefreshFailNoSessionFound,
             _ => Error::ModelError(err),
         })?;
 
@@ -159,7 +159,7 @@ async fn refresh_user_token(
         .await?;
         Ok((new_access_token, new_refresh_token))
     } else {
-        Err(Error::InvalidRefreshAttempt)
+        Err(Error::RefreshFailNoSessionFound)
     }
 }
 
@@ -176,10 +176,10 @@ async fn refresh_facility_token(
         })?;
 
     let access_token_jti =
-        Uuid::try_parse(access_token_claims.jti()).map_err(|_| Error::InvalidRefreshAttempt)?;
+        Uuid::try_parse(access_token_claims.jti()).map_err(|_| Error::RefreshFailInvalidAccessToken)?;
 
     let refresh_token_jti =
-        Uuid::try_parse(refresh_token_claims.jti()).map_err(|_| Error::InvalidRefreshAttempt)?;
+        Uuid::try_parse(refresh_token_claims.jti()).map_err(|_| Error::RefreshFailInvalidRefreshToken)?;
 
     let facility_session =
         FacilitySessionModelController::get(&context, model_manager, refresh_token_jti)
@@ -188,7 +188,7 @@ async fn refresh_facility_token(
                 model::Error::EntityNotFound {
                     entity: "facility_session",
                     field: UuidError(refresh_token_jti),
-                } if refresh_token_jti == refresh_token_jti => Error::InvalidRefreshAttempt,
+                } if refresh_token_jti == refresh_token_jti => Error::RefreshFailNoSessionFound,
                 _ => Error::ModelError(err),
             })?;
 
@@ -223,7 +223,7 @@ async fn refresh_facility_token(
         .await?;
         Ok((new_access_token, new_refresh_token))
     } else {
-        Err(Error::InvalidRefreshAttempt)
+        Err(Error::RefreshFailNoSessionFound)
     }
 }
 
@@ -240,10 +240,10 @@ async fn refresh_organiser_token(
         })?;
 
     let access_token_jti =
-        Uuid::try_parse(access_token_claims.jti()).map_err(|_| Error::InvalidRefreshAttempt)?;
+        Uuid::try_parse(access_token_claims.jti()).map_err(|_| Error::RefreshFailInvalidAccessToken)?;
 
     let refresh_token_jti =
-        Uuid::try_parse(refresh_token_claims.jti()).map_err(|_| Error::InvalidRefreshAttempt)?;
+        Uuid::try_parse(refresh_token_claims.jti()).map_err(|_| Error::RefreshFailInvalidRefreshToken)?;
 
     let organiser_session =
         OrganiserSessionModelController::get(&context, model_manager, refresh_token_jti)
@@ -252,7 +252,7 @@ async fn refresh_organiser_token(
                 model::Error::EntityNotFound {
                     entity: "organiser_session",
                     field: UuidError(refresh_token_jti),
-                } if refresh_token_jti == refresh_token_jti => Error::InvalidRefreshAttempt,
+                } if refresh_token_jti == refresh_token_jti => Error::RefreshFailNoSessionFound,
                 _ => Error::ModelError(err),
             })?;
 
@@ -287,7 +287,7 @@ async fn refresh_organiser_token(
         .await?;
         Ok((new_access_token, new_refresh_token))
     } else {
-        Err(Error::InvalidRefreshAttempt)
+        Err(Error::RefreshFailNoSessionFound)
     }
 }
 
@@ -304,10 +304,10 @@ async fn refresh_admin_token(
         })?;
 
     let access_token_jti =
-        Uuid::try_parse(access_token_claims.jti()).map_err(|_| Error::InvalidRefreshAttempt)?;
+        Uuid::try_parse(access_token_claims.jti()).map_err(|_| Error::RefreshFailInvalidAccessToken)?;
 
     let refresh_token_jti =
-        Uuid::try_parse(refresh_token_claims.jti()).map_err(|_| Error::InvalidRefreshAttempt)?;
+        Uuid::try_parse(refresh_token_claims.jti()).map_err(|_| Error::RefreshFailInvalidRefreshToken)?;
 
     let admin_session =
         AdminSessionModelController::get(&context, model_manager, refresh_token_jti)
@@ -316,7 +316,7 @@ async fn refresh_admin_token(
                 model::Error::EntityNotFound {
                     entity: "admin_session",
                     field: UuidError(refresh_token_jti),
-                } if refresh_token_jti == refresh_token_jti => Error::InvalidRefreshAttempt,
+                } if refresh_token_jti == refresh_token_jti => Error::RefreshFailNoSessionFound,
                 _ => Error::ModelError(err),
             })?;
 
@@ -351,7 +351,7 @@ async fn refresh_admin_token(
         .await?;
         Ok((new_access_token, new_refresh_token))
     } else {
-        Err(Error::InvalidRefreshAttempt)
+        Err(Error::RefreshFailNoSessionFound)
     }
 }
 

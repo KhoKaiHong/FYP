@@ -129,6 +129,27 @@ impl UserSessionModelController {
         Ok(())
     }
 
+    pub async fn delete_by_refresh_token_and_user_id(
+        context: &Context,
+        model_manager: &ModelManager,
+        refresh_token_id: Uuid,
+    ) -> Result<()> {
+        let db = model_manager.db();
+        let count = sqlx::query("DELETE FROM user_sessions WHERE refresh_token_id = $1 AND user_id = $2")
+            .bind(refresh_token_id)
+            .bind(context.user_id())
+            .execute(db)
+            .await?
+            .rows_affected();
+        if count == 0 {
+            return Err(Error::EntityNotFound {
+                entity: "user_session",
+                field: UuidError(refresh_token_id),
+            });
+        }
+        Ok(())
+    }
+
     pub async fn delete_by_user_id(
         context: &Context,
         model_manager: &ModelManager,

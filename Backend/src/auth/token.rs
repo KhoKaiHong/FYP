@@ -172,13 +172,13 @@ pub fn validate_refresh_token(refresh_token: &str) -> Result<RefreshTokenClaims>
     Ok(claims)
 }
 
-pub fn parse_refresh_token(access_token: &str) -> Result<RefreshTokenClaims> {
+pub fn parse_refresh_token(refresh_token: &str) -> Result<RefreshTokenClaims> {
     let mut validation_strategy = Validation::new(Algorithm::HS512);
     validation_strategy.validate_exp = false;
 
     let claims = jsonwebtoken::decode::<RefreshTokenClaims>(
-        access_token,
-        &DecodingKey::from_secret(&config().ACCESS_TOKEN_KEY),
+        refresh_token,
+        &DecodingKey::from_secret(&config().REFRESH_TOKEN_KEY),
         &validation_strategy,
     )
     .map_err(|_| Error::RefreshTokenInvalidFormat)?

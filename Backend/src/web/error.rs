@@ -15,12 +15,27 @@ pub enum Error {
     LoginFailUsernameNotFound,
     LoginFailPasswordNotMatching,
 
+    // -- Role
+    UserRoleRequired,
+    BloodCollectionFacilityRoleRequired,
+    OrganiserRoleRequired,
+    AdminRoleRequired,
+
     // -- Access Token Errors
     AccessTokenExpired,
 
     // -- Refresh Token Errors
-    InvalidRefreshAttempt,
     RefreshTokenExpired,
+
+    // -- Refresh Request Errors
+    RefreshFailAccessTokenNotFound,
+    RefreshFailInvalidAccessToken,
+    RefreshFailInvalidRefreshToken,
+    RefreshFailNoSessionFound,
+
+    // -- Logout Request Errors
+    LogoutFailInvalidRefreshToken,
+    LogoutFailNoSessionFound,
 
     // -- Context Errors
     ContextExtractor(web::middleware_auth::ContextExtractorError),
@@ -60,21 +75,21 @@ impl std::error::Error for Error {}
 
 // region:    --- Froms
 impl From<model::Error> for Error {
-	fn from(val: model::Error) -> Self {
-		Self::ModelError(val)
-	}
+    fn from(val: model::Error) -> Self {
+        Self::ModelError(val)
+    }
 }
 
 impl From<auth::Error> for Error {
-	fn from(val: auth::Error) -> Self {
-		Self::AuthError(val)
-	}
+    fn from(val: auth::Error) -> Self {
+        Self::AuthError(val)
+    }
 }
 
 impl From<web::middleware_auth::ContextExtractorError> for Error {
-	fn from(val: web::middleware_auth::ContextExtractorError) -> Self {
-		Self::ContextExtractor(val)
-	}
+    fn from(val: web::middleware_auth::ContextExtractorError) -> Self {
+        Self::ContextExtractor(val)
+    }
 }
 // endregion: --- Froms
 
@@ -92,8 +107,18 @@ impl Error {
             AuthError(_) => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
 
             // -- Login Fail
-            LoginFailUsernameNotFound => (StatusCode::UNAUTHORIZED, ClientError::USERNAME_NOT_FOUND),
-            LoginFailPasswordNotMatching => (StatusCode::UNAUTHORIZED, ClientError::INCORRECT_PASSWORD),
+            LoginFailUsernameNotFound => {
+                (StatusCode::UNAUTHORIZED, ClientError::USERNAME_NOT_FOUND)
+            }
+            LoginFailPasswordNotMatching => {
+                (StatusCode::UNAUTHORIZED, ClientError::INCORRECT_PASSWORD)
+            }
+
+            // -- Role
+            UserRoleRequired => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+            BloodCollectionFacilityRoleRequired => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+            OrganiserRoleRequired => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+            AdminRoleRequired => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
 
             // -- Access Token Errors
             AccessTokenExpired => (StatusCode::UNAUTHORIZED, ClientError::ACCESS_TOKEN_EXPIRED),
@@ -102,7 +127,14 @@ impl Error {
             RefreshTokenExpired => (StatusCode::UNAUTHORIZED, ClientError::SESSION_EXPIRED),
 
             // -- Refresh Request Errors
-            InvalidRefreshAttempt => (StatusCode::BAD_REQUEST, ClientError::UNABLE_TO_REFRESH),
+            RefreshFailAccessTokenNotFound => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+            RefreshFailInvalidAccessToken => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+            RefreshFailInvalidRefreshToken => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+            RefreshFailNoSessionFound => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+
+            // -- Logout Request Errors
+            LogoutFailInvalidRefreshToken => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+            LogoutFailNoSessionFound => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
 
             // -- Fallback.
             _ => (
@@ -120,7 +152,7 @@ pub enum ClientError {
     INCORRECT_PASSWORD,
     ACCESS_TOKEN_EXPIRED,
     SESSION_EXPIRED,
-    UNABLE_TO_REFRESH,
+    INVALID_REQUEST,
     NO_AUTH,
     SERVICE_ERROR,
 }
