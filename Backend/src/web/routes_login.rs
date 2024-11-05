@@ -64,7 +64,7 @@ async fn user_login_handler(
         user_id: user.id,
     };
 
-    let context = Context::new(user.id, Role::User);
+    let context = Context::new(user.id, Role::User, access_token_id);
 
     UserSessionModelController::create(&context, &app_state.model_manager, user_session).await?;
 
@@ -128,7 +128,7 @@ async fn facility_login_handler(
         facility_id: facility.id,
     };
 
-    let context = Context::new(facility.id, Role::BloodCollectionFacility);
+    let context = Context::new(facility.id, Role::BloodCollectionFacility, access_token_id);
 
     FacilitySessionModelController::create(&context, &app_state.model_manager, facility_session)
         .await?;
@@ -188,7 +188,7 @@ async fn organiser_login_handler(
         organiser_id: organiser.id,
     };
 
-    let context = Context::new(organiser.id, Role::Organiser);
+    let context = Context::new(organiser.id, Role::Organiser, access_token_id);
 
     OrganiserSessionModelController::create(&context, &app_state.model_manager, organiser_session)
         .await?;

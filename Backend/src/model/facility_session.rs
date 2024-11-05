@@ -130,18 +130,21 @@ impl FacilitySessionModelController {
         Ok(())
     }
 
-    pub async fn delete_by_refresh_token_and_facility_id(
+    pub async fn delete_by_session(
         context: &Context,
         model_manager: &ModelManager,
         refresh_token_id: Uuid,
     ) -> Result<()> {
         let db = model_manager.db();
-        let count = sqlx::query("DELETE FROM facility_sessions WHERE refresh_token_id = $1 AND facility_id = $2")
-            .bind(refresh_token_id)
-            .bind(context.user_id())
-            .execute(db)
-            .await?
-            .rows_affected();
+        let count = sqlx::query(
+            "DELETE FROM facility_sessions WHERE refresh_token_id = $1 AND access_token_id = $2 AND facility_id = $3",
+        )
+        .bind(refresh_token_id)
+        .bind(context.token_id())
+        .bind(context.user_id())
+        .execute(db)
+        .await?
+        .rows_affected();
         if count == 0 {
             return Err(Error::EntityNotFound {
                 entity: "facility_session",
@@ -170,6 +173,27 @@ impl FacilitySessionModelController {
                 field: I64Error(facility_id),
             });
         }
+
+        Ok(())
+    }
+
+    pub async fn check(
+        context: &Context,
+        model_manager: &ModelManager,
+        refresh_token_id: Uuid,
+    ) -> Result<()> {
+        let db = model_manager.db();
+
+        sqlx::query_as::<_, (i32,)>("SELECT 1 FROM facility_sessions WHERE refresh_token_id = $1 AND access_token_id = $2 AND user_id = $3 ")
+            .bind(refresh_token_id)
+            .bind(context.token_id())
+            .bind(context.user_id())
+            .fetch_optional(db)
+            .await?
+            .ok_or(Error::EntityNotFound {
+                entity: "facility_session",
+                field: UuidError(refresh_token_id),
+            })?;
 
         Ok(())
     }

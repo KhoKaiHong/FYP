@@ -12,6 +12,7 @@ use axum::middleware::Next;
 use axum::response::Response;
 use serde::Serialize;
 use tracing::debug;
+use uuid::Uuid;
 
 // Requires valid access token to continue
 pub async fn mw_require_auth(
@@ -125,7 +126,9 @@ async fn context_from_token(header: &HeaderMap) -> ContextExtractorResult {
         .role()
         .map_err(|_| ContextExtractorError::InvalidAccessToken)?;
 
-    let context = Context::new(claims.id(), role);
+    let jti = Uuid::try_parse(claims.jti()).map_err(|_| ContextExtractorError::InvalidAccessToken)?;
+
+    let context = Context::new(claims.id(), role, jti);
 
     Ok(context)
 }

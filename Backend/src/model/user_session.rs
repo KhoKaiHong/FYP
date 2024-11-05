@@ -1,6 +1,6 @@
 use crate::context::Context;
-use crate::model::{Error, ModelManager, Result};
 use crate::model::EntityErrorField::{I64Error, UuidError};
+use crate::model::{Error, ModelManager, Result};
 use serde::Deserialize;
 use sqlx::FromRow;
 use uuid::Uuid;
@@ -129,14 +129,15 @@ impl UserSessionModelController {
         Ok(())
     }
 
-    pub async fn delete_by_refresh_token_and_user_id(
+    pub async fn delete_by_session(
         context: &Context,
         model_manager: &ModelManager,
         refresh_token_id: Uuid,
     ) -> Result<()> {
         let db = model_manager.db();
-        let count = sqlx::query("DELETE FROM user_sessions WHERE refresh_token_id = $1 AND user_id = $2")
+        let count = sqlx::query("DELETE FROM user_sessions WHERE refresh_token_id = $1 AND access_token_id = $2 AND user_id = $3")
             .bind(refresh_token_id)
+            .bind(context.token_id())
             .bind(context.user_id())
             .execute(db)
             .await?
@@ -169,6 +170,27 @@ impl UserSessionModelController {
                 field: I64Error(user_id),
             });
         }
+
+        Ok(())
+    }
+
+    pub async fn check(
+        context: &Context,
+        model_manager: &ModelManager,
+        refresh_token_id: Uuid,
+    ) -> Result<()> {
+        let db = model_manager.db();
+
+        sqlx::query_as::<_, (i32,)>("SELECT 1 FROM user_sessions WHERE refresh_token_id = $1 AND access_token_id = $2 AND user_id = $3 ")
+            .bind(refresh_token_id)
+            .bind(context.token_id())
+            .bind(context.user_id())
+            .fetch_optional(db)
+            .await?
+            .ok_or(Error::EntityNotFound {
+                entity: "user_session",
+                field: UuidError(refresh_token_id),
+            })?;
 
         Ok(())
     }

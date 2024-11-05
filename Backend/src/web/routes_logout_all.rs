@@ -1,10 +1,10 @@
 use crate::auth::{token::parse_refresh_token, Role};
 use crate::context::Context;
 use crate::model::admin_session::AdminSessionModelController;
-use crate::model::facility_session::FacilitySessionModelController;
+use crate::model::facility_session::{self, FacilitySessionModelController};
 use crate::model::organiser_session::OrganiserSessionModelController;
 use crate::model::user_session::UserSessionModelController;
-use crate::model::EntityErrorField::UuidError;
+use crate::model::EntityErrorField::{I64Error, UuidError};
 use crate::model::{self, ModelManager};
 use crate::state::AppState;
 use crate::web::{Error, Result};
@@ -18,14 +18,14 @@ use uuid::Uuid;
 
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
-        .route("/logout", post(logout_handler))
+        .route("/logoutall", post(logout_all_handler))
         .with_state(app_state)
 }
 
-async fn logout_handler(
+async fn logout_all_handler(
     context: Context,
     State(app_state): State<AppState>,
-    Json(payload): Json<LogoutRequestPayload>,
+    Json(payload): Json<LogoutAllRequestPayload>,
 ) -> Result<Json<Value>> {
     debug!("{:<12} - logout_api", "HANDLER");
 
@@ -37,16 +37,16 @@ async fn logout_handler(
 
     match context.role() {
         Role::User => {
-            logout_user(&context, refresh_token_jti, model_manager).await?;
+            logout_all_user(&context, refresh_token_jti, model_manager).await?;
         }
         Role::BloodCollectionFacility => {
-            logout_facility(&context, refresh_token_jti, model_manager).await?;
+            logout_all_facility(&context, refresh_token_jti, model_manager).await?;
         }
         Role::Organiser => {
-            logout_organiser(&context, refresh_token_jti, model_manager).await?;
+            logout_all_organiser(&context, refresh_token_jti, model_manager).await?;
         }
         Role::Admin => {
-            logout_admin(&context, refresh_token_jti, model_manager).await?;
+            logout_all_admin(&context, refresh_token_jti, model_manager).await?;
         }
     }
 
@@ -59,12 +59,12 @@ async fn logout_handler(
     Ok(body)
 }
 
-async fn logout_user(
+async fn logout_all_user(
     context: &Context,
     refresh_token_jti: Uuid,
     model_manager: &ModelManager,
 ) -> Result<()> {
-    UserSessionModelController::delete_by_session(&context, model_manager, refresh_token_jti)
+    UserSessionModelController::check(&context, model_manager, refresh_token_jti)
         .await
         .map_err(|err| match err {
             model::Error::EntityNotFound {
@@ -74,15 +74,25 @@ async fn logout_user(
             _ => Error::ModelError(err),
         })?;
 
+    UserSessionModelController::delete_by_user_id(&context, model_manager, context.user_id())
+        .await
+        .map_err(|err| match err {
+            model::Error::EntityNotFound {
+                entity: "user_session",
+                field: I64Error(user_id),
+            } if user_id == context.user_id() => Error::LogoutFailNoSessionFound,
+            _ => Error::ModelError(err),
+        })?;
+
     Ok(())
 }
 
-async fn logout_facility(
+async fn logout_all_facility(
     context: &Context,
     refresh_token_jti: Uuid,
     model_manager: &ModelManager,
 ) -> Result<()> {
-    FacilitySessionModelController::delete_by_session(&context, model_manager, refresh_token_jti)
+    FacilitySessionModelController::check(&context, model_manager, refresh_token_jti)
         .await
         .map_err(|err| match err {
             model::Error::EntityNotFound {
@@ -92,15 +102,29 @@ async fn logout_facility(
             _ => Error::ModelError(err),
         })?;
 
+    FacilitySessionModelController::delete_by_facility_id(
+        &context,
+        model_manager,
+        context.user_id(),
+    )
+    .await
+    .map_err(|err| match err {
+        model::Error::EntityNotFound {
+            entity: "facility_session",
+            field: I64Error(facility_id),
+        } if facility_id == context.user_id() => Error::LogoutFailNoSessionFound,
+        _ => Error::ModelError(err),
+    })?;
+
     Ok(())
 }
 
-async fn logout_organiser(
+async fn logout_all_organiser(
     context: &Context,
     refresh_token_jti: Uuid,
     model_manager: &ModelManager,
 ) -> Result<()> {
-    OrganiserSessionModelController::delete_by_session(&context, model_manager, refresh_token_jti)
+    OrganiserSessionModelController::check(&context, model_manager, refresh_token_jti)
         .await
         .map_err(|err| match err {
             model::Error::EntityNotFound {
@@ -110,15 +134,29 @@ async fn logout_organiser(
             _ => Error::ModelError(err),
         })?;
 
+    OrganiserSessionModelController::delete_by_organiser_id(
+        &context,
+        model_manager,
+        context.user_id(),
+    )
+    .await
+    .map_err(|err| match err {
+        model::Error::EntityNotFound {
+            entity: "organiser_session",
+            field: I64Error(organiser_id),
+        } if organiser_id == context.user_id() => Error::LogoutFailNoSessionFound,
+        _ => Error::ModelError(err),
+    })?;
+
     Ok(())
 }
 
-async fn logout_admin(
+async fn logout_all_admin(
     context: &Context,
     refresh_token_jti: Uuid,
     model_manager: &ModelManager,
 ) -> Result<()> {
-    AdminSessionModelController::delete_by_session(&context, model_manager, refresh_token_jti)
+    AdminSessionModelController::check(&context, model_manager, refresh_token_jti)
         .await
         .map_err(|err| match err {
             model::Error::EntityNotFound {
@@ -128,10 +166,20 @@ async fn logout_admin(
             _ => Error::ModelError(err),
         })?;
 
+    AdminSessionModelController::delete_by_admin_id(&context, model_manager, context.user_id())
+        .await
+        .map_err(|err| match err {
+            model::Error::EntityNotFound {
+                entity: "admin_session",
+                field: I64Error(admin_id),
+            } if admin_id == context.user_id() => Error::LogoutFailNoSessionFound,
+            _ => Error::ModelError(err),
+        })?;
+
     Ok(())
 }
 
 #[derive(Debug, Deserialize)]
-struct LogoutRequestPayload {
+struct LogoutAllRequestPayload {
     refresh_token: String,
 }
