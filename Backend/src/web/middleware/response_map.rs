@@ -1,5 +1,4 @@
 use std::sync::Arc;
-
 use crate::context::Context;
 use crate::log::log_request;
 use crate::web;
@@ -10,13 +9,13 @@ use serde_json::json;
 use tracing::debug;
 use uuid::Uuid;
 
-pub async fn main_response_mapper(
+pub async fn response_mapper(
     ctx: Option<Context>,
     uri: Uri,
     req_method: Method,
     response: Response,
 ) -> Response {
-    debug!("{:<12} - main_response_mapper", "RES_MAPPER");
+    debug!("{:<12} - response_mapper", "RES_MAPPER");
     let uuid = Uuid::new_v4();
 
     // -- Get the eventual response error.

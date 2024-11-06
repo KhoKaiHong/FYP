@@ -27,7 +27,7 @@ async fn logout_all_handler(
     State(app_state): State<AppState>,
     Json(payload): Json<LogoutAllRequestPayload>,
 ) -> Result<Json<Value>> {
-    debug!("{:<12} - logout_api", "HANDLER");
+    debug!("{:<12} - logout_all_api", "HANDLER");
 
     let model_manager = &app_state.model_manager;
     let refresh_token_claims = parse_refresh_token(&payload.refresh_token)?;

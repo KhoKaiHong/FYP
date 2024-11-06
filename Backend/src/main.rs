@@ -41,26 +41,24 @@ async fn main() -> Result<()> {
     };
 
     let routes_all = Router::new()
-        .merge(web::routes_login::routes(app_state.clone()))
-        .merge(web::routes_refresh::routes(app_state.clone()))
+        .merge(web::routes::login::routes(app_state.clone()))
+        .merge(web::routes::refresh::routes(app_state.clone()))
         .nest(
             "/api",
             Router::new()
-                .merge(web::routes_hello::routes())
-                .merge(web::routes_logout::routes(app_state.clone()))
-                .merge(web::routes_logout_all::routes(app_state.clone()))
+                .merge(web::routes::hello::routes())
+                .merge(web::routes::logout::routes(app_state.clone()))
+                .merge(web::routes::logout_all::routes(app_state.clone()))
                 // Add other protected routes here
-                .layer(middleware::from_fn(web::middleware_auth::mw_require_auth)),
+                .layer(middleware::from_fn(web::middleware::auth::require_auth)),
         )
-        .layer(middleware::map_response(
-            web::response_map::main_response_mapper,
-        ))
+        .layer(middleware::map_response(web::middleware::response_mapper))
         .layer(middleware::from_fn_with_state(
             app_state.clone(),
-            web::middleware_auth::mw_ctx_resolver,
+            web::middleware::context_resolver,
         ))
         .layer(CookieManagerLayer::new())
-        .fallback_service(web::routes_static::serve_dir());
+        .fallback_service(web::routes::fallback::serve_dir());
 
     // region:    --- Start Server
     let listener = TcpListener::bind("127.0.0.1:3001").await.unwrap();

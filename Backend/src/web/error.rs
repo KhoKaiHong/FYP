@@ -9,7 +9,7 @@ use tracing::debug;
 pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Debug, Serialize, strum_macros::AsRefStr)]
-#[serde(tag = "type", content = "data")]
+// #[serde(tag = "type", content = "data")]
 pub enum Error {
     // -- Login
     LoginFailUsernameNotFound,
@@ -38,7 +38,7 @@ pub enum Error {
     LogoutFailNoSessionFound,
 
     // -- Context Errors
-    ContextExtractor(web::middleware_auth::ContextExtractorError),
+    ContextExtractor(web::middleware::ContextExtractorError),
 
     // -- Model Error
     ModelError(model::Error),
@@ -86,8 +86,8 @@ impl From<auth::Error> for Error {
     }
 }
 
-impl From<web::middleware_auth::ContextExtractorError> for Error {
-    fn from(val: web::middleware_auth::ContextExtractorError) -> Self {
+impl From<web::middleware::ContextExtractorError> for Error {
+    fn from(val: web::middleware::ContextExtractorError) -> Self {
         Self::ContextExtractor(val)
     }
 }

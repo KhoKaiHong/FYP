@@ -3,7 +3,8 @@ use crate::auth::{
     Role,
 };
 use crate::context::Context;
-use crate::model;
+use crate::model::admin::AdminModelController;
+use crate::model::admin_session::{AdminSessionForCreate, AdminSessionModelController};
 use crate::model::facility::FacilityModelController;
 use crate::model::facility_session::{FacilitySessionForCreate, FacilitySessionModelController};
 use crate::model::organiser::OrganiserModelController;
@@ -11,6 +12,7 @@ use crate::model::organiser_session::{OrganiserSessionForCreate, OrganiserSessio
 use crate::model::user::UserModelController;
 use crate::model::user_session::{UserSessionForCreate, UserSessionModelController};
 use crate::model::EntityErrorField::StringError;
+use crate::model;
 use crate::state::AppState;
 use crate::web::{Error, Result};
 use axum::extract::State;
@@ -26,6 +28,7 @@ pub fn routes(app_state: AppState) -> Router {
         .route("/api/userlogin", post(user_login_handler))
         .route("/api/facilitylogin", post(facility_login_handler))
         .route("/api/organiserlogin", post(organiser_login_handler))
+        .route("/api/adminlogin", post(admin_login_handler))
         .with_state(app_state)
 }
 
@@ -207,6 +210,66 @@ async fn organiser_login_handler(
 
 #[derive(Debug, Deserialize)]
 struct OrganiserLoginPayload {
+    email: String,
+    password: String,
+}
+
+async fn admin_login_handler(
+    State(app_state): State<AppState>,
+    Json(payload): Json<OrganiserLoginPayload>,
+) -> Result<Json<Value>> {
+    debug!("{:<12} - admin_login_api", "HANDLER");
+
+    let context = Context::root_ctx();
+
+    let admin =
+        AdminModelController::get_by_email(&context, &app_state.model_manager, &payload.email)
+            .await
+            .map_err(|err| match err {
+                model::Error::EntityNotFound {
+                    entity: "admin",
+                    field: StringError(ref email),
+                } if email == &payload.email => Error::LoginFailUsernameNotFound,
+                _ => Error::ModelError(err),
+            })?;
+
+    validate_password(&payload.password, &admin.password)
+        .await
+        .map_err(|err| match err {
+            auth::Error::PasswordNotMatching => Error::LoginFailPasswordNotMatching,
+            _ => Error::AuthError(err),
+        })?;
+
+    let access_token_id = Uuid::new_v4();
+    let access_token = generate_access_token(&access_token_id.to_string(), admin.id, &Role::Admin)?;
+
+    let refresh_token_id = Uuid::new_v4();
+    let refresh_token = generate_refresh_token(&refresh_token_id.to_string(), &Role::Admin)?;
+
+    let admin_session = AdminSessionForCreate {
+        refresh_token_id,
+        access_token_id,
+        admin_id: admin.id,
+    };
+
+    let context = Context::new(admin.id, Role::Admin, access_token_id);
+
+    AdminSessionModelController::create(&context, &app_state.model_manager, admin_session).await?;
+
+    let body = Json(json!({
+        "result": {
+            "success": true,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "admin_details": admin,
+        }
+    }));
+
+    Ok(body)
+}
+
+#[derive(Debug, Deserialize)]
+struct AdminLoginPayload {
     email: String,
     password: String,
 }
