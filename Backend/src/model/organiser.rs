@@ -2,6 +2,7 @@ use crate::context::Context;
 use crate::model::EntityErrorField::{I64Error, StringError};
 use crate::model::{Error, ModelManager, Result};
 use serde::{Deserialize, Serialize};
+use sqlx::postgres::PgDatabaseError;
 use sqlx::FromRow;
 
 // region:    --- Organiser Types
@@ -53,7 +54,8 @@ impl OrganiserModelController {
         .bind(organiser_created.name)
         .bind(organiser_created.phone_number)
         .fetch_one(db)
-        .await?;
+        .await
+        .map_err(check_duplicate)?;
 
         Ok(id)
     }
@@ -159,12 +161,51 @@ impl OrganiserModelController {
         query_builder.push_bind(id);
 
         let query = query_builder.build();
-        query.execute(db).await?;
+        let count = query
+            .execute(db)
+            .await
+            .map_err(check_duplicate)?
+            .rows_affected();
+
+        if count == 0 {
+            return Err(Error::EntityNotFound {
+                entity: "organiser",
+                field: I64Error(id),
+            });
+        };
 
         Ok(())
     }
 }
 // endregion: --- Organiser Model Controller
+
+// check for duplicate constraints
+fn check_duplicate(err: sqlx::Error) -> Error {
+    match err {
+        sqlx::Error::Database(ref e) => {
+            if let Some(pg_err) = e.try_downcast_ref::<PgDatabaseError>() {
+                if pg_err.code() == "23505" {
+                    match pg_err.constraint() {
+                        Some("event_organisers_email_key") => Error::DuplicateKey {
+                            table: "event_organisers",
+                            column: "email",
+                        },
+                        Some("event_organisers_phone_number_key") => Error::DuplicateKey {
+                            table: "event_organisers",
+                            column: "phone_number",
+                        },
+                        _ => Error::Sqlx(err),
+                    }
+                } else {
+                    Error::Sqlx(err)
+                }
+            } else {
+                Error::Sqlx(err)
+            }
+        }
+        _ => Error::Sqlx(err),
+    }
+}
 
 // Backend/src/model/organiser.rs
 // region:    --- Tests
@@ -335,7 +376,6 @@ mod tests {
         Ok(())
     }
 
-    
     #[tokio::test]
     #[serial]
     async fn get_by_email_ok() -> Result<()> {
@@ -353,7 +393,9 @@ mod tests {
             OrganiserModelController::create(&context, &model_manager, organiser_created).await?;
 
         // -- Exec
-        let organiser = OrganiserModelController::get_by_email(&model_manager, "test_create_ok@example.com").await?;
+        let organiser =
+            OrganiserModelController::get_by_email(&model_manager, "test_create_ok@example.com")
+                .await?;
 
         // -- Check
         assert_eq!(organiser.email, "test_create_ok@example.com");
@@ -379,7 +421,9 @@ mod tests {
         let model_manager = _dev_utils::init_test().await;
 
         // -- Exec
-        let res = OrganiserModelController::get_by_email(&model_manager, "test_list_ok@example.com").await;
+        let res =
+            OrganiserModelController::get_by_email(&model_manager, "test_list_ok@example.com")
+                .await;
 
         // -- Check
         assert!(

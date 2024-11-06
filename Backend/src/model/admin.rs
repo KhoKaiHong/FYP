@@ -2,6 +2,7 @@ use crate::context::Context;
 use crate::model::EntityErrorField::{I64Error, StringError};
 use crate::model::{Error, ModelManager, Result};
 use serde::{Deserialize, Serialize};
+use sqlx::postgres::PgDatabaseError;
 use sqlx::FromRow;
 
 // region:    --- Admin Types
@@ -49,7 +50,8 @@ impl AdminModelController {
         .bind(admin_created.password)
         .bind(admin_created.name)
         .fetch_one(db)
-        .await?;
+        .await
+        .map_err(check_duplicate)?;
 
         Ok(id)
     }
@@ -143,7 +145,11 @@ impl AdminModelController {
         query_builder.push_bind(id);
 
         let query = query_builder.build();
-        let count = query.execute(db).await?.rows_affected();
+        let count = query
+            .execute(db)
+            .await
+            .map_err(check_duplicate)?
+            .rows_affected();
 
         if count == 0 {
             return Err(Error::EntityNotFound {
@@ -172,6 +178,30 @@ impl AdminModelController {
         }
 
         Ok(())
+    }
+}
+
+// check for duplicate constraints
+fn check_duplicate(err: sqlx::Error) -> Error {
+    match err {
+        sqlx::Error::Database(ref e) => {
+            if let Some(pg_err) = e.try_downcast_ref::<PgDatabaseError>() {
+                if pg_err.code() == "23505" {
+                    match pg_err.constraint() {
+                        Some("admins_email_key") => Error::DuplicateKey {
+                            table: "admins",
+                            column: "email",
+                        },
+                        _ => Error::Sqlx(err),
+                    }
+                } else {
+                    Error::Sqlx(err)
+                }
+            } else {
+                Error::Sqlx(err)
+            }
+        }
+        _ => Error::Sqlx(err),
     }
 }
 

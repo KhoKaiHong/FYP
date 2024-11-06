@@ -1,13 +1,21 @@
-use std::sync::Arc;
 use crate::context::Context;
 use crate::log::log_request;
 use crate::web;
 use axum::http::{Method, Uri};
 use axum::response::{IntoResponse, Response};
 use axum::Json;
-use serde_json::json;
+use serde::Serialize;
+use serde_json::{json, to_value, Value};
+use std::sync::Arc;
 use tracing::debug;
 use uuid::Uuid;
+
+#[derive(Serialize)]
+struct ErrorData<'a> {
+    req_uuid: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    detail: Option<&'a Value>,
+}
 
 pub async fn response_mapper(
     ctx: Option<Context>,
@@ -29,10 +37,20 @@ pub async fn response_mapper(
     let error_response = client_status_error
         .as_ref()
         .map(|(status_code, client_error)| {
+            let client_error = to_value(client_error).ok();
+
+            let message = client_error.as_ref().and_then(|v| v.get("message"));
+            let detail = client_error.as_ref().and_then(|v| v.get("detail"));
+
+            let error_data = ErrorData {
+                req_uuid: uuid.to_string(),
+                detail: detail,
+            };
+
             let client_error_body = json!({
                 "error": {
-                    "type": client_error.as_ref(),
-                    "req_uuid": uuid.to_string(),
+                    "message": message,
+                    "data": error_data,
                 }
             });
 

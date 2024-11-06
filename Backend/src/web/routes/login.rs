@@ -216,7 +216,7 @@ struct OrganiserLoginPayload {
 
 async fn admin_login_handler(
     State(app_state): State<AppState>,
-    Json(payload): Json<OrganiserLoginPayload>,
+    Json(payload): Json<AdminLoginPayload>,
 ) -> Result<Json<Value>> {
     debug!("{:<12} - admin_login_api", "HANDLER");
 

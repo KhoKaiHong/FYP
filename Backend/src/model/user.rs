@@ -2,6 +2,7 @@ use crate::context::Context;
 use crate::model::EntityErrorField::{I64Error, StringError};
 use crate::model::{Error, ModelManager, Result};
 use serde::{Deserialize, Serialize};
+use sqlx::postgres::PgDatabaseError;
 use sqlx::{FromRow, Type};
 
 // region:    --- User Types
@@ -80,7 +81,7 @@ impl UserModelController {
     ) -> Result<i64> {
         let db = model_manager.db();
 
-        let (id,) = sqlx::query_as(
+        let (id,) = sqlx::query_as::<_, (i64,)>(
             "INSERT INTO users (ic_number, password, name, email, phone_number, blood_type, state_id, district_id) values ($1, $2, $3, $4, $5, $6, $7, $8) returning id",
         )
         .bind(user_created.ic_number)
@@ -92,7 +93,8 @@ impl UserModelController {
         .bind(user_created.state_id)
         .bind(user_created.district_id)
         .fetch_one(db)
-        .await?;
+        .await
+        .map_err(check_duplicate)?;
 
         Ok(id)
     }
@@ -209,12 +211,46 @@ impl UserModelController {
         query_builder.push_bind(id);
 
         let query = query_builder.build();
-        query.execute(db).await?;
+        let count = query
+            .execute(db)
+            .await
+            .map_err(check_duplicate)?
+            .rows_affected();
+
+        if count == 0 {
+            return Err(Error::EntityNotFound {
+                entity: "user",
+                field: I64Error(id),
+            });
+        };
 
         Ok(())
     }
 }
 // endregion: --- User Model Controller
+
+// check for duplicate constraints
+fn check_duplicate(err: sqlx::Error) -> Error {
+    match err {
+        sqlx::Error::Database(ref e) => {
+            if let Some(pg_err) = e.try_downcast_ref::<PgDatabaseError>() {
+                if pg_err.code() == "23505" {
+                    match pg_err.constraint() {
+                        Some("users_ic_number_key") => Error::DuplicateKey { table: "users", column: "ic_number" },
+                        Some("users_email_key") => Error::DuplicateKey { table: "users", column: "email" },
+                        Some("users_phone_number_key") => Error::DuplicateKey { table: "users", column: "phone_number" },
+                        _ => Error::Sqlx(err)
+                    }
+                } else {
+                    Error::Sqlx(err)
+                }
+            } else {
+                Error::Sqlx(err)
+            }
+        }
+        _ => Error::Sqlx(err)
+    }
+}
 
 // Backend/src/model/user.rs
 // region:    --- Tests

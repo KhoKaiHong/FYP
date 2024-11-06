@@ -2,6 +2,7 @@ use crate::context::Context;
 use crate::model::EntityErrorField::{I64Error, StringError};
 use crate::model::{Error, ModelManager, Result};
 use serde::{Deserialize, Serialize};
+use sqlx::postgres::PgDatabaseError;
 use sqlx::FromRow;
 
 // region:    --- Facility Types
@@ -73,7 +74,8 @@ impl FacilityModelController {
         .bind(facility_created.phone_number)
         .bind(facility_created.state_id)
         .fetch_one(db)
-        .await?;
+        .await
+        .map_err(check_duplicate)?;
 
         Ok(id)
     }
@@ -198,12 +200,53 @@ impl FacilityModelController {
         query_builder.push_bind(id);
 
         let query = query_builder.build();
-        query.execute(db).await?;
+        let count = query
+            .execute(db)
+            .await
+            .map_err(check_duplicate)?
+            .rows_affected();
+
+        if count == 0 {
+            return Err(Error::EntityNotFound {
+                entity: "facility",
+                field: I64Error(id),
+            });
+        };
 
         Ok(())
     }
 }
 // endregion: --- Facility Model Controller
+
+// check for duplicate constraints
+fn check_duplicate(err: sqlx::Error) -> Error {
+    match err {
+        sqlx::Error::Database(ref e) => {
+            if let Some(pg_err) = e.try_downcast_ref::<PgDatabaseError>() {
+                if pg_err.code() == "23505" {
+                    match pg_err.constraint() {
+                        Some("blood_collection_facilities_email_key") => Error::DuplicateKey {
+                            table: "blood_collection_facilities",
+                            column: "email",
+                        },
+                        Some("blood_collection_facilities_phone_number_key") => {
+                            Error::DuplicateKey {
+                                table: "blood_collection_facilities",
+                                column: "phone_number",
+                            }
+                        }
+                        _ => Error::Sqlx(err),
+                    }
+                } else {
+                    Error::Sqlx(err)
+                }
+            } else {
+                Error::Sqlx(err)
+            }
+        }
+        _ => Error::Sqlx(err),
+    }
+}
 
 // Backend/src/model/facility.rs
 // region:    --- Tests
@@ -407,7 +450,8 @@ mod tests {
             FacilityModelController::create(&context, &model_manager, facility_created).await?;
 
         // -- Exec
-        let facility = FacilityModelController::get_by_email(&model_manager, "test_email@example.com").await?;
+        let facility =
+            FacilityModelController::get_by_email(&model_manager, "test_email@example.com").await?;
 
         // -- Check
         assert_eq!(facility.password, "welcome");
@@ -434,7 +478,8 @@ mod tests {
         let model_manager = _dev_utils::init_test().await;
 
         // -- Exec
-        let res = FacilityModelController::get_by_email(&model_manager, "test_list_ok@example.com").await;
+        let res =
+            FacilityModelController::get_by_email(&model_manager, "test_list_ok@example.com").await;
 
         // -- Check
         assert!(

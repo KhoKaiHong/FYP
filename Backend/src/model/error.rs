@@ -21,6 +21,12 @@ pub enum Error {
         field: EntityErrorField,
     },
 
+    // -- Duplicate Errors
+    DuplicateKey {
+        table: &'static str,
+        column: &'static str,
+    },
+
     // -- Modules
     Store(store::Error),
 

@@ -136,6 +136,9 @@ impl Error {
             LogoutFailInvalidRefreshToken => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
             LogoutFailNoSessionFound => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
 
+            // Duplicate Record Errors
+            ModelError(model::Error::DuplicateKey { table: _ , column }) => (StatusCode::BAD_REQUEST, ClientError::DUPLICATE_RECORD(column.to_string())),
+
             // -- Fallback.
             _ => (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -146,6 +149,7 @@ impl Error {
 }
 
 #[derive(Debug, Serialize, strum_macros::AsRefStr)]
+#[serde(tag = "message", content = "detail")]
 #[allow(non_camel_case_types)]
 pub enum ClientError {
     USERNAME_NOT_FOUND,
@@ -155,5 +159,6 @@ pub enum ClientError {
     INVALID_REQUEST,
     NO_AUTH,
     SERVICE_ERROR,
+    DUPLICATE_RECORD(String),
 }
 // endregion: --- Client Error

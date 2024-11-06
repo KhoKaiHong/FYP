@@ -1,7 +1,7 @@
 use crate::auth::{token::parse_refresh_token, Role};
 use crate::context::Context;
 use crate::model::admin_session::AdminSessionModelController;
-use crate::model::facility_session::{self, FacilitySessionModelController};
+use crate::model::facility_session::FacilitySessionModelController;
 use crate::model::organiser_session::OrganiserSessionModelController;
 use crate::model::user_session::UserSessionModelController;
 use crate::model::EntityErrorField::{I64Error, UuidError};
