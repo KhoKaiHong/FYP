@@ -21,6 +21,7 @@ use tokio::net::TcpListener;
 use tower_cookies::CookieManagerLayer;
 use tracing::info;
 use tracing_subscriber::{self, EnvFilter};
+use tower_http::cors::{Any, CorsLayer};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -49,6 +50,7 @@ async fn main() -> Result<()> {
             Router::new()
                 .merge(web::routes::hello::routes())
                 .merge(web::routes::logout::routes(app_state.clone()))
+                .merge(web::routes::get_credentials::routes(app_state.clone()))
                 .merge(web::routes::logout_all::routes(app_state.clone()))
                 // Add other protected routes here
                 .layer(middleware::from_fn(web::middleware::auth::require_auth)),
@@ -59,6 +61,7 @@ async fn main() -> Result<()> {
             web::middleware::context_resolver,
         ))
         .layer(CookieManagerLayer::new())
+        .layer(CorsLayer::permissive())
         .fallback_service(web::routes::fallback::serve_dir());
 
     // region:    --- Start Server

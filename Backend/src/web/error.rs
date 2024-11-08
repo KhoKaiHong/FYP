@@ -21,6 +21,9 @@ pub enum Error {
     OrganiserRoleRequired,
     AdminRoleRequired,
 
+    // -- No User Found
+    NoUserFound,
+
     // -- Access Token Errors
     AccessTokenExpired,
 
@@ -119,6 +122,9 @@ impl Error {
             BloodCollectionFacilityRoleRequired => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
             OrganiserRoleRequired => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
             AdminRoleRequired => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+
+            // -- No User Found
+            NoUserFound => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
 
             // -- Access Token Errors
             AccessTokenExpired => (StatusCode::UNAUTHORIZED, ClientError::ACCESS_TOKEN_EXPIRED),
