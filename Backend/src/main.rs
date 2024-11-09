@@ -19,9 +19,11 @@ use resend_rs::Resend;
 use state::AppState;
 use tokio::net::TcpListener;
 use tower_cookies::CookieManagerLayer;
+use tower_http::cors::{Any, CorsLayer};
+use axum::http::header::{AUTHORIZATION, ACCEPT, ACCEPT_LANGUAGE, CONTENT_LANGUAGE, CONTENT_TYPE, RANGE};
+use axum::http::Method;
 use tracing::info;
 use tracing_subscriber::{self, EnvFilter};
-use tower_http::cors::{Any, CorsLayer};
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -40,6 +42,14 @@ async fn main() -> Result<()> {
         model_manager: ModelManager::new().await?,
         email_manager: Resend::new(config().RESEND_API_KEY.as_str()),
     };
+
+    // Initialize CORS
+    let cors_layer = CorsLayer::new()
+    //Allow auth headers and CORS-safelisted request headers
+        .allow_headers([AUTHORIZATION, ACCEPT, ACCEPT_LANGUAGE, CONTENT_LANGUAGE, CONTENT_TYPE, RANGE])
+        .allow_methods([Method::GET, Method::POST])
+        .allow_origin([config().FRONTEND_URL.parse().expect("Invalid frontend URL")])
+        .expose_headers(Any);
 
     let routes_all = Router::new()
         .merge(web::routes::login::routes(app_state.clone()))
@@ -61,7 +71,7 @@ async fn main() -> Result<()> {
             web::middleware::context_resolver,
         ))
         .layer(CookieManagerLayer::new())
-        .layer(CorsLayer::permissive())
+        .layer(cors_layer)
         .fallback_service(web::routes::fallback::serve_dir());
 
     // region:    --- Start Server

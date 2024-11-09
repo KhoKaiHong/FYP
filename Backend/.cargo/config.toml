@@ -18,7 +18,7 @@ RUST_LOG="Backend=debug"
 # e.g., "welcome" type of passwords.
 # i.e., Encryption not needed.
 
-SERVICE_DB_URL = "postgresql://dev:dev_only_pwd@localhost:5432/dev_db"
+DEV_DB_URL = "postgresql://dev:dev_only_pwd@localhost:5432/dev_db"
 
 ACCESS_TOKEN_KEY = "3FfRZM3zUDkrE3HCmomcH9hrCdr3M8IKi_wHjzWQmlVPD9ljyAuiUN0i3ZfY4SatztRXh3GvsTmnpCqc6YeVhQ" # Public key to encode access token in HMAC 512
 REFRESH_TOKEN_KEY = "uuqY7SNuIFtkuXUXzgrPJrqc2jJTYt1y9YInr8g0n_dkxKXJSjXDGENyqOkeufLv4bFLpshxt1yB7s2v4w8vCw" # Public key to encode refresh token in HMAC 512
@@ -30,4 +30,7 @@ RESEND_API_KEY = "re_ELknmXim_BxyHR5XiNCAu92pk51Lmwg7A"
 
 # This will be relative to Cargo.toml
 # In deployed images, probably use absolute path.
-SERVICE_WEB_FOLDER="web-folder/"
+WEB_FOLDER="web-folder/"
+
+## -- Dev Frontend Variables
+DEV_FRONTEND_URL="http://localhost:3000"

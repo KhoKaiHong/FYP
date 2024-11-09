@@ -24,6 +24,9 @@ pub struct Config {
 
     // -- Email Service
     pub RESEND_API_KEY: String,
+
+    // -- Frontend URL
+    pub FRONTEND_URL: String,
 }
 
 impl Config {
@@ -34,13 +37,16 @@ impl Config {
             REFRESH_TOKEN_KEY: get_env_b64u_as_u8("REFRESH_TOKEN_KEY")?,
 
             // -- Database
-            DATABASE_URL: get_env("SERVICE_DB_URL")?,
+            DATABASE_URL: get_env("DEV_DB_URL")?,
 
             // -- Web
-            WEB_FOLDER: get_env("SERVICE_WEB_FOLDER")?,
+            WEB_FOLDER: get_env("WEB_FOLDER")?,
 
             // -- Email Service
             RESEND_API_KEY: get_env("RESEND_API_KEY")?,
+
+            // -- Frontend URL
+            FRONTEND_URL: get_env("DEV_FRONTEND_URL")?,
         })
     }
 }

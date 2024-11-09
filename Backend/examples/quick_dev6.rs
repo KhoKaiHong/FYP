@@ -14,13 +14,17 @@ async fn main() -> Result<()> {
         }),
     );
 
-    let res = req_login.await?.json_body()?;
-    let access_token = res["result"]["access_token"].as_str().unwrap();
+    let res = req_login.await?;
+    res.print().await?;
+    let json = res.json_body()?;
+    let access_token = json["result"]["access_token"].as_str().unwrap();
 
     let req = hc
         .reqwest_client()
         .get("http://localhost:3001/api/getcredentials")
+        .header("Accept","text/html")
         .bearer_auth(access_token);
+    println!("{:?}", req);
 
     let res = req.send().await?;
 
@@ -31,6 +35,8 @@ async fn main() -> Result<()> {
         .reqwest_client()
         .get("http://localhost:3001/api/getcredentials")
         .bearer_auth("figrniughjnrfi");
+    println!("{:?}", req);
+    println!();
 
     let res = req.send().await?;
 
