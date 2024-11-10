@@ -1,6 +1,7 @@
 import { createSignal } from 'solid-js';
 import { userLogin, facilityLogin, organiserLogin, adminLogin } from '@/utils/login';
 
+
 function LoginButtons() {
   const [icNumber, setIcNumber] = createSignal('');
   const [email, setEmail] = createSignal('');
@@ -10,7 +11,6 @@ function LoginButtons() {
   const handleUserLogin = async () => {
     try {
       const result = await userLogin(icNumber(), password());
-      setLoginResult('User login successful!');
     } catch (error) {
       setLoginResult('User login failed');
     }

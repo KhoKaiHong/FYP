@@ -11,7 +11,7 @@ async fn main() -> Result<()> {
     let req_login = hc.do_post(
         "/api/userlogin",
         json!({
-            "ic_number": "900101-01-1234",
+            "icNumber": "900101-01-1234",
             "password": "password123"
         }),
     );
@@ -21,11 +21,11 @@ async fn main() -> Result<()> {
     res.print().await?;
     println!();
     let json = res.json_body()?;
-    let access_token = json["result"]["access_token"].as_str().unwrap();
-    let refresh_token = json["result"]["refresh_token"].as_str().unwrap();
+    let access_token = json["data"]["accessToken"].as_str().unwrap();
+    let refresh_token = json["data"]["refreshToken"].as_str().unwrap();
 
     let mut map = HashMap::new();
-    map.insert("refresh_token", refresh_token);
+    map.insert("refreshToken", refresh_token);
 
     let req = hc
         .reqwest_client()
@@ -59,7 +59,7 @@ async fn main() -> Result<()> {
     // let req_login = hc.do_post(
     //     "/api/userlogin",
     //     json!({
-    //         "ic_number": "900101-01-1234",
+    //         "icNumber": "900101-01-1234",
     //         "password": "password123"
     //     }),
     // );
@@ -68,7 +68,7 @@ async fn main() -> Result<()> {
     // let req_login = hc.do_post(
     //     "/api/userlogin",
     //     json!({
-    //         "ic_number": "900101-01-1234",
+    //         "icNumber": "900101-01-1234",
     //         "password": "htrghtghn"
     //     }),
     // );

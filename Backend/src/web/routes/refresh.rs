@@ -81,10 +81,9 @@ async fn refresh_handler(
         }
 
         let body = Json(json!({
-            "result": {
-                "success": true,
-                "access_token": updated_access_token,
-                "refresh_token": updated_refresh_token,
+            "data": {
+                "accessToken": updated_access_token,
+                "refreshToken": updated_refresh_token,
             }
         }));
 
@@ -350,6 +349,7 @@ async fn refresh_admin_token(
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 struct RefreshRequestPayload {
     refresh_token: String,
 }

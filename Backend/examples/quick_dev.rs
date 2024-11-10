@@ -9,13 +9,13 @@ async fn main() -> Result<()> {
     let req_login = hc.do_post(
         "/api/userlogin",
         json!({
-            "ic_number": "900101-01-1234",
+            "icNumber": "900101-01-1234",
             "password": "password123"
         }),
     );
 
     let res = req_login.await?.json_body()?;
-    let token = res["result"]["access_token"].as_str().unwrap();
+    let token = res["data"]["accessToken"].as_str().unwrap();
 
     let req = hc
         .reqwest_client()
@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
     let req_login = hc.do_post(
         "/api/userlogin",
         json!({
-            "ic_number": "900101-01-1234",
+            "icNumber": "900101-01-1234",
             "password": "password123"
         }),
     );
@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     let req_login = hc.do_post(
         "/api/userlogin",
         json!({
-            "ic_number": "900101-01-1234",
+            "icNumber": "900101-01-1234",
             "password": "htrghtghn"
         }),
     );

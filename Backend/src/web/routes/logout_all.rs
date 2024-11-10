@@ -51,9 +51,7 @@ async fn logout_all_handler(
     }
 
     let body = Json(json!({
-        "result": {
-            "success": true,
-        }
+        "data": { }
     }));
 
     Ok(body)
@@ -180,6 +178,7 @@ async fn logout_all_admin(
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 struct LogoutAllRequestPayload {
     refresh_token: String,
 }

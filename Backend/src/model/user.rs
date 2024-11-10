@@ -23,6 +23,7 @@ pub struct User {
 }
 
 #[derive(Debug, FromRow, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UserWithLocation {
     pub id: i64,
     pub ic_number: String,
@@ -66,6 +67,7 @@ pub enum EligibilityStatus {
     Eligible,
     Ineligible,
     #[sqlx(rename = "Ineligible - Condition")]
+    #[serde(rename = "Ineligible - Condition")]
     IneligibleCondition,
 }
 // endregion: --- User Types

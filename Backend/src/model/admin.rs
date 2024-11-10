@@ -8,6 +8,7 @@ use sqlx::FromRow;
 // region:    --- Admin Types
 
 #[derive(Debug, FromRow, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Admin {
     pub id: i64,
     pub email: String,

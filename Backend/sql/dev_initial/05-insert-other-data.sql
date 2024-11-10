@@ -1,6 +1,6 @@
 -- Insert data into users
 INSERT INTO users (ic_number, password, name, email, phone_number, blood_type, eligibility, state_id, district_id) VALUES
-('900101-01-1234', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'John Doe', 'john.doe@example.com', '60123456789', 'A+', 'Eligible', 1, 1),
+('900101-01-1234', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'John Doe', 'john.doe@example.com', '60123456789', 'A+', 'Ineligible - Condition', 1, 1),
 ('900102-02-2345', 'password123', 'Jane Smith', 'jane.smith@example.com', '60123456790', 'B+', 'Ineligible', 1, 1),
 ('900103-03-3456', 'password123', 'Ali Bin Ahmad', 'ali.ahmad@example.com', '60123456791', 'O-', 'Eligible', 1, 1);
 

@@ -1,4 +1,3 @@
-use crate::auth::Role;
 use crate::context::Context;
 use crate::web::{self, ClientError};
 use crate::Result;

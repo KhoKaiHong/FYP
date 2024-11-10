@@ -3,6 +3,7 @@ use crate::auth::{
     Role,
 };
 use crate::context::Context;
+use crate::model;
 use crate::model::admin::AdminModelController;
 use crate::model::admin_session::{AdminSessionForCreate, AdminSessionModelController};
 use crate::model::facility::FacilityModelController;
@@ -12,7 +13,6 @@ use crate::model::organiser_session::{OrganiserSessionForCreate, OrganiserSessio
 use crate::model::user::UserModelController;
 use crate::model::user_session::{UserSessionForCreate, UserSessionModelController};
 use crate::model::EntityErrorField::StringError;
-use crate::model;
 use crate::state::AppState;
 use crate::web::{Error, Result};
 use axum::extract::State;
@@ -72,11 +72,10 @@ async fn user_login_handler(
     UserSessionModelController::create(&context, &app_state.model_manager, user_session).await?;
 
     let body = Json(json!({
-        "result": {
-            "success": true,
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "user_details": user,
+        "data": {
+            "accessToken": access_token,
+            "refreshToken": refresh_token,
+            "userDetails": user,
         }
     }));
 
@@ -84,6 +83,7 @@ async fn user_login_handler(
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 struct UserLoginPayload {
     ic_number: String,
     password: String,
@@ -137,11 +137,10 @@ async fn facility_login_handler(
         .await?;
 
     let body = Json(json!({
-        "result": {
-            "success": true,
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "facility_details": facility,
+        "data": {
+            "accessToken": access_token,
+            "refreshToken": refresh_token,
+            "facilityDetails": facility,
         }
     }));
 
@@ -149,6 +148,7 @@ async fn facility_login_handler(
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 struct FacilityLoginPayload {
     email: String,
     password: String,
@@ -197,11 +197,10 @@ async fn organiser_login_handler(
         .await?;
 
     let body = Json(json!({
-        "result": {
-            "success": true,
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "organiser_details": organiser,
+        "data": {
+            "accessToken": access_token,
+            "refreshToken": refresh_token,
+            "organiserDetails": organiser,
         }
     }));
 
@@ -209,6 +208,7 @@ async fn organiser_login_handler(
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 struct OrganiserLoginPayload {
     email: String,
     password: String,
@@ -257,11 +257,10 @@ async fn admin_login_handler(
     AdminSessionModelController::create(&context, &app_state.model_manager, admin_session).await?;
 
     let body = Json(json!({
-        "result": {
-            "success": true,
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "admin_details": admin,
+        "data": {
+            "accessToken": access_token,
+            "refreshToken": refresh_token,
+            "adminDetails": admin,
         }
     }));
 
@@ -269,6 +268,7 @@ async fn admin_login_handler(
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 struct AdminLoginPayload {
     email: String,
     password: String,

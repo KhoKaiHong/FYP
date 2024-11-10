@@ -46,15 +46,14 @@ async fn user_register_handler(
     UserModelController::create(&context, &app_state.model_manager, registered_user).await?;
 
     let body = Json(json!({
-        "result": {
-            "success": true,
-        }
+        "data": { }
     }));
 
     Ok(body)
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 struct UserRegisterPayload {
     ic_number: String,
     password: String,
@@ -73,7 +72,7 @@ async fn facility_register_handler(
     debug!("{:<12} - facility_register_api", "HANDLER");
 
     let context = Context::root_ctx();
-    
+
     let password_hash = encrypt_password(&payload.password).await?;
 
     let registered_facility = FacilityForCreate {
@@ -85,18 +84,18 @@ async fn facility_register_handler(
         state_id: payload.state_id,
     };
 
-    FacilityModelController::create(&context, &app_state.model_manager, registered_facility).await?;
+    FacilityModelController::create(&context, &app_state.model_manager, registered_facility)
+        .await?;
 
     let body = Json(json!({
-        "result": {
-            "success": true,
-        }
+        "data": { }
     }));
 
     Ok(body)
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 struct FacilityRegisterPayload {
     email: String,
     password: String,
@@ -123,18 +122,18 @@ async fn organiser_register_handler(
         phone_number: payload.phone_number,
     };
 
-    OrganiserModelController::create(&context, &app_state.model_manager, registered_organiser).await?;
+    OrganiserModelController::create(&context, &app_state.model_manager, registered_organiser)
+        .await?;
 
     let body = Json(json!({
-        "result": {
-            "success": true,
-        }
+        "data": { }
     }));
 
     Ok(body)
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 struct OrganiserRegisterPayload {
     email: String,
     password: String,
@@ -161,15 +160,14 @@ async fn admin_register_handler(
     AdminModelController::create(&context, &app_state.model_manager, registered_admin).await?;
 
     let body = Json(json!({
-        "result": {
-            "success": true,
-        }
+        "data": { }
     }));
 
     Ok(body)
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
 struct AdminRegisterPayload {
     email: String,
     password: String,

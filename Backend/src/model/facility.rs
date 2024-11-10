@@ -20,6 +20,7 @@ pub struct Facility {
 }
 
 #[derive(Debug, FromRow, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct FacilityWithLocation {
     pub id: i64,
     pub email: String,

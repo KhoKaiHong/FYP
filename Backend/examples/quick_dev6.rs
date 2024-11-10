@@ -9,7 +9,7 @@ async fn main() -> Result<()> {
     let req_login = hc.do_post(
         "/api/userlogin",
         json!({
-            "ic_number": "900101-01-1234",
+            "icNumber": "900101-01-1234",
             "password": "password123"
         }),
     );
@@ -17,12 +17,12 @@ async fn main() -> Result<()> {
     let res = req_login.await?;
     res.print().await?;
     let json = res.json_body()?;
-    let access_token = json["result"]["access_token"].as_str().unwrap();
+    let access_token = json["data"]["accessToken"].as_str().unwrap();
 
     let req = hc
         .reqwest_client()
         .get("http://localhost:3001/api/getcredentials")
-        .header("Accept","text/html")
+        .header("Accept", "text/html")
         .bearer_auth(access_token);
     println!("{:?}", req);
 
@@ -52,7 +52,7 @@ async fn main() -> Result<()> {
         }),
     );
     let res = req_login.await?.json_body()?;
-    let access_token = res["result"]["access_token"].as_str().unwrap();
+    let access_token = res["data"]["accessToken"].as_str().unwrap();
 
     let req = hc
         .reqwest_client()
@@ -74,7 +74,6 @@ async fn main() -> Result<()> {
     println!("{:?}", res);
     println!("{:?}\n\n", res.text().await?);
 
-
     // Organiser login test
     let req_login = hc.do_post(
         "/api/organiserlogin",
@@ -84,7 +83,7 @@ async fn main() -> Result<()> {
         }),
     );
     let res = req_login.await?.json_body()?;
-    let access_token = res["result"]["access_token"].as_str().unwrap();
+    let access_token = res["data"]["accessToken"].as_str().unwrap();
 
     let req = hc
         .reqwest_client()
@@ -115,7 +114,7 @@ async fn main() -> Result<()> {
         }),
     );
     let res = req_login.await?.json_body()?;
-    let access_token = res["result"]["access_token"].as_str().unwrap();
+    let access_token = res["data"]["accessToken"].as_str().unwrap();
 
     let req = hc
         .reqwest_client()

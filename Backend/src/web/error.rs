@@ -117,10 +117,10 @@ impl Error {
             }
 
             // -- Role
-            UserRoleRequired => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
-            BloodCollectionFacilityRoleRequired => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
-            OrganiserRoleRequired => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
-            AdminRoleRequired => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
+            UserRoleRequired => (StatusCode::FORBIDDEN, ClientError::PERMISSION_DENIED),
+            BloodCollectionFacilityRoleRequired => (StatusCode::FORBIDDEN, ClientError::PERMISSION_DENIED),
+            OrganiserRoleRequired => (StatusCode::FORBIDDEN, ClientError::PERMISSION_DENIED),
+            AdminRoleRequired => (StatusCode::FORBIDDEN, ClientError::PERMISSION_DENIED),
 
             // -- No User Found
             NoUserFound => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
@@ -164,5 +164,6 @@ pub enum ClientError {
     NO_AUTH,
     SERVICE_ERROR,
     DUPLICATE_RECORD(String),
+    PERMISSION_DENIED,
 }
 // endregion: --- Client Error

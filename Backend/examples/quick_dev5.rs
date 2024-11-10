@@ -9,19 +9,19 @@ async fn main() -> Result<()> {
     // let req_login = hc.do_post(
     //     "/api/userlogin",
     //     json!({
-    //         "ic_number": "031120-07-0559",
+    //         "icNumber": "031120-07-0559",
     //         "password": "testpassword",
     //         "name": "Khp Kai Hong",
     //         "email": "khokaihong@gmail.com",
-    //         "phone_number": "+6011-35275289",
-    //         "blood_type": "A",
-    //         "state_id": 1,
-    //         "district_id": 1,
+    //         "phoneNumber": "+6011-35275289",
+    //         "bloodType": "A",
+    //         "stateId": 1,
+    //         "districtId": 1,
     //     }),
     // );
 
     // let res = req_login.await?.json_body()?;
-    // let token = res["result"]["access_token"].as_str().unwrap();
+    // let token = res["data"]["accessToken"].as_str().unwrap();
 
     // let req = hc
     //     .reqwest_client()
@@ -46,14 +46,14 @@ async fn main() -> Result<()> {
     let req_register = hc.do_post(
         "/api/userregister",
         json!({
-            "ic_number": "031120-07-0559",
+            "icNumber": "031120-07-0559",
             "password": "testpassword",
             "name": "Kho Kai Hong",
             "email": "khokaihong@gmail.com",
-            "phone_number": "+6011-35275289",
-            "blood_type": "A",
-            "state_id": 1,
-            "district_id": 1,
+            "phoneNumber": "+6011-35275289",
+            "bloodType": "A",
+            "stateId": 1,
+            "districtId": 1,
         }),
     );
     req_register.await?.print().await?;
@@ -61,14 +61,14 @@ async fn main() -> Result<()> {
     let req_register = hc.do_post(
         "/api/userregister",
         json!({
-            "ic_number": "0311fe20-07-0559",
+            "icNumber": "0311fe20-07-0559",
             "password": "testpassword",
             "name": "Test User",
             "email": "khokaihongg@gmail.com",
-            "phone_number": "+6011g-35275289",
-            "blood_type": "A",
-            "state_id": 30,
-            "district_id": 1,
+            "phoneNumber": "+6011g-35275289",
+            "bloodType": "A",
+            "stateId": 30,
+            "districtId": 1,
         }),
     );
     req_register.await?.print().await?;
@@ -76,7 +76,7 @@ async fn main() -> Result<()> {
     let req_login = hc.do_post(
         "/api/userlogin",
         json!({
-            "ic_number": "031120-07-0559",
+            "icNumber": "031120-07-0559",
             "password": "testpassword"
         }),
     );
@@ -85,7 +85,7 @@ async fn main() -> Result<()> {
     let req_login = hc.do_post(
         "/api/userlogin",
         json!({
-            "ic_number": "031120-07-0559",
+            "icNumber": "031120-07-0559",
             "password": "htrhbgthtr"
         }),
     );
@@ -99,8 +99,8 @@ async fn main() -> Result<()> {
             "password": "testpassword",
             "name": "Test Facility",
             "address": "test facility location",
-            "phone_number": "+604-91837484",
-            "state_id": 1,
+            "phoneNumber": "+604-91837484",
+            "stateId": 1,
         }),
     );
     req_register.await?.print().await?;
@@ -112,8 +112,8 @@ async fn main() -> Result<()> {
             "password": "testpassword2",
             "name": "Test2 Facility",
             "address": "test facility location",
-            "phone_number": "+604-91837484",
-            "state_id": 50,
+            "phoneNumber": "+604-91837484",
+            "stateId": 50,
         }),
     );
     req_register.await?.print().await?;
@@ -143,7 +143,7 @@ async fn main() -> Result<()> {
             "email": "testorganiser@hotmail.com",
             "password": "testpassword",
             "name": "Test Organiser",
-            "phone_number": "+604-91837484",
+            "phoneNumber": "+604-91837484",
         }),
     );
     req_register.await?.print().await?;
@@ -154,7 +154,7 @@ async fn main() -> Result<()> {
             "email": "testorganiser2@hotmail.com",
             "password": "testpassword",
             "name": "Test Organiser 2",
-            "phone_number": "+604-91837484",
+            "phoneNumber": "+604-91837484",
         }),
     );
     req_register.await?.print().await?;

@@ -1,31 +1,32 @@
-const BACKEND_PATH = import.meta.env.VITE_BACKEND_PATH || 'http://localhost:3001';
+const BACKEND_PATH =
+  import.meta.env.VITE_BACKEND_PATH || "http://localhost:3001";
 
 export async function fetchWithAuth({
   path,
-  method = 'GET',
+  method = "GET",
   body = null,
 }: {
   path: string;
   method?: string;
   body?: any;
 }) {
-  // Check if access_token and refresh_token are in localStorage
-  const accessToken = localStorage.getItem('access_token');
-  const refreshToken = localStorage.getItem('refresh_token');
+  // Check if accessToken and refreshToken are in localStorage
+  const accessToken = localStorage.getItem("accessToken");
+  const refreshToken = localStorage.getItem("refreshToken");
 
   if (!accessToken || !refreshToken) {
     // If no tokens, redirect to home page
-    window.location.href = '/';
+    window.location.href = "/";
     return;
   }
 
-  // Function to handle API calls with the access_token
+  // Function to handle API calls with the accessToken
   const makeRequest = async (accessToken: string) => {
     try {
       const response = await fetch(`${BACKEND_PATH}${path}`, {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
         body: body ? JSON.stringify(body) : null,
@@ -38,61 +39,69 @@ export async function fetchWithAuth({
         // Handle specific error cases
         const errorResponse = await response.json();
 
-        if (response.status === 401 && errorResponse.error?.message === 'ACCESS_TOKEN_EXPIRED') {
+        if (
+          response.status === 401 &&
+          errorResponse.error?.message === "ACCESS_TOKEN_EXPIRED"
+        ) {
           // If access token expired, try to refresh it
           return await handleTokenRefresh(accessToken, refreshToken);
         } else if (
-          (response.status === 401 && errorResponse.error?.message === 'SESSION_EXPIRED') ||
-          (response.status === 403 && errorResponse.error?.message === 'NO_AUTH')
+          (response.status === 401 &&
+            errorResponse.error?.message === "SESSION_EXPIRED") ||
+          (response.status === 403 &&
+            errorResponse.error?.message === "NO_AUTH")
         ) {
           // If session expired or no authorization, clear tokens and redirect
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          window.location.href = '/';
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          window.location.href = "/";
         } else {
           // For other errors, just redirect to home
-          window.location.href = '/';
+          window.location.href = "/";
         }
       }
     } catch (error) {
-      console.error('Error during fetch:', error);
-      window.location.href = '/';
+      console.error("Error during fetch:", error);
+      window.location.href = "/";
     }
   };
 
   // Function to handle token refresh if expired
-  const handleTokenRefresh = async (accessToken: string, refreshToken: string) => {
+  const handleTokenRefresh = async (
+    accessToken: string,
+    refreshToken: string
+  ) => {
     try {
       const refreshResponse = await fetch(`${BACKEND_PATH}/api/refresh`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ refresh_token: refreshToken }),
+        body: JSON.stringify({ refreshToken: refreshToken }),
       });
 
       if (refreshResponse.ok) {
         const refreshData = await refreshResponse.json();
         if (refreshData.result.success) {
           // Successfully refreshed tokens, update them in localStorage
-          localStorage.setItem('access_token', refreshData.result.access_token);
-          localStorage.setItem('refresh_token', refreshData.result.refresh_token);
+          localStorage.setItem("accessToken", refreshData.result.accessToken);
+          localStorage.setItem("refreshToken", refreshData.result.refreshToken);
 
           // Retry the original request with the new access token
-          return await makeRequest(localStorage.getItem('access_token'));
+          return await makeRequest(localStorage.getItem("accessToken"));
         }
       }
 
       // If refresh failed, clear tokens and redirect
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      window.location.href = '/';
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      window.location.href = "/";
     } catch (error) {
-      console.error('Error during token refresh:', error);
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      window.location.href = '/';
+      console.error("Error during token refresh:", error);
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      window.location.href = "/";
     }
   };
 

@@ -11,14 +11,14 @@ async fn main() -> Result<()> {
     let user_req_login = hc.do_post(
         "/api/userlogin",
         json!({
-            "ic_number": "900101-01-1234",
+            "icNumber": "900101-01-1234",
             "password": "password123"
         }),
     );
 
     let res = user_req_login.await?.json_body()?;
-    let user_access_token = res["result"]["access_token"].as_str().unwrap();
-    let user_refresh_token = res["result"]["refresh_token"].as_str().unwrap();
+    let user_access_token = res["data"]["accessToken"].as_str().unwrap();
+    let user_refresh_token = res["data"]["refreshToken"].as_str().unwrap();
 
     let facility_req_login = hc.do_post(
         "/api/facilitylogin",
@@ -29,11 +29,11 @@ async fn main() -> Result<()> {
     );
 
     let res = facility_req_login.await?.json_body()?;
-    let facility_access_token = res["result"]["access_token"].as_str().unwrap();
-    let facility_refresh_token = res["result"]["refresh_token"].as_str().unwrap();
+    let facility_access_token = res["data"]["accessToken"].as_str().unwrap();
+    let facility_refresh_token = res["data"]["refreshToken"].as_str().unwrap();
 
     let mut map = HashMap::new();
-    map.insert("refresh_token", user_refresh_token);
+    map.insert("refreshToken", user_refresh_token);
 
     let req = hc
         .reqwest_client()
@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
     println!("{:?}\n\n", res.text().await?);
 
     let mut map = HashMap::new();
-    map.insert("refresh_token", facility_refresh_token);
+    map.insert("refreshToken", facility_refresh_token);
 
     let req = hc
         .reqwest_client()
@@ -80,7 +80,7 @@ async fn main() -> Result<()> {
     // let req_login = hc.do_post(
     //     "/api/userlogin",
     //     json!({
-    //         "ic_number": "900101-01-1234",
+    //         "icNumber": "900101-01-1234",
     //         "password": "password123"
     //     }),
     // );
@@ -89,7 +89,7 @@ async fn main() -> Result<()> {
     // let req_login = hc.do_post(
     //     "/api/userlogin",
     //     json!({
-    //         "ic_number": "900101-01-1234",
+    //         "icNumber": "900101-01-1234",
     //         "password": "htrghtghn"
     //     }),
     // );

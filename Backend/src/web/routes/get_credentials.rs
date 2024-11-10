@@ -1,11 +1,11 @@
 use crate::auth::Role;
 use crate::context::Context;
-use crate::model::{self, ModelManager};
 use crate::model::admin::AdminModelController;
 use crate::model::facility::FacilityModelController;
 use crate::model::organiser::OrganiserModelController;
 use crate::model::user::UserModelController;
 use crate::model::EntityErrorField::I64Error;
+use crate::model::{self, ModelManager};
 use crate::state::AppState;
 use crate::web::{Error, Result};
 use axum::extract::State;
@@ -32,7 +32,9 @@ async fn get_credentials_handler(
 
     match context.role() {
         Role::User => body = get_user_credentials(&context, model_manager).await?,
-        Role::BloodCollectionFacility => body = get_facility_credentials(&context, model_manager).await?,
+        Role::BloodCollectionFacility => {
+            body = get_facility_credentials(&context, model_manager).await?
+        }
         Role::Organiser => body = get_organiser_credentials(&context, model_manager).await?,
         Role::Admin => body = get_admin_credentials(&context, model_manager).await?,
     }
@@ -40,7 +42,10 @@ async fn get_credentials_handler(
     Ok(body)
 }
 
-async fn get_user_credentials(context: &Context, model_manager: &ModelManager) -> Result<Json<Value>> {
+async fn get_user_credentials(
+    context: &Context,
+    model_manager: &ModelManager,
+) -> Result<Json<Value>> {
     let user = UserModelController::get(context, model_manager, context.user_id())
         .await
         .map_err(|err| match err {
@@ -52,16 +57,18 @@ async fn get_user_credentials(context: &Context, model_manager: &ModelManager) -
         })?;
 
     let body = Json(json!({
-        "result": {
-            "success": true,
-            "user_details": user,
+        "data": {
+            "userDetails": user,
         }
     }));
 
     Ok(body)
 }
 
-async fn get_facility_credentials(context: &Context, model_manager: &ModelManager) -> Result<Json<Value>> {
+async fn get_facility_credentials(
+    context: &Context,
+    model_manager: &ModelManager,
+) -> Result<Json<Value>> {
     let facility = FacilityModelController::get(context, model_manager, context.user_id())
         .await
         .map_err(|err| match err {
@@ -73,16 +80,18 @@ async fn get_facility_credentials(context: &Context, model_manager: &ModelManage
         })?;
 
     let body = Json(json!({
-        "result": {
-            "success": true,
-            "facility_details": facility,
+        "data": {
+            "facilityDetails": facility,
         }
     }));
 
     Ok(body)
 }
 
-async fn get_organiser_credentials(context: &Context, model_manager: &ModelManager) -> Result<Json<Value>> {
+async fn get_organiser_credentials(
+    context: &Context,
+    model_manager: &ModelManager,
+) -> Result<Json<Value>> {
     let organiser = OrganiserModelController::get(context, model_manager, context.user_id())
         .await
         .map_err(|err| match err {
@@ -94,16 +103,18 @@ async fn get_organiser_credentials(context: &Context, model_manager: &ModelManag
         })?;
 
     let body = Json(json!({
-        "result": {
-            "success": true,
-            "organiser_details": organiser,
+        "data": {
+            "organiserDetails": organiser,
         }
     }));
 
     Ok(body)
 }
 
-async fn get_admin_credentials(context: &Context, model_manager: &ModelManager) -> Result<Json<Value>> {
+async fn get_admin_credentials(
+    context: &Context,
+    model_manager: &ModelManager,
+) -> Result<Json<Value>> {
     let admin = AdminModelController::get(context, model_manager, context.user_id())
         .await
         .map_err(|err| match err {
@@ -115,9 +126,8 @@ async fn get_admin_credentials(context: &Context, model_manager: &ModelManager) 
         })?;
 
     let body = Json(json!({
-        "result": {
-            "success": true,
-            "admin_details": admin,
+        "data": {
+            "adminDetails": admin,
         }
     }));
 
