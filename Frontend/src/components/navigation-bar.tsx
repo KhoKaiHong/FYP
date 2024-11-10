@@ -11,7 +11,7 @@ import {
   NavigationMenuLink,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { ChevronUp, ChevronDown, X } from "lucide-solid";
+import { ChevronDown, X } from "lucide-solid";
 import {
   Collapsible,
   CollapsibleContent,
@@ -24,6 +24,16 @@ function Navbar() {
   const toggleMenu = () => {
     setIsOpen(!isOpen());
   };
+
+  createEffect(() => {
+    if (isOpen()) {
+      document.body.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.touchAction = "";
+    }
+  });
 
   const navItems = [
     {
@@ -132,13 +142,10 @@ function Navbar() {
       </div>
 
       <div
-        class={`lg:hidden fixed left-0 right-0 bg-white overflow-hidden transition-all duration-300 ease-in-out z-40 top-20`}
-        style={{
-          opacity: isOpen() ? "1" : "0",
-          visibility: isOpen() ? "visible" : "hidden",
-        }}
+        class={`lg:hidden fixed overflow-auto inset-x-0 top-16 bg-background transition-all duration-300 ease-in-out z-40 overscroll-none py-4 px-6
+          ${isOpen() ? "opacity-100 h-[calc(100dvh-4rem)]" : "opacity-0 h-0"}`}
       >
-        <div class="container mx-auto px-4 flex flex-col space-y-4 mt-4 h-full">
+        <div class="flex flex-col gap-y-3">
           <For each={navItems}>
             {(item) => (
               <div>
@@ -147,24 +154,28 @@ function Navbar() {
                     variant="ghost"
                     as="a"
                     href={item.href}
-                    class="w-full justify-start"
+                    class="px-2 py-0 h-8 text-base"
                     onClick={() => setIsOpen(false)}
                   >
                     {item.name}
                   </Button>
                 ) : (
                   <Collapsible>
-                    <CollapsibleTrigger class="text-sm font-medium">
+                    <CollapsibleTrigger class="text-base font-medium flex items-center gap-x-1 [&[data-expanded]>svg]:rotate-180 h-8 px-2">
                       {item.name}
+                      <ChevronDown
+                        size={16}
+                        class="transition-transform duration-200 "
+                      />
                     </CollapsibleTrigger>
-                    <CollapsibleContent class="overflow-hidden">
+                    <CollapsibleContent class="transition-opacity duration-200 data-[expanded]:opacity-100 data-[closed]:opacity-0 grid grid-cols-1">
                       <For each={item.subpages}>
                         {(subpage) => (
                           <Button
                             variant="ghost"
                             as="a"
                             href={subpage.href}
-                            class="w-full justify-start"
+                            class="justify-start ml-2 px-2 py-0 h-8 w-fit"
                             onClick={() => setIsOpen(false)}
                           >
                             {subpage.name}

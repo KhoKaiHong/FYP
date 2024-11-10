@@ -11,7 +11,7 @@ workspace = true
 
 [dependencies]
 # Async
-tokio = { version = "1.41.0", features = ["full"] }
+tokio = { version = "1.41.1", features = ["full"] }
 async-trait = "0.1.83"
 
 # Serialisation
@@ -27,6 +27,8 @@ argon2 = "0.5.3"
 axum = "0.7.7"
 tower-http = { version = "0.6.1", features = ["fs", "cors"] }
 tower-cookies = "0.10.0"
+headers = "0.4.0"
+axum-extra = { version = "0.9.4", features = ["typed-header"] }
 
 # Database
 sqlx = { version = "0.8.2", features = [ "runtime-tokio", "tls-rustls-ring", "postgres", "uuid", "chrono" ] }
@@ -49,4 +51,4 @@ chrono = { version = "0.4.38", features = ["serde"] }
 [dev-dependencies]
 anyhow = "1.0.93"
 httpc-test = "0.1.10"
-serial_test = "3.1.1"
+serial_test = "3.2.0"

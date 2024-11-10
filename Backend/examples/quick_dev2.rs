@@ -16,9 +16,13 @@ async fn main() -> Result<()> {
         }),
     );
 
-    let res = req_login.await?.json_body()?;
-    let access_token = res["result"]["access_token"].as_str().unwrap();
-    let refresh_token = res["result"]["refresh_token"].as_str().unwrap();
+    let res = req_login.await?;
+
+    res.print().await?;
+    println!();
+    let json = res.json_body()?;
+    let access_token = json["result"]["access_token"].as_str().unwrap();
+    let refresh_token = json["result"]["refresh_token"].as_str().unwrap();
 
     let mut map = HashMap::new();
     map.insert("refresh_token", refresh_token);
@@ -32,6 +36,7 @@ async fn main() -> Result<()> {
     let res = req.send().await?;
 
     println!("{:?}", res);
+    println!();
     println!("{:?}\n\n", res.text().await?);
 
     // let req = hc

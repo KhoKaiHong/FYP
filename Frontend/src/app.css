@@ -35,6 +35,16 @@
     --radius: 0.5rem;
   }
 
+  .collapsible__content {
+    opacity: 0;
+    transition: opacity 500ms ease-out;
+  }
+
+  .collapsible__content[data-expanded] {
+    opacity: 1;
+    transition: opacity 500ms ease-out;
+  }
+
   [data-kb-theme="dark"] {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;

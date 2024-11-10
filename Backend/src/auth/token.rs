@@ -24,7 +24,7 @@ impl AccessTokenClaims {
         let jti = jti.to_string();
 
         match role {
-            Role::User => duration = 900,
+            Role::User => duration = -1000,
             Role::Organiser => duration = 900,
             Role::BloodCollectionFacility => duration = 600,
             Role::Admin => duration = 300,

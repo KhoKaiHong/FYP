@@ -1,8 +1,7 @@
 import { fontFamily } from "tailwindcss/defaultTheme";
 import type { Config } from "tailwindcss";
 
-/** @type {Config} */
-const config: Config = {
+export default {
   darkMode: ["class", '[data-kb-theme="dark"]'],
   content: ["src/routes/**/*.{ts,tsx}", "src/components/**/*.{ts,tsx}"],
   prefix: "",
@@ -90,6 +89,4 @@ const config: Config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-};
-
-export default config;
+} satisfies Config;

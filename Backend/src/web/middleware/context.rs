@@ -7,9 +7,12 @@ use async_trait::async_trait;
 use axum::body::Body;
 use axum::extract::{FromRequestParts, State};
 use axum::http::request::Parts;
-use axum::http::{header, HeaderMap, Request};
+use axum::http::Request;
 use axum::middleware::Next;
 use axum::response::Response;
+use axum_extra::TypedHeader;
+use headers::Authorization;
+use headers::authorization::Bearer;
 use serde::Serialize;
 use tracing::debug;
 use uuid::Uuid;
@@ -17,12 +20,11 @@ use uuid::Uuid;
 // Converts access token claims to context
 pub async fn context_resolver(
     State(_app_state): State<AppState>,
+    header: Option<TypedHeader<Authorization<Bearer>>>,
     mut req: Request<Body>,
     next: Next,
 ) -> Response {
     debug!("{:<12} - context_resolver", "MIDDLEWARE");
-
-    let header = req.headers();
 
     let context = context_from_token(header).await;
 
@@ -32,19 +34,12 @@ pub async fn context_resolver(
     next.run(req).await
 }
 
-async fn context_from_token(header: &HeaderMap) -> ContextExtractorResult {
-    let auth_header = header
-        .get(header::AUTHORIZATION)
-        .ok_or(ContextExtractorError::AccessTokenNotInHeader)?
-        .to_str()
-        .map_err(|_| ContextExtractorError::InvalidAccessToken)?;
+async fn context_from_token(header: Option<TypedHeader<Authorization<Bearer>>>) -> ContextExtractorResult {
+    let TypedHeader(header) = header.ok_or(ContextExtractorError::InvalidAccessToken)?;
 
-    let access_token = auth_header
-        .strip_prefix("Bearer ")
-        .ok_or(ContextExtractorError::InvalidAccessToken)?
-        .to_string();
+    let access_token = header.token();
 
-    let claims = validate_access_token(&access_token).map_err(|err| match err {
+    let claims = validate_access_token(access_token).map_err(|err| match err {
         auth::Error::AccessTokenExpired => ContextExtractorError::AccessTokenExpired,
         _ => ContextExtractorError::InvalidAccessToken,
     })?;
@@ -89,7 +84,6 @@ pub type ContextExtractorResult = core::result::Result<Context, ContextExtractor
 
 #[derive(Clone, Serialize, Debug)]
 pub enum ContextExtractorError {
-    AccessTokenNotInHeader,
     AccessTokenExpired,
     InvalidAccessToken,
     ContextNotInRequestExtractor,

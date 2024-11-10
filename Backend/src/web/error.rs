@@ -31,7 +31,6 @@ pub enum Error {
     RefreshTokenExpired,
 
     // -- Refresh Request Errors
-    RefreshFailAccessTokenNotFound,
     RefreshFailInvalidAccessToken,
     RefreshFailInvalidRefreshToken,
     RefreshFailNoSessionFound,
@@ -133,7 +132,6 @@ impl Error {
             RefreshTokenExpired => (StatusCode::UNAUTHORIZED, ClientError::SESSION_EXPIRED),
 
             // -- Refresh Request Errors
-            RefreshFailAccessTokenNotFound => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
             RefreshFailInvalidAccessToken => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
             RefreshFailInvalidRefreshToken => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
             RefreshFailNoSessionFound => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
