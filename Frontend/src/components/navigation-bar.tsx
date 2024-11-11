@@ -17,6 +17,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import ProfileDropDown from "@/components/profile";
 
 function Navbar() {
   const [isOpen, setIsOpen] = createSignal(false);
@@ -128,6 +129,7 @@ function Navbar() {
         </div>
 
         <div class="flex items-center">
+          <ProfileDropDown />
           <ColourModeToggle />
           <Button
             variant="ghost"
