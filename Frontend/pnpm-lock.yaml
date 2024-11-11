@@ -21,8 +21,11 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       lucide-solid:
-        specifier: ^0.454.0
-        version: 0.454.0(solid-js@1.9.3)
+        specifier: ^0.456.0
+        version: 0.456.0(solid-js@1.9.3)
+      neverthrow:
+        specifier: ^8.1.1
+        version: 8.1.1
       solid-js:
         specifier: ^1.9.3
         version: 1.9.3
@@ -884,8 +887,8 @@ packages:
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
-  lucide-solid@0.454.0:
-    resolution: {integrity: sha512-+p90rTZhsAbMGZ7LW1x9VEgkPMXX/C24uXtgvN4+tHMp/EoCM3wTRSQ2URIt/fusN7yIk10aLeBE6PpoZXnaxQ==}
+  lucide-solid@0.456.0:
+    resolution: {integrity: sha512-GNpxCduirznNl6J0Xlc4chRGpmuPzcAzuD29Xki+kq/TxBu0L4wTUB/PC9HkRITzDidyKQ19j3yOdJrKQmYoTg==}
     peerDependencies:
       solid-js: ^1.4.7
 
@@ -914,6 +917,10 @@ packages:
     resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
+
+  neverthrow@8.1.1:
+    resolution: {integrity: sha512-DpbZ/UDI0B+TxJB1JysXSfi1++3YK2xLBqQLTlRN0b4zxlZ2MoiB+dKKV8dMRzt1fAFjRKDknXOVJgpl+a4Amw==}
+    engines: {node: '>=18'}
 
   node-releases@2.0.14:
     resolution: {integrity: sha512-y10wOWt8yZpqXmOgRo77WaHEmhYQYGNA6y421PKsKYWEK8aW+cqAphborZDhqfyKrbZEN92CN1X2KbafY2s7Yw==}
@@ -2010,7 +2017,7 @@ snapshots:
     dependencies:
       yallist: 3.1.1
 
-  lucide-solid@0.454.0(solid-js@1.9.3):
+  lucide-solid@0.456.0(solid-js@1.9.3):
     dependencies:
       solid-js: 1.9.3
 
@@ -2038,6 +2045,10 @@ snapshots:
       thenify-all: 1.6.0
 
   nanoid@3.3.7: {}
+
+  neverthrow@8.1.1:
+    optionalDependencies:
+      '@rollup/rollup-linux-x64-gnu': 4.24.4
 
   node-releases@2.0.14: {}
 

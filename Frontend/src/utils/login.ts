@@ -1,4 +1,5 @@
-import { ApiResult } from "@/types/result";
+import { err, ok, Result } from 'neverthrow';
+import { Error } from '@/types/error';
 import {
   UserLoginResponse,
   FacilityLoginResponse,
@@ -13,7 +14,7 @@ const BACKEND_PATH =
 export async function userLogin(
   icNumber: string,
   password: string
-): Promise<ApiResult<UserLoginResponse>> {
+): Promise<Result<UserLoginResponse, Error>> {
   try {
     const response = await fetch(`${BACKEND_PATH}/api/userlogin`, {
       method: "POST",
@@ -28,15 +29,15 @@ export async function userLogin(
     if (response.ok) {
       localStorage.setItem("accessToken", result.data.accessToken);
       localStorage.setItem("refreshToken", result.data.refreshToken);
-      return result as UserLoginResponse;
+      return ok(result as UserLoginResponse);
     }
     
     const parsedError = parseErrorResponse(result);
-    return parsedError;
+    return err(parsedError);
 
   } catch (error) {
     console.error("Error during user login:", error);
-    return { error: "UNKNOWN_ERROR" };
+    return err({ message: "UNKNOWN_ERROR" });
   }
 }
 
@@ -44,7 +45,7 @@ export async function userLogin(
 export async function facilityLogin(
   email: string,
   password: string
-): Promise<ApiResult<FacilityLoginResponse>> {
+): Promise<Result<FacilityLoginResponse, Error>> {
   try {
     const response = await fetch(`${BACKEND_PATH}/api/facilitylogin`, {
       method: "POST",
@@ -59,15 +60,15 @@ export async function facilityLogin(
     if (response.ok) {
       localStorage.setItem("accessToken", result.data.accessToken);
       localStorage.setItem("refreshToken", result.data.refreshToken);
-      return result as FacilityLoginResponse;
+      return ok(result as FacilityLoginResponse);
     }
     
     const parsedError = parseErrorResponse(result);
-    return parsedError;
+    return err(parsedError);
 
   } catch (error) {
     console.error("Error during facility login:", error);
-    return { error: "UNKNOWN_ERROR" };
+    return err({ message: "UNKNOWN_ERROR" });
   }
 }
 
@@ -75,7 +76,7 @@ export async function facilityLogin(
 export async function organiserLogin(
   email: string,
   password: string
-): Promise<ApiResult<OrganiserLoginResponse>> {
+): Promise<Result<OrganiserLoginResponse, Error>> {
   try {
     const response = await fetch(`${BACKEND_PATH}/api/organiserlogin`, {
       method: "POST",
@@ -90,15 +91,15 @@ export async function organiserLogin(
     if (response.ok) {
       localStorage.setItem("accessToken", result.data.accessToken);
       localStorage.setItem("refreshToken", result.data.refreshToken);
-      return result as OrganiserLoginResponse;
+      return ok(result as OrganiserLoginResponse);
     }
     
     const parsedError = parseErrorResponse(result);
-    return parsedError;
+    return err(parsedError);
 
   } catch (error) {
     console.error("Error during organiser login:", error);
-    return { error: "SERVICE_ERROR" };
+    return err({ message: "UNKNOWN_ERROR" });
   }
 }
 
@@ -106,7 +107,7 @@ export async function organiserLogin(
 export async function adminLogin(
   email: string,
   password: string
-): Promise<ApiResult<AdminLoginResponse>> {
+): Promise<Result<AdminLoginResponse, Error>> {
   try {
     const response = await fetch(`${BACKEND_PATH}/api/adminlogin`, {
       method: "POST",
@@ -121,14 +122,14 @@ export async function adminLogin(
     if (response.ok) {
       localStorage.setItem("accessToken", result.data.accessToken);
       localStorage.setItem("refreshToken", result.data.refreshToken);
-      return result as AdminLoginResponse;
+      return ok(result as AdminLoginResponse);
     }
     
     const parsedError = parseErrorResponse(result);
-    return parsedError;
+    return err(parsedError);
 
   } catch (error) {
     console.error("Error during admin login:", error);
-    return { error: "SERVICE_ERROR" };
+    return err({ message: "UNKNOWN_ERROR" });
   }
 }

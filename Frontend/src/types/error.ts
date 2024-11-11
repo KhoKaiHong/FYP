@@ -1,18 +1,18 @@
 type ClientError =
-  | { error: "USERNAME_NOT_FOUND" }
-  | { error: "INCORRECT_PASSWORD" }
-  | { error: "ACCESS_TOKEN_EXPIRED" }
-  | { error: "SESSION_EXPIRED" }
-  | { error: "INVALID_REQUEST" }
-  | { error: "NO_AUTH" }
-  | { error: "SERVICE_ERROR" }
-  | { error: "DUPLICATE_RECORD"; detail: string }
-  | { error: "PERMISSION_DENIED" };
+  | { message: "USERNAME_NOT_FOUND" }
+  | { message: "INCORRECT_PASSWORD" }
+  | { message: "ACCESS_TOKEN_EXPIRED" }
+  | { message: "SESSION_EXPIRED" }
+  | { message: "INVALID_REQUEST" }
+  | { message: "NO_AUTH" }
+  | { message: "SERVICE_ERROR" }
+  | { message: "DUPLICATE_RECORD"; detail: string }
+  | { message: "PERMISSION_DENIED" };
 
 // Type for the error response from the backend
 export interface ClientErrorResponse {
   error: {
-    message: ClientError["error"];
+    message: ClientError["message"];
     data: {
       req_uuid: string;
       detail?: any;
@@ -20,4 +20,4 @@ export interface ClientErrorResponse {
   };
 }
 
-export type Error = ClientError | { error: "UNKNOWN_ERROR" };
+export type Error = ClientError | { message: "UNKNOWN_ERROR" };

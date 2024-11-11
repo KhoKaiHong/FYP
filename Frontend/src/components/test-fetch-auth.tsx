@@ -1,5 +1,6 @@
 import { createSignal } from 'solid-js';
-import { fetchWithAuth } from '@/utils/fetch'; // Update the path based on your project structure
+import { fetchWithAuth } from '@/utils/fetch';
+ // Update the path based on your project structure
 
 function TestFetchButton() {
   const [result, setResult] = createSignal<string | null>(null);

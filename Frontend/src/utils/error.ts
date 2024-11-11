@@ -15,7 +15,7 @@ function isClientError(errorResponse: any): errorResponse is ClientErrorResponse
 // Function to parse any error response into a ClientError or UNKNOWN_ERROR
 export function parseErrorResponse(errorResponse: any): Error {
   if (!isClientError(errorResponse)) {
-    return { error: "UNKNOWN_ERROR" };
+    return { message: "UNKNOWN_ERROR" };
   }
 
   const { message, data } = errorResponse.error;
@@ -29,12 +29,12 @@ export function parseErrorResponse(errorResponse: any): Error {
     case "NO_AUTH":
     case "SERVICE_ERROR":
     case "PERMISSION_DENIED":
-      return { error: message };
+      return { message };
 
     case "DUPLICATE_RECORD":
-      return { error: message, detail: data.detail as string };
+      return { message, detail: data.detail as string };
 
     default:
-      return { error: "UNKNOWN_ERROR" };
+      return { message: "UNKNOWN_ERROR" };
   }
 }

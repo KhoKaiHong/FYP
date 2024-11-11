@@ -1,14 +1,16 @@
 import Navbar from "@/components/navigation-bar";
+import { useUser } from "@/context/userContext";
 
 function Home() {
+  const { user } = useUser();
+
   return (
     <div>
       <Navbar />
       <div class="p-8">
         <h1 class="text-3xl font-bold mb-4">Welcome Home</h1>
         <p class="text-gray-600 mb-4">
-          This is the home page of our Solid.js application. Feel free to
-          explore!
+          {JSON.stringify(user)}
         </p>
         <p class="text-gray-600 mb-4">
           This is the home page of our Solid.js application. Feel free to

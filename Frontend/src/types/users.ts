@@ -41,3 +41,5 @@ export type Admin = {
   email: string;
   name: string;
 };
+
+export type Users = User | Facility | Organiser | Admin;

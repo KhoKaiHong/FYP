@@ -1,45 +1,106 @@
-import { createSignal } from 'solid-js';
-import { userLogin, facilityLogin, organiserLogin, adminLogin } from '@/utils/login';
-
+import { createEffect, createSignal } from "solid-js";
+import {
+  userLogin,
+  facilityLogin,
+  organiserLogin,
+  adminLogin,
+} from "@/utils/login";
+import {
+  UserLoginResponse,
+  FacilityLoginResponse,
+  OrganiserLoginResponse,
+  AdminLoginResponse,
+} from "@/types/login";
+import { useUser } from "@/context/userContext";
 
 function LoginButtons() {
-  const [icNumber, setIcNumber] = createSignal('');
-  const [email, setEmail] = createSignal('');
-  const [password, setPassword] = createSignal('');
+  const [icNumber, setIcNumber] = createSignal("");
+  const [email, setEmail] = createSignal("");
+  const [password, setPassword] = createSignal("");
   const [loginResult, setLoginResult] = createSignal<string | null>(null);
 
+  const { user, setUserStore, refreshUser } = useUser();
+
   const handleUserLogin = async () => {
+    setUserStore({ isLoading: true });
     try {
-      const result = await userLogin(icNumber(), password());
+      const response = await userLogin(icNumber(), password());
+      if (response.isOk()) {
+        setUserStore({
+          isAuthenticated: true,
+          isLoading: false,
+          user: response.value.data.userDetails,
+          error: null,
+          role: "User",
+        });
+        setLoginResult(JSON.stringify(user));
+      } else {
+        setLoginResult(JSON.stringify(response.error));
+      }
     } catch (error) {
-      setLoginResult('User login failed');
+      setLoginResult("User login failed");
     }
   };
 
   const handleFacilityLogin = async () => {
+    setUserStore("isLoading", true);
     try {
-      const result = await facilityLogin(email(), password());
-      setLoginResult('Facility login successful!');
+      const response = await facilityLogin(email(), password());
+      if (response.isOk()) {
+        setUserStore({
+          isAuthenticated: true,
+          isLoading: false,
+          user: response.value.data.facilityDetails,
+          error: null,
+          role: "Facility",
+        });
+        setLoginResult(JSON.stringify(user));
+      } else {
+        setLoginResult(JSON.stringify(response.error));
+      }
     } catch (error) {
-      setLoginResult('Facility login failed');
+      setLoginResult("Facility login failed");
     }
   };
 
   const handleOrganiserLogin = async () => {
+    setUserStore("isLoading", true);
     try {
-      const result = await organiserLogin(email(), password());
-      setLoginResult('Organiser login successful!');
+      const response = await organiserLogin(email(), password());
+      if (response.isOk()) {
+        setUserStore({
+          isAuthenticated: true,
+          isLoading: false,
+          user: response.value.data.organiserDetails,
+          error: null,
+          role: "Organiser",
+        });
+        setLoginResult(JSON.stringify(user));
+      } else {
+        setLoginResult(JSON.stringify(response.error));
+      }
     } catch (error) {
-      setLoginResult('Organiser login failed');
+      setLoginResult("Organiser login failed");
     }
   };
 
   const handleAdminLogin = async () => {
     try {
-      const result = await adminLogin(email(), password());
-      setLoginResult('Admin login successful!');
+      const response = await adminLogin(email(), password());
+      if (response.isOk()) {
+        setUserStore({
+          isAuthenticated: true,
+          isLoading: false,
+          user: response.value.data.adminDetails,
+          error: null,
+          role: "Admin",
+        });
+        setLoginResult(JSON.stringify(user));
+      } else {
+        setLoginResult(JSON.stringify(response.error));
+      }
     } catch (error) {
-      setLoginResult('Admin login failed');
+      setLoginResult("Admin login failed");
     }
   };
 
@@ -63,15 +124,17 @@ function LoginButtons() {
         onInput={(e) => setPassword(e.currentTarget.value)}
         value={password()}
       />
-      
+
       <button onClick={handleUserLogin}>User Login</button>
       <button onClick={handleFacilityLogin}>Facility Login</button>
       <button onClick={handleOrganiserLogin}>Organiser Login</button>
       <button onClick={handleAdminLogin}>Admin Login</button>
-      
+      <button onClick={refreshUser}>Refetch User</button>
+
       {loginResult() && <p>{loginResult()}</p>}
+      <p>{JSON.stringify(user)}</p>
     </div>
   );
-};
+}
 
 export default LoginButtons;
