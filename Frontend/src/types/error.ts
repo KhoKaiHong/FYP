@@ -21,4 +21,4 @@ export interface ClientErrorResponse {
   };
 }
 
-export type Error = ClientError | { message: "UNKNOWN_ERROR" };
+export type AppError = ClientError | { message: "UNKNOWN_ERROR" };

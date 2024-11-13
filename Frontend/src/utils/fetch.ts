@@ -1,6 +1,6 @@
-import { Error } from "@/types/error";
+import { AppError } from "@/types/error";
 import { parseErrorResponse } from "@/utils/error";
-import { err, ok, Result } from 'neverthrow';
+import { err, ok, Result } from "neverthrow";
 
 const BACKEND_PATH =
   import.meta.env.VITE_BACKEND_PATH || "http://localhost:3001";
@@ -13,7 +13,7 @@ export async function fetchWithAuth<T = unknown>({
   path: string;
   method?: string;
   body?: unknown;
-}): Promise<Result<T, Error>> {
+}): Promise<Result<T, AppError>> {
   // Check if accessToken and refreshToken are in localStorage
   const accessToken = localStorage.getItem("accessToken");
   const refreshToken = localStorage.getItem("refreshToken");
@@ -23,7 +23,7 @@ export async function fetchWithAuth<T = unknown>({
   }
 
   // Function to handle API calls with the accessToken
-  const makeRequest = async (token: string): Promise<Result<T, Error>> => {
+  const makeRequest = async (token: string): Promise<Result<T, AppError>> => {
     try {
       const response = await fetch(`${BACKEND_PATH}${path}`, {
         method,
@@ -50,7 +50,8 @@ export async function fetchWithAuth<T = unknown>({
         // If access token expired, try to refresh it
         return await handleTokenRefresh(token, refreshToken);
       } else if (
-        (response.status === 401 && parsedError.message === "SESSION_EXPIRED") ||
+        (response.status === 401 &&
+          parsedError.message === "SESSION_EXPIRED") ||
         (response.status === 403 && parsedError.message === "NO_AUTH")
       ) {
         localStorage.removeItem("accessToken");
@@ -68,7 +69,7 @@ export async function fetchWithAuth<T = unknown>({
   const handleTokenRefresh = async (
     accessToken: string,
     refreshToken: string
-  ): Promise<Result<T, Error>> => {
+  ): Promise<Result<T, AppError>> => {
     try {
       const refreshResponse = await fetch(`${BACKEND_PATH}/api/refresh`, {
         method: "POST",

@@ -1,11 +1,11 @@
 import { err, ok, Result } from "neverthrow";
-import { Error } from "@/types/error";
+import { AppError } from "@/types/error";
 import { LogoutResponse } from "@/types/logout";
 import { fetchWithAuth } from "@/utils/fetch";
 
 export async function logout(
   refreshToken: string
-): Promise<Result<LogoutResponse, Error>> {
+): Promise<Result<LogoutResponse, AppError>> {
   try {
     const result = await fetchWithAuth<LogoutResponse>({
       path: "/api/logout",
@@ -20,7 +20,6 @@ export async function logout(
     } else {
       return err(result.error);
     }
-
   } catch (error) {
     console.error("Error during user logout:", error);
     return err({ message: "UNKNOWN_ERROR" });

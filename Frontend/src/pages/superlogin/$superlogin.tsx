@@ -75,9 +75,9 @@ function SuperLogin() {
       }
       const response = await facilityLogin(email(), password());
       if (response.isOk()) {
-        setUser(response.value.data.facilityDetails);
-        setRole("Facility");
         setIsAuthenticated(true);
+        setRole("Facility");
+        setUser(response.value.data.facilityDetails);
         setError(null);
         navigate("/");
       } else {
@@ -110,9 +110,9 @@ function SuperLogin() {
       }
       const response = await adminLogin(email(), password());
       if (response.isOk()) {
-        setUser(response.value.data.adminDetails);
-        setRole("Admin");
         setIsAuthenticated(true);
+        setRole("Admin");
+        setUser(response.value.data.adminDetails);
         setError(null);
         navigate("/");
       } else {

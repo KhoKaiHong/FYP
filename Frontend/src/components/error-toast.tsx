@@ -6,9 +6,9 @@ import {
 } from "@/components/ui/toast";
 import { toaster } from "@kobalte/core";
 import { getErrorMessage } from "@/utils/error";
-import { Error } from "@/types/error";
+import { AppError } from "@/types/error";
 
-function showErrorToast(error: Error) {
+function showErrorToast(error: AppError) {
   toaster.show((props) => (
     <Toast toastId={props.toastId} variant="destructive">
       <ToastContent>

@@ -4,47 +4,56 @@ import {
   createSignal,
   Accessor,
   Setter,
+  JSXElement,
 } from "solid-js";
 import { createResource } from "solid-js";
 import { fetchWithAuth } from "@/utils/fetch";
 import { createEffect } from "solid-js";
 import { Users } from "@/types/users";
-import { Error } from "@/types/error";
+import { AppError } from "@/types/error";
 import { GetCredentialsResponse } from "@/types/get-credentials";
-import { Result } from "neverthrow";
+import { Result, err } from "neverthrow";
 import { logout } from "@/routes/logout";
 import showErrorToast from "@/components/error-toast";
 
 type Role = "User" | "Facility" | "Organiser" | "Admin";
 
 type UserContextType = {
-  user: Accessor<Users>;
-  role: Accessor<Role>;
+  user: Accessor<Users | null>;
+  role: Accessor<Role | null>;
   isAuthenticated: Accessor<boolean>;
-  error: Accessor<Error>;
+  error: Accessor<AppError | null>;
   isLoading: Accessor<boolean>;
-  setUser: Setter<Users>;
-  setRole: Setter<Role>;
+  setUser: Setter<Users | null>;
+  setRole: Setter<Role | null>;
   setIsAuthenticated: Setter<boolean>;
-  setError: Setter<Error>;
+  setError: Setter<AppError | null>;
   refreshUser: () =>
-    | Result<GetCredentialsResponse, Error>
-    | Promise<Result<GetCredentialsResponse, Error>>;
+    | Result<GetCredentialsResponse, AppError>
+    | Promise<Result<GetCredentialsResponse, AppError> | undefined>
+    | undefined
+    | null;
   logout: () => Promise<void>;
 };
 
 const UserContext = createContext<UserContextType>();
 
-export function UserProvider(props) {
+type UserProviderProps = {
+  children?: JSXElement;
+};
+
+export function UserProvider(props: UserProviderProps) {
   const [user, setUser] = createSignal<Users | null>(null);
   const [role, setRole] = createSignal<Role | null>(null);
   const [isAuthenticated, setIsAuthenticated] = createSignal(
     !!localStorage.getItem("accessToken")
   );
-  const [error, setError] = createSignal<Error | null>(null);
+  const [error, setError] = createSignal<AppError | null>(null);
   const [isLoading, setIsLoading] = createSignal(false);
 
-  async function fetchUser(): Promise<Result<GetCredentialsResponse, Error>> {
+  async function fetchUser(): Promise<
+    Result<GetCredentialsResponse, AppError>
+  > {
     console.log("fetchUserData function called");
 
     try {
@@ -54,7 +63,8 @@ export function UserProvider(props) {
       });
 
       return result;
-    } catch (err) {
+    } catch (error) {
+      console.error("Error during user fetch:", error);
       return err({ message: "UNKNOWN_ERROR" });
     }
   }
@@ -65,67 +75,86 @@ export function UserProvider(props) {
   );
 
   createEffect(() => {
-    if (userData.error) {
-      setError({ message: "UNKNOWN_ERROR" });
-      showErrorToast({ message: "UNKNOWN_ERROR" });
-    }
-
     if (userData.loading) {
       console.log("userData.loading");
       setIsLoading(true);
-    } else {
-      console.log("userData.loaded");
-      setIsLoading(false);
+      return;
     }
 
-    if (userData()) {
-      userData().match(
-        (response) => {
-          if ("userDetails" in response.data) {
-            setUser(response.data.userDetails);
-            setRole("User");
-            setIsAuthenticated(true);
-            setError(null);
-          } else if ("facilityDetails" in response.data) {
-            setUser(response.data.facilityDetails);
-            setRole("Facility");
-            setIsAuthenticated(true);
-            setError(null);
-          } else if ("organiserDetails" in response.data) {
-            setUser(response.data.organiserDetails);
-            setRole("Organiser");
-            setIsAuthenticated(true);
-            setError(null);
-          } else if ("adminDetails" in response.data) {
-            setUser(response.data.adminDetails);
-            setRole("Admin");
-            setIsAuthenticated(true);
-            setError(null);
-          } else {
-            setError({ message: "UNKNOWN_ERROR" });
-            showErrorToast({ message: "UNKNOWN_ERROR" });
-          }
-        },
-        (error) => {
-          if (
-            error.message === "NO_AUTH" ||
-            error.message === "SESSION_EXPIRED"
-          ) {
-            setUser(null);
-            setRole(null);
-            setIsAuthenticated(false);
-          }
-          setError(error);
-          showErrorToast(error);
-          console.error("Error during user fetch:", error);
-        }
-      );
+    setIsLoading(false);
+    console.log("userData.loaded");
+
+    if (userData.error) {
+      setError({ message: "UNKNOWN_ERROR" });
+      showErrorToast({ message: "UNKNOWN_ERROR" });
+      return;
     }
+
+    const data = userData();
+    if (!data) {
+      setIsAuthenticated(false);
+      setRole(null);
+      setUser(null);
+      console.log("data is null");
+      return;
+    }
+
+    data.match(
+      (response) => {
+        if ("userDetails" in response.data) {
+          setIsAuthenticated(true);
+          setRole("User");
+          setUser(response.data.userDetails);
+          setError(null);
+        } else if ("facilityDetails" in response.data) {
+          setIsAuthenticated(true);
+          setRole("Facility");
+          setUser(response.data.facilityDetails);
+          setError(null);
+        } else if ("organiserDetails" in response.data) {
+          setIsAuthenticated(true);
+          setRole("Organiser");
+          setUser(response.data.organiserDetails);
+          setError(null);
+        } else if ("adminDetails" in response.data) {
+          setIsAuthenticated(true);
+          setRole("Admin");
+          setUser(response.data.adminDetails);
+          setError(null);
+        } else {
+          setError({ message: "UNKNOWN_ERROR" });
+          showErrorToast({ message: "UNKNOWN_ERROR" });
+        }
+      },
+      (error) => {
+        if (
+          error.message === "NO_AUTH" ||
+          error.message === "SESSION_EXPIRED"
+        ) {
+          setIsAuthenticated(false);
+          setRole(null);
+          setUser(null);
+        }
+        setError(error);
+        showErrorToast(error);
+        console.error("Error during user fetch:", error);
+      }
+    );
   });
 
   async function performLogout() {
     try {
       const refreshToken = localStorage.getItem("refreshToken");
+      if (!refreshToken) {
+        localStorage.removeItem("accessToken");
+        setIsAuthenticated(false);
+        setRole(null);
+        setUser(null);
+        setError({ message: "NO_AUTH" });
+        showErrorToast({ message: "NO_AUTH" });
+        return;
+      }
+
       const result = await logout(refreshToken);
 
       if (result.isOk()) {
@@ -173,5 +202,11 @@ export function UserProvider(props) {
 }
 
 export function useUser() {
-  return useContext(UserContext);
+  const context = useContext(UserContext);
+  if (!context) {
+    showErrorToast({ message: "UNKNOWN_ERROR" });
+    console.error("Cannot find UserContext");
+    throw new Error("Cannot find UserContext");
+  }
+  return context;
 }

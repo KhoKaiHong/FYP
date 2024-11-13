@@ -1,4 +1,4 @@
-import { Error, ClientErrorResponse } from "@/types/error";
+import { AppError, ClientErrorResponse } from "@/types/error";
 
 // Type guard to check if an error response is a client error from backend
 function isClientError(
@@ -22,7 +22,7 @@ function isClientError(
 }
 
 // Function to parse any error response into a ClientError or UNKNOWN_ERROR
-export function parseErrorResponse(errorResponse: unknown): Error {
+export function parseErrorResponse(errorResponse: unknown): AppError {
   if (!isClientError(errorResponse)) {
     return { message: "UNKNOWN_ERROR" };
   }
@@ -49,7 +49,7 @@ export function parseErrorResponse(errorResponse: unknown): Error {
   }
 }
 
-export function getErrorMessage(error: Error): string {
+export function getErrorMessage(error: AppError): string {
   switch (error.message) {
     case "EMAIL_NOT_FOUND":
       return "Email not found.";
@@ -77,4 +77,3 @@ export function getErrorMessage(error: Error): string {
       return "An unspecified error occurred.";
   }
 }
-

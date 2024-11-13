@@ -1,5 +1,5 @@
-import { err, ok, Result } from 'neverthrow';
-import { Error } from '@/types/error';
+import { err, ok, Result } from "neverthrow";
+import { AppError } from "@/types/error";
 import {
   UserLoginResponse,
   FacilityLoginResponse,
@@ -14,7 +14,7 @@ const BACKEND_PATH =
 export async function userLogin(
   icNumber: string,
   password: string
-): Promise<Result<UserLoginResponse, Error>> {
+): Promise<Result<UserLoginResponse, AppError>> {
   try {
     const response = await fetch(`${BACKEND_PATH}/api/userlogin`, {
       method: "POST",
@@ -31,10 +31,9 @@ export async function userLogin(
       localStorage.setItem("refreshToken", result.data.refreshToken);
       return ok(result as UserLoginResponse);
     }
-    
+
     const parsedError = parseErrorResponse(result);
     return err(parsedError);
-
   } catch (error) {
     console.error("Error during user login:", error);
     return err({ message: "UNKNOWN_ERROR" });
@@ -45,7 +44,7 @@ export async function userLogin(
 export async function facilityLogin(
   email: string,
   password: string
-): Promise<Result<FacilityLoginResponse, Error>> {
+): Promise<Result<FacilityLoginResponse, AppError>> {
   try {
     const response = await fetch(`${BACKEND_PATH}/api/facilitylogin`, {
       method: "POST",
@@ -62,10 +61,9 @@ export async function facilityLogin(
       localStorage.setItem("refreshToken", result.data.refreshToken);
       return ok(result as FacilityLoginResponse);
     }
-    
+
     const parsedError = parseErrorResponse(result);
     return err(parsedError);
-
   } catch (error) {
     console.error("Error during facility login:", error);
     return err({ message: "UNKNOWN_ERROR" });
@@ -76,7 +74,7 @@ export async function facilityLogin(
 export async function organiserLogin(
   email: string,
   password: string
-): Promise<Result<OrganiserLoginResponse, Error>> {
+): Promise<Result<OrganiserLoginResponse, AppError>> {
   try {
     const response = await fetch(`${BACKEND_PATH}/api/organiserlogin`, {
       method: "POST",
@@ -93,10 +91,9 @@ export async function organiserLogin(
       localStorage.setItem("refreshToken", result.data.refreshToken);
       return ok(result as OrganiserLoginResponse);
     }
-    
+
     const parsedError = parseErrorResponse(result);
     return err(parsedError);
-
   } catch (error) {
     console.error("Error during organiser login:", error);
     return err({ message: "UNKNOWN_ERROR" });
@@ -107,7 +104,7 @@ export async function organiserLogin(
 export async function adminLogin(
   email: string,
   password: string
-): Promise<Result<AdminLoginResponse, Error>> {
+): Promise<Result<AdminLoginResponse, AppError>> {
   try {
     const response = await fetch(`${BACKEND_PATH}/api/adminlogin`, {
       method: "POST",
@@ -124,10 +121,9 @@ export async function adminLogin(
       localStorage.setItem("refreshToken", result.data.refreshToken);
       return ok(result as AdminLoginResponse);
     }
-    
+
     const parsedError = parseErrorResponse(result);
     return err(parsedError);
-
   } catch (error) {
     console.error("Error during admin login:", error);
     return err({ message: "UNKNOWN_ERROR" });

@@ -75,9 +75,9 @@ function Login() {
       }
       const response = await userLogin(id(), password());
       if (response.isOk()) {
-        setUser(response.value.data.userDetails);
-        setRole("User");
         setIsAuthenticated(true);
+        setRole("User");
+        setUser(response.value.data.userDetails);
         setError(null);
         navigate("/");
       } else {
@@ -110,9 +110,9 @@ function Login() {
       }
       const response = await organiserLogin(id(), password());
       if (response.isOk()) {
-        setUser(response.value.data.organiserDetails);
-        setRole("Organiser");
         setIsAuthenticated(true);
+        setRole("Organiser");
+        setUser(response.value.data.organiserDetails);
         setError(null);
         navigate("/");
       } else {
