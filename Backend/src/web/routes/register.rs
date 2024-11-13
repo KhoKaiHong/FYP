@@ -46,7 +46,9 @@ async fn user_register_handler(
     UserModelController::create(&context, &app_state.model_manager, registered_user).await?;
 
     let body = Json(json!({
-        "data": { }
+        "data": {
+            "success": true
+        }
     }));
 
     Ok(body)
@@ -88,7 +90,9 @@ async fn facility_register_handler(
         .await?;
 
     let body = Json(json!({
-        "data": { }
+        "data": {
+            "success": true
+        }
     }));
 
     Ok(body)
@@ -126,7 +130,9 @@ async fn organiser_register_handler(
         .await?;
 
     let body = Json(json!({
-        "data": { }
+        "data": {
+            "success": true
+        }
     }));
 
     Ok(body)
@@ -160,7 +166,9 @@ async fn admin_register_handler(
     AdminModelController::create(&context, &app_state.model_manager, registered_admin).await?;
 
     let body = Json(json!({
-        "data": { }
+        "data": {
+            "success": true
+        }
     }));
 
     Ok(body)

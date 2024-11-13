@@ -44,7 +44,7 @@ async fn user_login_handler(
             model::Error::EntityNotFound {
                 entity: "user",
                 field: StringError(ref ic_number),
-            } if ic_number == &payload.ic_number => Error::LoginFailUsernameNotFound,
+            } if ic_number == &payload.ic_number => Error::LoginFailIcNotFound,
             _ => Error::ModelError(err),
         })?;
 
@@ -101,7 +101,7 @@ async fn facility_login_handler(
             model::Error::EntityNotFound {
                 entity: "facility",
                 field: StringError(ref email),
-            } if email == &payload.email => Error::LoginFailUsernameNotFound,
+            } if email == &payload.email => Error::LoginFailEmailNotFound,
             _ => Error::ModelError(err),
         })?;
 
@@ -167,7 +167,7 @@ async fn organiser_login_handler(
                 model::Error::EntityNotFound {
                     entity: "organiser",
                     field: StringError(ref email),
-                } if email == &payload.email => Error::LoginFailUsernameNotFound,
+                } if email == &payload.email => Error::LoginFailEmailNotFound,
                 _ => Error::ModelError(err),
             })?;
 
@@ -229,7 +229,7 @@ async fn admin_login_handler(
                 model::Error::EntityNotFound {
                     entity: "admin",
                     field: StringError(ref email),
-                } if email == &payload.email => Error::LoginFailUsernameNotFound,
+                } if email == &payload.email => Error::LoginFailEmailNotFound,
                 _ => Error::ModelError(err),
             })?;
 

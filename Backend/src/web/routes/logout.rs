@@ -51,7 +51,9 @@ async fn logout_handler(
     }
 
     let body = Json(json!({
-        "data": { }
+        "data": {
+            "success": true
+        }
     }));
 
     Ok(body)

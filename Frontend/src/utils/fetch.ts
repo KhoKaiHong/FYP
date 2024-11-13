@@ -6,14 +6,14 @@ import { err, ok, Result } from 'neverthrow';
 const BACKEND_PATH =
   import.meta.env.VITE_BACKEND_PATH || "http://localhost:3001";
 
-export async function fetchWithAuth<T = any>({
+export async function fetchWithAuth<T = unknown>({
   path,
   method = "GET",
   body = null,
 }: {
   path: string;
   method?: string;
-  body?: any;
+  body?: unknown;
 }): Promise<Result<T, Error>> {
   // Check if accessToken and refreshToken are in localStorage
   const accessToken = localStorage.getItem("accessToken");

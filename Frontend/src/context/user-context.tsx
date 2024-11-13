@@ -12,6 +12,8 @@ import { Users } from "@/types/users";
 import { Error } from "@/types/error";
 import { GetCredentialsResponse } from "@/types/get-credentials";
 import { Result } from "neverthrow";
+import { logout } from "@/routes/logout";
+import showErrorToast from "@/components/error-toast";
 
 type Role = "User" | "Facility" | "Organiser" | "Admin";
 
@@ -28,6 +30,7 @@ type UserContextType = {
   refreshUser: () =>
     | Result<GetCredentialsResponse, Error>
     | Promise<Result<GetCredentialsResponse, Error>>;
+  logout: () => Promise<void>;
 };
 
 const UserContext = createContext<UserContextType>();
@@ -64,6 +67,7 @@ export function UserProvider(props) {
   createEffect(() => {
     if (userData.error) {
       setError({ message: "UNKNOWN_ERROR" });
+      showErrorToast({ message: "UNKNOWN_ERROR" });
     }
 
     if (userData.loading) {
@@ -99,6 +103,7 @@ export function UserProvider(props) {
             setError(null);
           } else {
             setError({ message: "UNKNOWN_ERROR" });
+            showErrorToast({ message: "UNKNOWN_ERROR" });
           }
         },
         (error) => {
@@ -111,10 +116,42 @@ export function UserProvider(props) {
             setIsAuthenticated(false);
           }
           setError(error);
+          showErrorToast(error);
+          console.error("Error during user fetch:", error);
         }
       );
     }
   });
+
+  async function performLogout() {
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+      const result = await logout(refreshToken);
+
+      if (result.isOk()) {
+        setIsAuthenticated(false);
+        setRole(null);
+        setUser(null);
+        setError(null);
+      } else {
+        setError(result.error);
+
+        if (
+          result.error.message === "NO_AUTH" ||
+          result.error.message === "SESSION_EXPIRED"
+        ) {
+          setIsAuthenticated(false);
+          setRole(null);
+          setUser(null);
+        }
+        showErrorToast(result.error);
+      }
+    } catch (err) {
+      setError({ message: "UNKNOWN_ERROR" });
+      showErrorToast({ message: "UNKNOWN_ERROR" });
+      console.error("Error during user logout:", err);
+    }
+  }
 
   const value = {
     user,
@@ -127,6 +164,7 @@ export function UserProvider(props) {
     setIsAuthenticated,
     setError,
     refreshUser: refetch,
+    logout: performLogout,
   };
 
   return (

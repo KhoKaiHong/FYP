@@ -1,4 +1,3 @@
-// LogoutButton.tsx
 import { JSX } from "solid-js";
 import { logout } from "@/routes/logout";
 import { Component } from "solid-js";
@@ -9,7 +8,8 @@ type LogoutButtonProps = {
 };
 
 const LogoutButton: Component<LogoutButtonProps> = (props) => {
-  let refreshToken = localStorage.getItem("refreshToken");
+  const refreshToken = localStorage.getItem("refreshToken");
+  
   const handleLogout = async () => {
     await logout(refreshToken);
     props.onLogout?.();

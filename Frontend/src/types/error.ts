@@ -1,5 +1,6 @@
 type ClientError =
-  | { message: "USERNAME_NOT_FOUND" }
+  | { message: "EMAIL_NOT_FOUND" }
+  | { message: "IC_NOT_FOUND" }
   | { message: "INCORRECT_PASSWORD" }
   | { message: "ACCESS_TOKEN_EXPIRED" }
   | { message: "SESSION_EXPIRED" }
@@ -15,7 +16,7 @@ export interface ClientErrorResponse {
     message: ClientError["message"];
     data: {
       req_uuid: string;
-      detail?: any;
+      detail?: unknown;
     };
   };
 }

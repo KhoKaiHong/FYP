@@ -23,69 +23,69 @@ import {
   TextFieldLabel,
   TextFieldRoot,
 } from "@/components/ui/text-field";
-import { userLogin, organiserLogin } from "@/routes/login";
+import { facilityLogin, adminLogin } from "@/routes/login";
 import { createSignal } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { getErrorMessage } from "@/utils/error";
 import showErrorToast from "@/components/error-toast";
 
-function Login() {
+function SuperLogin() {
   const { setUser, setRole, setIsAuthenticated, setError } = useUser();
   const navigate = useNavigate();
 
-  const [id, setId] = createSignal("");
+  const [email, setEmail] = createSignal("");
   const [password, setPassword] = createSignal("");
 
-  const [userIcError, setUserIcError] = createSignal("");
-  const [userPasswordError, setUserPasswordError] = createSignal("");
+  const [facilityEmailError, setFacilityEmailError] = createSignal("");
+  const [facilityPasswordError, setFacilityPasswordError] = createSignal("");
 
-  const [organiserEmailError, setOrganiserEmailError] = createSignal("");
-  const [organiserPasswordError, setOrganiserPasswordError] = createSignal("");
+  const [adminEmailError, setAdminEmailError] = createSignal("");
+  const [adminPasswordError, setAdminPasswordError] = createSignal("");
 
-  function handleUserIcChange(ic: string) {
-    setUserIcError("");
-    setId(ic);
+  function handleFacilityEmailChange(email: string) {
+    setFacilityEmailError("");
+    setEmail(email);
   }
 
-  function handleUserPasswordChange(password: string) {
-    setUserPasswordError("");
+  function handleFacilityPasswordChange(password: string) {
+    setFacilityPasswordError("");
     setPassword(password);
   }
 
-  function handleOrganiserEmailChange(email: string) {
-    setOrganiserEmailError("");
-    setId(email);
+  function handleAdminEmailChange(email: string) {
+    setAdminEmailError("");
+    setEmail(email);
   }
 
-  function handleOrganiserPasswordChange(password: string) {
-    setOrganiserPasswordError("");
+  function handleAdminPasswordChange(password: string) {
+    setAdminPasswordError("");
     setPassword(password);
   }
 
-  async function handleUserLogin() {
+  async function handleFacilityLogin() {
     try {
-      if (id() === "") {
-        setUserIcError("Please enter your IC Number");
+      if (email() === "") {
+        setFacilityEmailError("Please enter your email");
       }
       if (password() === "") {
-        setUserPasswordError("Please enter your password");
+        setFacilityPasswordError("Please enter your password");
       }
-      if (id() === "" || password() === "") {
+      if (email() === "" || password() === "") {
         return;
       }
-      const response = await userLogin(id(), password());
+      const response = await facilityLogin(email(), password());
       if (response.isOk()) {
-        setUser(response.value.data.userDetails);
-        setRole("User");
+        setUser(response.value.data.facilityDetails);
+        setRole("Facility");
         setIsAuthenticated(true);
         setError(null);
         navigate("/");
       } else {
         setError(response.error);
-        if (response.error.message === "IC_NOT_FOUND") {
-          setUserIcError(getErrorMessage(response.error));
+        if (response.error.message === "EMAIL_NOT_FOUND") {
+          setFacilityEmailError(getErrorMessage(response.error));
         } else if (response.error.message === "INCORRECT_PASSWORD") {
-          setUserPasswordError(getErrorMessage(response.error));
+          setFacilityPasswordError(getErrorMessage(response.error));
         } else {
           showErrorToast(response.error);
         }
@@ -97,30 +97,30 @@ function Login() {
     }
   }
 
-  async function handleOrganiserLogin() {
+  async function handleAdminLogin() {
     try {
-      if (id() === "") {
-        setOrganiserEmailError("Please enter your email");
+      if (email() === "") {
+        setAdminEmailError("Please enter your email");
       }
       if (password() === "") {
-        setOrganiserPasswordError("Please enter your password");
+        setAdminPasswordError("Please enter your password");
       }
-      if (id() === "" || password() === "") {
+      if (email() === "" || password() === "") {
         return;
       }
-      const response = await organiserLogin(id(), password());
+      const response = await adminLogin(email(), password());
       if (response.isOk()) {
-        setUser(response.value.data.organiserDetails);
-        setRole("Organiser");
+        setUser(response.value.data.adminDetails);
+        setRole("Admin");
         setIsAuthenticated(true);
         setError(null);
         navigate("/");
       } else {
         setError(response.error);
         if (response.error.message === "EMAIL_NOT_FOUND") {
-          setOrganiserEmailError(getErrorMessage(response.error));
+          setAdminEmailError(getErrorMessage(response.error));
         } else if (response.error.message === "INCORRECT_PASSWORD") {
-          setOrganiserPasswordError(getErrorMessage(response.error));
+          setAdminPasswordError(getErrorMessage(response.error));
         } else {
           showErrorToast(response.error);
         }
@@ -139,100 +139,100 @@ function Login() {
       <div class="flex h-[calc(100dvh-4rem)] justify-center items-center">
         <div class="w-full max-w-4xl px-8">
           <Tabs
-            defaultValue="user"
+            defaultValue="facility"
             onChange={() => {
-              setId("");
+              setEmail("");
               setPassword("");
-              setUserIcError("");
-              setUserPasswordError("");
-              setOrganiserEmailError("");
-              setOrganiserPasswordError("");
+              setFacilityEmailError("");
+              setFacilityPasswordError("");
+              setAdminEmailError("");
+              setAdminPasswordError("");
             }}
           >
             <TabsList>
-              <TabsTrigger value="user">User</TabsTrigger>
-              <TabsTrigger value="organiser">Event Organiser</TabsTrigger>
+              <TabsTrigger value="facility">Blood Collection Facility</TabsTrigger>
+              <TabsTrigger value="admin">Admin</TabsTrigger>
               <TabsIndicator />
             </TabsList>
-            <TabsContent value="user">
+            <TabsContent value="facility">
               <Card>
                 <CardHeader>
-                  <CardTitle>User Login</CardTitle>
-                  <CardDescription>Login as a user here.</CardDescription>
+                  <CardTitle>Blood Collection Facility Login</CardTitle>
+                  <CardDescription>Login as a blood collection facility here.</CardDescription>
                 </CardHeader>
                 <CardContent class="space-y-2">
                   <TextFieldRoot
                     class="space-y-1"
-                    validationState={userIcError() === "" ? "valid" : "invalid"}
-                    value={id()}
-                    onChange={handleUserIcChange}
+                    validationState={facilityEmailError() === "" ? "valid" : "invalid"}
+                    value={email()}
+                    onChange={handleFacilityEmailChange}
                   >
-                    <TextFieldLabel>IC Number</TextFieldLabel>
-                    <TextField placeholder="e.g. 123456-78-9012" />
+                    <TextFieldLabel>Email Address</TextFieldLabel>
+                    <TextField type="email" />
                     <TextFieldErrorMessage>
-                      {userIcError()}
+                      {facilityEmailError()}
                     </TextFieldErrorMessage>
                   </TextFieldRoot>
                   <TextFieldRoot
                     class="space-y-1"
                     validationState={
-                      userPasswordError() === "" ? "valid" : "invalid"
+                      facilityPasswordError() === "" ? "valid" : "invalid"
                     }
                     value={password()}
-                    onChange={handleUserPasswordChange}
+                    onChange={handleFacilityPasswordChange}
                   >
                     <TextFieldLabel>Password</TextFieldLabel>
                     <TextField type="password" />
                     <TextFieldErrorMessage>
-                      {userPasswordError()}
+                      {facilityPasswordError()}
                     </TextFieldErrorMessage>
                   </TextFieldRoot>
                 </CardContent>
                 <CardFooter>
-                  <Button onClick={handleUserLogin}>Log In</Button>
+                  <Button onClick={handleFacilityLogin}>Log In</Button>
                 </CardFooter>
               </Card>
             </TabsContent>
-            <TabsContent value="organiser">
+            <TabsContent value="admin">
               <Card>
                 <CardHeader>
-                  <CardTitle>Event Organiser Login</CardTitle>
+                  <CardTitle>Admin Login</CardTitle>
                   <CardDescription>
-                    Login as an event organiser here.
+                    Login as an admin here.
                   </CardDescription>
                 </CardHeader>
                 <CardContent class="space-y-2">
                   <TextFieldRoot
                     class="space-y-1"
                     validationState={
-                      organiserEmailError() === "" ? "valid" : "invalid"
+                      adminEmailError() === "" ? "valid" : "invalid"
                     }
-                    value={id()}
-                    onChange={handleOrganiserEmailChange}
+                    value={email()}
+                    onChange={handleAdminEmailChange}
                   >
                     <TextFieldLabel>Email Address</TextFieldLabel>
                     <TextField type="email" />
                     <TextFieldErrorMessage>
-                      {organiserEmailError()}
+                      {adminEmailError()}
                     </TextFieldErrorMessage>
                   </TextFieldRoot>
                   <TextFieldRoot
                     class="space-y-1"
                     validationState={
-                      organiserPasswordError() === "" ? "valid" : "invalid"
+                      adminPasswordError() === "" ? "valid" : "invalid"
                     }
                     value={password()}
-                    onChange={handleOrganiserPasswordChange}
+                    onChange={handleAdminPasswordChange}
                   >
                     <TextFieldLabel>Password</TextFieldLabel>
                     <TextField type="password" />
                     <TextFieldErrorMessage>
-                      {organiserPasswordError()}
+                      {adminPasswordError()}
                     </TextFieldErrorMessage>
                   </TextFieldRoot>
                 </CardContent>
                 <CardFooter>
-                  <Button onClick={handleOrganiserLogin}>Log In</Button>
+                  <Button onClick={handleAdminLogin}>Log In</Button>
                 </CardFooter>
               </Card>
             </TabsContent>
@@ -243,4 +243,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default SuperLogin;

@@ -18,9 +18,11 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import ProfileDropDown from "@/components/profile";
+import { useNavigate } from "@solidjs/router";
 
 function Navbar() {
   const [isOpen, setIsOpen] = createSignal(false);
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen());
@@ -39,7 +41,7 @@ function Navbar() {
   const navItems = [
     {
       name: "Home",
-      href: "#",
+      href: "/",
       subpages: null,
     },
     {
@@ -80,7 +82,7 @@ function Navbar() {
     <div class="w-full border-b bg-background z-50 sticky top-0 left-0 right-0">
       <div class="flex justify-between h-16 px-6">
         <div class="flex items-center">
-          <Button variant="none" class="px-2 space-x-3">
+          <Button variant="none" class="px-2 space-x-3" onClick={() => navigate("/")}>
             <Logo />
             <span class="hidden ml-2 text-lg font-semibold sm:block">
               MyBloodConnect

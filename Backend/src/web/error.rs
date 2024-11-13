@@ -12,7 +12,8 @@ pub type Result<T> = core::result::Result<T, Error>;
 // #[serde(tag = "type", content = "data")]
 pub enum Error {
     // -- Login
-    LoginFailUsernameNotFound,
+    LoginFailEmailNotFound,
+    LoginFailIcNotFound,
     LoginFailPasswordNotMatching,
 
     // -- Role
@@ -109,8 +110,11 @@ impl Error {
             AuthError(_) => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
 
             // -- Login Fail
-            LoginFailUsernameNotFound => {
-                (StatusCode::UNAUTHORIZED, ClientError::USERNAME_NOT_FOUND)
+            LoginFailEmailNotFound => {
+                (StatusCode::UNAUTHORIZED, ClientError::EMAIL_NOT_FOUND)
+            }
+            LoginFailIcNotFound => {
+                (StatusCode::UNAUTHORIZED, ClientError::IC_NOT_FOUND)
             }
             LoginFailPasswordNotMatching => {
                 (StatusCode::UNAUTHORIZED, ClientError::INCORRECT_PASSWORD)
@@ -156,7 +160,8 @@ impl Error {
 #[serde(tag = "message", content = "detail")]
 #[allow(non_camel_case_types)]
 pub enum ClientError {
-    USERNAME_NOT_FOUND,
+    EMAIL_NOT_FOUND,
+    IC_NOT_FOUND,
     INCORRECT_PASSWORD,
     ACCESS_TOKEN_EXPIRED,
     SESSION_EXPIRED,

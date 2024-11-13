@@ -1,3 +1,5 @@
 export type LogoutResponse = {
-  data: {};
+  data: {
+    success: boolean;
+  };
 };

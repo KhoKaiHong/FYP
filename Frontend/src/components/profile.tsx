@@ -22,14 +22,35 @@ import {
   PanelTop,
   UserRoundPlus,
 } from "lucide-solid";
+import { Switch, Match } from "solid-js";
+import { useNavigate } from "@solidjs/router";
 
 function ProfileDropDown() {
-  const { user, role, isLoading } = useUser();
+  const { user, role, isLoading, logout } = useUser();
+  const navigate = useNavigate();
 
   function DropDownContent() {
-    switch (role()) {
-      case "User":
-        return (
+    return (
+      <Switch
+        fallback={
+          <DropdownMenuGroup>
+            <div class="flex flex-col items-center py-2">
+              <UserRoundX size={42} />
+              <p>Guest</p>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/login")}>
+              <LogIn size={18} />
+              <p>Log In</p>
+            </DropdownMenuItem>
+            <DropdownMenuItem class="gap-x-2">
+              <UserRoundPlus size={18} />
+              <p>Register</p>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
+        }
+      >
+        <Match when={role() === "User"}>
           <DropdownMenuGroup>
             <div class="flex flex-col items-center gap-y-2 py-2">
               <UserRound size={42} />
@@ -45,14 +66,16 @@ function ProfileDropDown() {
               <p>Dashboard</p>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="gap-x-2">
+            <DropdownMenuItem
+              class="gap-x-2"
+              onClick={async () => await logout()}
+            >
               <LogOut size={18} />
               <p>Log Out</p>
             </DropdownMenuItem>
           </DropdownMenuGroup>
-        );
-      case "Facility":
-        return (
+        </Match>
+        <Match when={role() === "Facility"}>
           <DropdownMenuGroup>
             <div class="flex flex-col items-center gap-y-4 py-2">
               <Hospital size={42} />
@@ -68,14 +91,16 @@ function ProfileDropDown() {
               <p>Dashboard</p>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="gap-x-2">
+            <DropdownMenuItem
+              class="gap-x-2"
+              onClick={async () => await logout()}
+            >
               <LogOut size={18} />
               <p>Log Out</p>
             </DropdownMenuItem>
           </DropdownMenuGroup>
-        );
-      case "Organiser":
-        return (
+        </Match>
+        <Match when={role() === "Organiser"}>
           <DropdownMenuGroup>
             <div class="flex flex-col items-center gap-y-4 py-2">
               <UsersRound size={42} />
@@ -91,14 +116,16 @@ function ProfileDropDown() {
               <p>Dashboard</p>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="gap-x-2">
+            <DropdownMenuItem
+              class="gap-x-2"
+              onClick={async () => await logout()}
+            >
               <LogOut size={18} />
               <p>Log Out</p>
             </DropdownMenuItem>
           </DropdownMenuGroup>
-        );
-      case "Admin":
-        return (
+        </Match>
+        <Match when={role() === "Admin"}>
           <DropdownMenuGroup>
             <div class="flex flex-col items-center gap-y-4 py-2">
               <UserRoundCog size={42} />
@@ -114,31 +141,17 @@ function ProfileDropDown() {
               <p>Dashboard</p>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="gap-x-2">
+            <DropdownMenuItem
+              class="gap-x-2"
+              onClick={async () => await logout()}
+            >
               <LogOut size={18} />
               <p>Log Out</p>
             </DropdownMenuItem>
           </DropdownMenuGroup>
-        );
-      default:
-        return (
-          <DropdownMenuGroup>
-            <div class="flex flex-col items-center py-2">
-              <UserRoundX size={42} />
-              <p>Guest</p>
-            </div>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem class="gap-x-2">
-              <LogIn size={18} />
-              <p>Log In</p>
-            </DropdownMenuItem>
-            <DropdownMenuItem class="gap-x-2">
-              <UserRoundPlus size={18} />
-              <p>Register</p>
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        );
-    }
+        </Match>
+      </Switch>
+    );
   }
 
   return (
