@@ -1,10 +1,10 @@
 use crate::context::Context;
 use crate::model::EntityErrorField::{I64Error, StringError};
 use crate::model::{Error, ModelManager, Result};
+use crate::model::enums::{BloodType, EligibilityStatus};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgDatabaseError;
-use sqlx::{FromRow, Type};
-use strum_macros::EnumString;
+use sqlx::FromRow;
 
 // region:    --- User Types
 
@@ -60,53 +60,6 @@ pub struct UserForUpdate {
     pub phone_number: Option<String>,
     pub state_id: Option<i32>,
     pub district_id: Option<i32>,
-}
-
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone, Type)]
-#[sqlx(type_name = "eligibility_status")]
-pub enum EligibilityStatus {
-    Eligible,
-    Ineligible,
-    #[sqlx(rename = "Ineligible - Condition")]
-    #[serde(rename = "Ineligible - Condition")]
-    IneligibleCondition,
-}
-
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone, Type, EnumString)]
-#[sqlx(type_name = "blood_type_enum")]
-pub enum BloodType {
-    #[sqlx(rename = "A+")]
-    #[serde(rename = "A+")]
-    #[strum(serialize = "A+")]
-    APositive,
-    #[sqlx(rename = "A-")]
-    #[serde(rename = "A-")]
-    #[strum(serialize = "A-")]
-    ANegative,
-    #[sqlx(rename = "B+")]
-    #[serde(rename = "B+")]
-    #[strum(serialize = "B+")]
-    BPositive,
-    #[sqlx(rename = "B-")]
-    #[serde(rename = "B-")]
-    #[strum(serialize = "B-")]
-    BNegative,
-    #[sqlx(rename = "O+")]
-    #[serde(rename = "O+")]
-    #[strum(serialize = "O+")]
-    OPositive,
-    #[sqlx(rename = "O-")]
-    #[serde(rename = "O-")]
-    #[strum(serialize = "O-")]
-    ONegative,
-    #[sqlx(rename = "AB+")]
-    #[serde(rename = "AB+")]
-    #[strum(serialize = "AB+")]
-    ABPositive,
-    #[sqlx(rename = "AB-")]
-    #[serde(rename = "AB-")]
-    #[strum(serialize = "AB-")]
-    ABNegative,
 }
 // endregion: --- User Types
 

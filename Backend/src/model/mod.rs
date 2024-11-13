@@ -35,6 +35,7 @@ pub mod user_session;
 pub mod facility_session;
 pub mod organiser_session;
 pub mod admin_session;
+pub mod enums;
 
 pub use self::error::{Error, Result};
 pub use self::error::EntityErrorField;

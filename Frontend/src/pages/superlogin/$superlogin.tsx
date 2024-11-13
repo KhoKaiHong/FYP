@@ -150,7 +150,9 @@ function SuperLogin() {
             }}
           >
             <TabsList>
-              <TabsTrigger value="facility">Blood Collection Facility</TabsTrigger>
+              <TabsTrigger value="facility">
+                Blood Collection Facility
+              </TabsTrigger>
               <TabsTrigger value="admin">Admin</TabsTrigger>
               <TabsIndicator />
             </TabsList>
@@ -158,12 +160,16 @@ function SuperLogin() {
               <Card>
                 <CardHeader>
                   <CardTitle>Blood Collection Facility Login</CardTitle>
-                  <CardDescription>Login as a blood collection facility here.</CardDescription>
+                  <CardDescription>
+                    Login as a blood collection facility here.
+                  </CardDescription>
                 </CardHeader>
                 <CardContent class="space-y-2">
                   <TextFieldRoot
                     class="space-y-1"
-                    validationState={facilityEmailError() === "" ? "valid" : "invalid"}
+                    validationState={
+                      facilityEmailError() === "" ? "valid" : "invalid"
+                    }
                     value={email()}
                     onChange={handleFacilityEmailChange}
                   >
@@ -197,9 +203,7 @@ function SuperLogin() {
               <Card>
                 <CardHeader>
                   <CardTitle>Admin Login</CardTitle>
-                  <CardDescription>
-                    Login as an admin here.
-                  </CardDescription>
+                  <CardDescription>Login as an admin here.</CardDescription>
                 </CardHeader>
                 <CardContent class="space-y-2">
                   <TextFieldRoot

@@ -1,9 +1,11 @@
 use crate::context::Context;
 use crate::model::{ModelManager, Result};
+use serde::Serialize;
 use sqlx::FromRow;
 
 // region:    --- State Types
-#[derive(Debug, FromRow)]
+#[derive(Debug, FromRow, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct State {
     pub id: i32,
     pub name: String,

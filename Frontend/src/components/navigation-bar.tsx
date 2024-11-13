@@ -82,7 +82,11 @@ function Navbar() {
     <div class="w-full border-b bg-background z-50 sticky top-0 left-0 right-0">
       <div class="flex justify-between h-16 px-6">
         <div class="flex items-center">
-          <Button variant="none" class="px-2 space-x-3" onClick={() => navigate("/")}>
+          <Button
+            variant="none"
+            class="px-2 gap-x-3"
+            onClick={() => navigate("/")}
+          >
             <Logo />
             <span class="hidden ml-2 text-lg font-semibold sm:block">
               MyBloodConnect

@@ -26,7 +26,7 @@ import { Switch, Match } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 
 function ProfileDropDown() {
-  const { user, role, isLoading, logout } = useUser();
+  const { isAuthenticated, user, role, isLoading, logout } = useUser();
   const navigate = useNavigate();
 
   function DropDownContent() {
@@ -43,18 +43,18 @@ function ProfileDropDown() {
               <LogIn size={18} />
               <p>Log In</p>
             </DropdownMenuItem>
-            <DropdownMenuItem class="gap-x-2">
+            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/register")}>
               <UserRoundPlus size={18} />
               <p>Register</p>
             </DropdownMenuItem>
           </DropdownMenuGroup>
         }
       >
-        <Match when={role() === "User"}>
+        <Match when={role() === "User" && isAuthenticated() && user() != null}>
           <DropdownMenuGroup>
             <div class="flex flex-col items-center gap-y-2 py-2">
               <UserRound size={42} />
-              <p class="font-medium">{user().name}</p>
+              <p class="font-medium">{user()?.name || "Loading..."}</p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem class="gap-x-2">
@@ -75,11 +75,11 @@ function ProfileDropDown() {
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </Match>
-        <Match when={role() === "Facility"}>
+        <Match when={role() === "Facility"  && isAuthenticated() && user() != null}>
           <DropdownMenuGroup>
             <div class="flex flex-col items-center gap-y-4 py-2">
               <Hospital size={42} />
-              <p>{user().name}</p>
+              <p>{user()?.name || "Loading..."}</p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem class="gap-x-2">
@@ -100,11 +100,11 @@ function ProfileDropDown() {
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </Match>
-        <Match when={role() === "Organiser"}>
+        <Match when={role() === "Organiser"  && isAuthenticated() && user() != null}>
           <DropdownMenuGroup>
             <div class="flex flex-col items-center gap-y-4 py-2">
               <UsersRound size={42} />
-              <p>{user().name}</p>
+              <p>{user()?.name || "Loading..."}</p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem class="gap-x-2">
@@ -125,11 +125,11 @@ function ProfileDropDown() {
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </Match>
-        <Match when={role() === "Admin"}>
+        <Match when={role() === "Admin"  && isAuthenticated() && user() != null}>
           <DropdownMenuGroup>
             <div class="flex flex-col items-center gap-y-4 py-2">
               <UserRoundCog size={42} />
-              <p>{user().name}</p>
+              <p>{user()?.name || "Loading..."}</p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem class="gap-x-2">
