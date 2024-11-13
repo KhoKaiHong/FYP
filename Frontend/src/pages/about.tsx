@@ -1,6 +1,5 @@
 import Navbar from "@/components/navigation-bar";
 import TestFetchButton from "@/components/test-fetch-auth";
-import LoginButtons from "@/components/test-login";
 import { useUser } from "@/context/user-context";
 
 function About() {
@@ -8,7 +7,6 @@ function About() {
   return (
     <div>
       <Navbar />
-      <LoginButtons />
       <TestFetchButton />
       <div class="p-8">
         <p class="text-gray-600 mb-4">{JSON.stringify(user())}</p>

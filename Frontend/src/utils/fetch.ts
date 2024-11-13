@@ -2,7 +2,6 @@ import { Error } from "@/types/error";
 import { parseErrorResponse } from "@/utils/error";
 import { err, ok, Result } from 'neverthrow';
 
-
 const BACKEND_PATH =
   import.meta.env.VITE_BACKEND_PATH || "http://localhost:3001";
 
