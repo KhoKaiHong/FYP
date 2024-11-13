@@ -2,8 +2,7 @@ import Navbar from "@/components/navigation-bar";
 import { useUser } from "@/context/user-context";
 
 function Home() {
-  const { user, setUser, role, setRole, isAuthenticated, setIsAuthenticated } =
-    useUser();
+  const { user, role, isAuthenticated } = useUser();
 
   return (
     <div>

@@ -30,6 +30,7 @@ CREATE TABLE "districts" (
 );
 
 CREATE TYPE eligibility_status AS ENUM ('Eligible', 'Ineligible', 'Ineligible - Condition');
+CREATE TYPE blood_type_enum AS ENUM ('A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-');
 
 -- Users
 CREATE TABLE "users" (
@@ -39,7 +40,7 @@ CREATE TABLE "users" (
   name TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   phone_number TEXT NOT NULL UNIQUE,
-  blood_type TEXT NOT NULL,
+  blood_type blood_type_enum NOT NULL,
   eligibility eligibility_status NOT NULL DEFAULT 'Eligible',
   state_id INTEGER REFERENCES states(id) NOT NULL,
   district_id INTEGER REFERENCES districts(id) NOT NULL

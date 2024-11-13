@@ -233,7 +233,7 @@ fn check_duplicate(err: sqlx::Error) -> Error {
                         Some("blood_collection_facilities_phone_number_key") => {
                             Error::DuplicateKey {
                                 table: "blood_collection_facilities",
-                                column: "phone_number",
+                                column: "phone number",
                             }
                         }
                         _ => Error::Sqlx(err),

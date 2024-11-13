@@ -51,7 +51,7 @@ async fn main() -> Result<()> {
             "name": "Kho Kai Hong",
             "email": "khokaihong@gmail.com",
             "phoneNumber": "+6011-35275289",
-            "bloodType": "A",
+            "bloodType": "A+",
             "stateId": 1,
             "districtId": 1,
         }),
@@ -67,7 +67,7 @@ async fn main() -> Result<()> {
             "email": "khokaihongg@gmail.com",
             "phoneNumber": "+6011g-35275289",
             "bloodType": "A",
-            "stateId": 30,
+            "stateId": 1,
             "districtId": 1,
         }),
     );

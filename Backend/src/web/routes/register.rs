@@ -1,11 +1,12 @@
+use std::str::FromStr;
 use crate::auth::password::encrypt_password;
 use crate::context::Context;
 use crate::model::admin::{AdminForCreate, AdminModelController};
 use crate::model::facility::{FacilityForCreate, FacilityModelController};
 use crate::model::organiser::{OrganiserForCreate, OrganiserModelController};
-use crate::model::user::{UserForCreate, UserModelController};
+use crate::model::user::{UserForCreate, UserModelController, BloodType};
 use crate::state::AppState;
-use crate::web::Result;
+use crate::web::{Result, Error};
 use axum::extract::State;
 use axum::routing::post;
 use axum::{Json, Router};
@@ -38,7 +39,7 @@ async fn user_register_handler(
         name: payload.name,
         email: payload.email,
         phone_number: payload.phone_number,
-        blood_type: payload.blood_type,
+        blood_type: BloodType::from_str(&payload.blood_type).map_err(|_| Error::InvalidData("blood type".to_string()))?,
         state_id: payload.state_id,
         district_id: payload.district_id,
     };

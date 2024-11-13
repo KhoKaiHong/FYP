@@ -40,6 +40,9 @@ pub enum Error {
     LogoutFailInvalidRefreshToken,
     LogoutFailNoSessionFound,
 
+    // Invalid Data Errors
+    InvalidData(String),
+
     // -- Context Errors
     ContextExtractor(web::middleware::ContextExtractorError),
 
@@ -110,19 +113,17 @@ impl Error {
             AuthError(_) => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
 
             // -- Login Fail
-            LoginFailEmailNotFound => {
-                (StatusCode::UNAUTHORIZED, ClientError::EMAIL_NOT_FOUND)
-            }
-            LoginFailIcNotFound => {
-                (StatusCode::UNAUTHORIZED, ClientError::IC_NOT_FOUND)
-            }
+            LoginFailEmailNotFound => (StatusCode::UNAUTHORIZED, ClientError::EMAIL_NOT_FOUND),
+            LoginFailIcNotFound => (StatusCode::UNAUTHORIZED, ClientError::IC_NOT_FOUND),
             LoginFailPasswordNotMatching => {
                 (StatusCode::UNAUTHORIZED, ClientError::INCORRECT_PASSWORD)
             }
 
             // -- Role
             UserRoleRequired => (StatusCode::FORBIDDEN, ClientError::PERMISSION_DENIED),
-            BloodCollectionFacilityRoleRequired => (StatusCode::FORBIDDEN, ClientError::PERMISSION_DENIED),
+            BloodCollectionFacilityRoleRequired => {
+                (StatusCode::FORBIDDEN, ClientError::PERMISSION_DENIED)
+            }
             OrganiserRoleRequired => (StatusCode::FORBIDDEN, ClientError::PERMISSION_DENIED),
             AdminRoleRequired => (StatusCode::FORBIDDEN, ClientError::PERMISSION_DENIED),
 
@@ -144,8 +145,14 @@ impl Error {
             LogoutFailInvalidRefreshToken => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
             LogoutFailNoSessionFound => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
 
+            // Invalid Data Errors
+            InvalidData(_) => (StatusCode::BAD_REQUEST, ClientError::INVALID_REQUEST),
+
             // Duplicate Record Errors
-            ModelError(model::Error::DuplicateKey { table: _ , column }) => (StatusCode::BAD_REQUEST, ClientError::DUPLICATE_RECORD(column.to_string())),
+            ModelError(model::Error::DuplicateKey { table: _, column }) => (
+                StatusCode::BAD_REQUEST,
+                ClientError::DUPLICATE_RECORD(column.to_string()),
+            ),
 
             // -- Fallback.
             _ => (

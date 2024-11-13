@@ -4,6 +4,7 @@ use crate::model::{Error, ModelManager, Result};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgDatabaseError;
 use sqlx::{FromRow, Type};
+use strum_macros::EnumString;
 
 // region:    --- User Types
 
@@ -32,7 +33,7 @@ pub struct UserWithLocation {
     pub name: String,
     pub email: String,
     pub phone_number: String,
-    pub blood_type: String,
+    pub blood_type: BloodType,
     pub eligibility: EligibilityStatus,
     pub state_id: i32,
     pub district_id: i32,
@@ -47,7 +48,7 @@ pub struct UserForCreate {
     pub name: String,
     pub email: String,
     pub phone_number: String,
-    pub blood_type: String,
+    pub blood_type: BloodType,
     pub state_id: i32,
     pub district_id: i32,
 }
@@ -69,6 +70,43 @@ pub enum EligibilityStatus {
     #[sqlx(rename = "Ineligible - Condition")]
     #[serde(rename = "Ineligible - Condition")]
     IneligibleCondition,
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone, Type, EnumString)]
+#[sqlx(type_name = "blood_type_enum")]
+pub enum BloodType {
+    #[sqlx(rename = "A+")]
+    #[serde(rename = "A+")]
+    #[strum(serialize = "A+")]
+    APositive,
+    #[sqlx(rename = "A-")]
+    #[serde(rename = "A-")]
+    #[strum(serialize = "A-")]
+    ANegative,
+    #[sqlx(rename = "B+")]
+    #[serde(rename = "B+")]
+    #[strum(serialize = "B+")]
+    BPositive,
+    #[sqlx(rename = "B-")]
+    #[serde(rename = "B-")]
+    #[strum(serialize = "B-")]
+    BNegative,
+    #[sqlx(rename = "O+")]
+    #[serde(rename = "O+")]
+    #[strum(serialize = "O+")]
+    OPositive,
+    #[sqlx(rename = "O-")]
+    #[serde(rename = "O-")]
+    #[strum(serialize = "O-")]
+    ONegative,
+    #[sqlx(rename = "AB+")]
+    #[serde(rename = "AB+")]
+    #[strum(serialize = "AB+")]
+    ABPositive,
+    #[sqlx(rename = "AB-")]
+    #[serde(rename = "AB-")]
+    #[strum(serialize = "AB-")]
+    ABNegative,
 }
 // endregion: --- User Types
 
@@ -238,9 +276,9 @@ fn check_duplicate(err: sqlx::Error) -> Error {
             if let Some(pg_err) = e.try_downcast_ref::<PgDatabaseError>() {
                 if pg_err.code() == "23505" {
                     match pg_err.constraint() {
-                        Some("users_ic_number_key") => Error::DuplicateKey { table: "users", column: "ic_number" },
+                        Some("users_ic_number_key") => Error::DuplicateKey { table: "users", column: "IC number" },
                         Some("users_email_key") => Error::DuplicateKey { table: "users", column: "email" },
-                        Some("users_phone_number_key") => Error::DuplicateKey { table: "users", column: "phone_number" },
+                        Some("users_phone_number_key") => Error::DuplicateKey { table: "users", column: "phone number" },
                         _ => Error::Sqlx(err)
                     }
                 } else {
@@ -275,7 +313,7 @@ mod tests {
             name: "John Doe".to_string(),
             email: "john@example.com".to_string(),
             phone_number: "1234567890".to_string(),
-            blood_type: "A+".to_string(),
+            blood_type: BloodType::APositive,
             state_id: 1,
             district_id: 1,
         };
@@ -290,7 +328,7 @@ mod tests {
         assert_eq!(user.name, "John Doe");
         assert_eq!(user.email, "john@example.com");
         assert_eq!(user.phone_number, "1234567890");
-        assert_eq!(user.blood_type, "A+".to_string());
+        assert_eq!(user.blood_type, BloodType::APositive);
         assert_eq!(user.eligibility, EligibilityStatus::Eligible);
         assert_eq!(user.state_id, 1);
         assert_eq!(user.district_id, 1);
@@ -345,7 +383,7 @@ mod tests {
             name: "John Doe".to_string(),
             email: "john@example.com".to_string(),
             phone_number: "1234567890".to_string(),
-            blood_type: "A+".to_string(),
+            blood_type: BloodType::APositive,
             state_id: 1,
             district_id: 1,
         };
@@ -355,7 +393,7 @@ mod tests {
             name: "Jane Doe".to_string(),
             email: "jane@example.com".to_string(),
             phone_number: "9876543210".to_string(),
-            blood_type: "O-".to_string(),
+            blood_type: BloodType::OPositive,
             state_id: 2,
             district_id: 2,
         };
@@ -400,7 +438,7 @@ mod tests {
             name: "John Doe".to_string(),
             email: "john@example.com".to_string(),
             phone_number: "1234567890".to_string(),
-            blood_type: "A+".to_string(),
+            blood_type: BloodType::APositive,
             state_id: 1,
             district_id: 1,
         };
@@ -425,7 +463,7 @@ mod tests {
         assert_eq!(user.name, "John Doe");
         assert_eq!(user.email, "john@example.com");
         assert_eq!(user.phone_number, "9876543210");
-        assert_eq!(user.blood_type, "A+".to_string());
+        assert_eq!(user.blood_type, BloodType::APositive);
         assert_eq!(user.eligibility, EligibilityStatus::Eligible);
         assert_eq!(user.state_id, 2);
         assert_eq!(user.district_id, 2);
@@ -453,7 +491,7 @@ mod tests {
             name: "John Doe".to_string(),
             email: "john@example.com".to_string(),
             phone_number: "1234567890".to_string(),
-            blood_type: "A+".to_string(),
+            blood_type: BloodType::APositive,
             state_id: 1,
             district_id: 1,
         };
@@ -468,7 +506,7 @@ mod tests {
         assert_eq!(user.password, "password");
         assert_eq!(user.name, "John Doe");
         assert_eq!(user.phone_number, "1234567890");
-        assert_eq!(user.blood_type, "A+");
+        assert_eq!(user.blood_type, BloodType::APositive);
         assert_eq!(user.state_id, 1);
         assert_eq!(user.district_id, 1);
 
