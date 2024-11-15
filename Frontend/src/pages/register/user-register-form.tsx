@@ -34,6 +34,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { District } from "@/types/districts";
 import { UserRegisterPayload } from "@/types/register";
 import { userRegister } from "@/routes/register";
+import showSuccessToast from "@/components/success-toast";
+import { Button } from "@/components/ui/button";
 
 function UserRegisterForm() {
   const [bloodTypes] = createResource(getBloodTypes);
@@ -111,7 +113,20 @@ function UserRegisterForm() {
         districtId: value.districtId,
       };
       const response = await userRegister(userRegisterPayload);
-      console.log(response);
+      response.match(
+        () => {
+          showSuccessToast({ successTitle: "Register successful" });
+          return;
+        },
+        (error) => {
+          console.error("Error performing registration: ", error);
+          showErrorToast({
+            errorTitle: "Error loading registration form.",
+            error: error,
+          });
+          return;
+        }
+      );
     },
     validatorAdapter: zodValidator(),
   }));
@@ -647,7 +662,12 @@ function UserRegisterForm() {
                       )}
                     >
                       <ComboboxTrigger>
-                        <ComboboxInput />
+                        <ComboboxInput
+                          onBlur={(e) => {
+                            e.currentTarget.value =
+                              districtInput()?.districtName ?? "";
+                          }}
+                        />
                       </ComboboxTrigger>
                       <ComboboxErrorMessage class="font-medium text-destructive text-xs">
                         {field().state.meta.errors.join(", ")}
@@ -659,7 +679,9 @@ function UserRegisterForm() {
               }}
             />
           </div>
-          <button type="submit">Submit</button>
+          <div class="flex items-center pt-6">
+            <Button type="submit">Register</Button>
+          </div>
         </form>
       </Suspense>
     </div>

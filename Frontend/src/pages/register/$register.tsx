@@ -53,9 +53,6 @@ function Register() {
                 <CardContent class="space-y-2">
                   <UserRegisterForm />
                 </CardContent>
-                <CardFooter>
-                  <Button>Register</Button>
-                </CardFooter>
               </Card>
             </TabsContent>
             <TabsContent value="organiser">
@@ -77,9 +74,6 @@ function Register() {
                     <Skeleton class="w-full" />
                   </div>
                 </CardContent>
-                <CardFooter>
-                  <Button>Register</Button>
-                </CardFooter>
               </Card>
             </TabsContent>
           </Tabs>

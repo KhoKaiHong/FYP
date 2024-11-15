@@ -27,6 +27,8 @@ export const toastVariants = cva(
 				default: "border bg-background",
 				destructive:
 					"destructive group border-destructive bg-destructive text-destructive-foreground",
+				success:
+					"success group border-success bg-success text-success-foreground",
 			},
 		},
 		defaultVariants: {
@@ -138,7 +140,7 @@ export const ToastContent = (props: ComponentProps<"div">) => {
 	return (
 		<div class={cn("flex w-full flex-col", local.class)} {...rest}>
 			<div>{local.children}</div>
-			<ToastPrimitive.CloseButton class="absolute right-1 top-1 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50">
+			<ToastPrimitive.CloseButton class="absolute right-1 top-1 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:hover:text-red-50 group-[.success]:text-green-300 group-[.success]:hover:text-green-50">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
 					class="h-4 w-4"
@@ -161,8 +163,8 @@ export const ToastContent = (props: ComponentProps<"div">) => {
 
 export const ToastProgress: VoidComponent = () => {
 	return (
-		<ToastPrimitive.ProgressTrack class="h-1 w-full overflow-hidden rounded-xl bg-primary/20 group-[.destructive]:bg-background/20">
-			<ToastPrimitive.ProgressFill class="h-full w-[--kb-toast-progress-fill-width] bg-primary transition-all duration-150 ease-linear group-[.destructive]:bg-destructive-foreground" />
+		<ToastPrimitive.ProgressTrack class="h-1 w-full overflow-hidden rounded-xl bg-primary/20 group-[.destructive]:bg-background/20 group-[.success]:bg-background/20">
+			<ToastPrimitive.ProgressFill class="h-full w-[--kb-toast-progress-fill-width] bg-primary transition-all duration-150 ease-linear group-[.destructive]:bg-destructive-foreground group-[.success]:bg-success-foreground" />
 		</ToastPrimitive.ProgressTrack>
 	);
 };
