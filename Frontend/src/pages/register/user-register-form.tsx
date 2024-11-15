@@ -89,6 +89,10 @@ function UserRegisterForm() {
     );
   }
 
+  const [duplicateIcNumber, setDuplicateIcNumber] = createSignal(false);
+  const [duplicateEmail, setDuplicateEmail] = createSignal(false);
+  const [duplicatePhoneNumber, setDuplicatePhoneNumber] = createSignal(false);
+
   const form = createForm(() => ({
     defaultValues: {
       icNumber: "",
@@ -119,11 +123,25 @@ function UserRegisterForm() {
           return;
         },
         (error) => {
-          console.error("Error performing registration: ", error);
-          showErrorToast({
-            errorTitle: "Error loading registration form.",
-            error: error,
-          });
+          if (error.message === "DUPLICATE_RECORD") {
+            if (error.detail === "IC number") {
+              setDuplicateIcNumber(true);
+            } else if (error.detail === "email") {
+              setDuplicateEmail(true);
+            } else if (error.detail === "phone number") {
+              setDuplicatePhoneNumber(true);
+            } else {
+              showErrorToast({
+                errorTitle: "Error performing registration. Please try again.",
+                error: error,
+              });
+            }
+          } else {
+            showErrorToast({
+              errorTitle: "Error performing registration. Please try again.",
+              error: error,
+            });
+          }
           return;
         }
       );
@@ -161,8 +179,8 @@ function UserRegisterForm() {
   const emailSchema = z
     .string()
     .min(1, "Email is required")
-    .max(64, "Email must be at most 64 characters")
-    .email("Email is not valid");
+    .email("Please enter a valid email address")
+    .max(64, "Email must be at most 64 characters");
 
   const phoneNumberSchema = z
     .string()
@@ -257,8 +275,9 @@ function UserRegisterForm() {
               children={(field) => {
                 const hasError = createMemo(() => {
                   return (
-                    field().state.meta.errors.length > 0 &&
-                    field().state.meta.isTouched
+                    (field().state.meta.errors.length > 0 &&
+                      field().state.meta.isTouched) ||
+                    duplicateIcNumber()
                   );
                 });
 
@@ -269,12 +288,17 @@ function UserRegisterForm() {
                     validationState={hasError() ? "invalid" : "valid"}
                     value={field().state.value}
                     onBlur={field().handleBlur}
-                    onChange={field().handleChange}
+                    onChange={(e) => {
+                      field().handleChange(e);
+                      setDuplicateIcNumber(false);
+                    }}
                   >
                     <TextFieldLabel>IC Number</TextFieldLabel>
                     <TextField placeholder="e.g. 123456-78-9012" />
                     <TextFieldErrorMessage>
-                      {field().state.meta.errors.join(", ")}
+                      {duplicateIcNumber()
+                        ? "IC Number already registered"
+                        : field().state.meta.errors.join(", ").split(", ")[0]}
                     </TextFieldErrorMessage>
                   </TextFieldRoot>
                 );
@@ -303,7 +327,7 @@ function UserRegisterForm() {
                     <TextFieldLabel>Name</TextFieldLabel>
                     <TextField />
                     <TextFieldErrorMessage>
-                      {field().state.meta.errors.join(", ")}
+                      {field().state.meta.errors.join(", ").split(", ")[0]}
                     </TextFieldErrorMessage>
                   </TextFieldRoot>
                 );
@@ -360,7 +384,7 @@ function UserRegisterForm() {
                         </button>
                       </div>
                       <TextFieldErrorMessage>
-                        {field().state.meta.errors.join(", ")}
+                        {field().state.meta.errors.join(", ").split(", ")[0]}
                       </TextFieldErrorMessage>
                     </TextFieldRoot>
                   </div>
@@ -421,7 +445,7 @@ function UserRegisterForm() {
                         </button>
                       </div>
                       <TextFieldErrorMessage>
-                        {field().state.meta.errors.join(", ")}
+                        {field().state.meta.errors.join(", ").split(", ")[0]}
                       </TextFieldErrorMessage>
                     </TextFieldRoot>
                   </div>
@@ -435,8 +459,9 @@ function UserRegisterForm() {
               children={(field) => {
                 const hasError = createMemo(() => {
                   return (
-                    field().state.meta.errors.length > 0 &&
-                    field().state.meta.isTouched
+                    (field().state.meta.errors.length > 0 &&
+                      field().state.meta.isTouched) ||
+                    duplicateEmail()
                   );
                 });
 
@@ -447,12 +472,17 @@ function UserRegisterForm() {
                     validationState={hasError() ? "invalid" : "valid"}
                     value={field().state.value}
                     onBlur={field().handleBlur}
-                    onChange={field().handleChange}
+                    onChange={(e) => {
+                      field().handleChange(e);
+                      setDuplicateEmail(false);
+                    }}
                   >
                     <TextFieldLabel>Email</TextFieldLabel>
                     <TextField type="email" />
                     <TextFieldErrorMessage>
-                      {field().state.meta.errors.join(", ")}
+                      {duplicateEmail()
+                        ? "Email already registered"
+                        : field().state.meta.errors.join(", ").split(", ")[0]}
                     </TextFieldErrorMessage>
                   </TextFieldRoot>
                 );
@@ -464,8 +494,9 @@ function UserRegisterForm() {
               children={(field) => {
                 const hasError = createMemo(() => {
                   return (
-                    field().state.meta.errors.length > 0 &&
-                    field().state.meta.isTouched
+                    (field().state.meta.errors.length > 0 &&
+                      field().state.meta.isTouched) ||
+                    duplicatePhoneNumber()
                   );
                 });
 
@@ -476,7 +507,10 @@ function UserRegisterForm() {
                     validationState={hasError() ? "invalid" : "valid"}
                     value={field().state.value}
                     onBlur={field().handleBlur}
-                    onChange={field().handleChange}
+                    onChange={(e) => {
+                      field().handleChange(e);
+                      setDuplicatePhoneNumber(false);
+                    }}
                   >
                     <TextFieldLabel>Phone Number</TextFieldLabel>
                     <div class="flex rounded-lg">
@@ -490,7 +524,9 @@ function UserRegisterForm() {
                       />
                     </div>
                     <TextFieldErrorMessage>
-                      {field().state.meta.errors.join(", ")}
+                    {duplicatePhoneNumber()
+                        ? "Phone number already registered"
+                        : field().state.meta.errors.join(", ").split(", ")[0]}
                     </TextFieldErrorMessage>
                   </TextFieldRoot>
                 );
@@ -546,7 +582,7 @@ function UserRegisterForm() {
                         </SelectValue>
                       </SelectTrigger>
                       <SelectErrorMessage class="font-medium text-destructive text-xs">
-                        {field().state.meta.errors.join(", ")}
+                        {field().state.meta.errors.join(", ").split(", ")[0]}
                       </SelectErrorMessage>
                       <SelectContent />
                     </Select>
@@ -603,7 +639,7 @@ function UserRegisterForm() {
                         </SelectValue>
                       </SelectTrigger>
                       <SelectErrorMessage class="font-medium text-destructive text-xs">
-                        {field().state.meta.errors.join(", ")}
+                        {field().state.meta.errors.join(", ").split(", ")[0]}
                       </SelectErrorMessage>
                       <SelectContent />
                     </Select>
@@ -670,7 +706,7 @@ function UserRegisterForm() {
                         />
                       </ComboboxTrigger>
                       <ComboboxErrorMessage class="font-medium text-destructive text-xs">
-                        {field().state.meta.errors.join(", ")}
+                        {field().state.meta.errors.join(", ").split(", ")[0]}
                       </ComboboxErrorMessage>
                       <ComboboxContent />
                     </Combobox>
