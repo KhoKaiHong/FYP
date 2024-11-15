@@ -6,3 +6,6 @@ pub mod logout_all;
 pub mod refresh;
 pub mod register;
 pub mod get_credentials;
+pub mod district;
+pub mod state;
+pub mod blood_type;

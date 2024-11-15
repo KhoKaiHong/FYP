@@ -86,7 +86,7 @@ export function UserProvider(props: UserProviderProps) {
 
     if (userData.error) {
       setError({ message: "UNKNOWN_ERROR" });
-      showErrorToast({ message: "UNKNOWN_ERROR" });
+      showErrorToast({ errorTitle: "Error loading user data.", error: { message: "UNKNOWN_ERROR" } });
       return;
     }
 
@@ -123,7 +123,7 @@ export function UserProvider(props: UserProviderProps) {
           setError(null);
         } else {
           setError({ message: "UNKNOWN_ERROR" });
-          showErrorToast({ message: "UNKNOWN_ERROR" });
+          showErrorToast({ errorTitle: "Error loading user data.", error: { message: "UNKNOWN_ERROR" } });
         }
       },
       (error) => {
@@ -136,7 +136,7 @@ export function UserProvider(props: UserProviderProps) {
           setUser(null);
         }
         setError(error);
-        showErrorToast(error);
+        showErrorToast({ errorTitle: "Error loading user data.", error });
         console.error("Error during user fetch:", error);
       }
     );
@@ -151,7 +151,7 @@ export function UserProvider(props: UserProviderProps) {
         setRole(null);
         setUser(null);
         setError({ message: "NO_AUTH" });
-        showErrorToast({ message: "NO_AUTH" });
+        showErrorToast({ errorTitle: "Error during log out.", error: { message: "NO_AUTH" } });
         return;
       }
 
@@ -173,11 +173,11 @@ export function UserProvider(props: UserProviderProps) {
           setRole(null);
           setUser(null);
         }
-        showErrorToast(result.error);
+        showErrorToast({ errorTitle: "Error during log out.", error: result.error });
       }
     } catch (err) {
       setError({ message: "UNKNOWN_ERROR" });
-      showErrorToast({ message: "UNKNOWN_ERROR" });
+      showErrorToast({ errorTitle: "Error during log out.", error: { message: "UNKNOWN_ERROR" } });
       console.error("Error during user logout:", err);
     }
   }
@@ -204,7 +204,7 @@ export function UserProvider(props: UserProviderProps) {
 export function useUser() {
   const context = useContext(UserContext);
   if (!context) {
-    showErrorToast({ message: "UNKNOWN_ERROR" });
+    showErrorToast({ errorTitle: "Error loading user data.", error: { message: "UNKNOWN_ERROR" } });
     console.error("Cannot find UserContext");
     throw new Error("Cannot find UserContext");
   }

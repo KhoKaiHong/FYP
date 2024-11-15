@@ -15,7 +15,7 @@ const App: Component = () => {
   return (
     <Router
       root={(props) => (
-        <Suspense>
+        <>
           <ColorModeScript />
           <ColorModeProvider>
             <ToastRegion>
@@ -23,7 +23,7 @@ const App: Component = () => {
             </ToastRegion>
             <UserProvider>{props.children}</UserProvider>
           </ColorModeProvider>
-        </Suspense>
+        </>
       )}
     >
       <Route path="/" component={Home} />

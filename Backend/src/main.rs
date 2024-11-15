@@ -65,6 +65,9 @@ async fn main() -> Result<()> {
         .merge(web::routes::login::routes(app_state.clone()))
         .merge(web::routes::register::routes(app_state.clone()))
         .merge(web::routes::refresh::routes(app_state.clone()))
+        .merge(web::routes::district::routes(app_state.clone()))
+        .merge(web::routes::state::routes(app_state.clone()))
+        .merge(web::routes::blood_type::routes())
         .nest(
             "/api",
             Router::new()

@@ -40,7 +40,7 @@ impl DistrictModelController {
     ) -> Result<Vec<DistrictWithState>> {
         let db = model_manager.db();
 
-        let districts = sqlx::query_as("SELECT districts.id AS district_id, districts.name AS district_name, districts.state_id, states.name AS state_name FROM districts JOIN states ON districts.state_id = states.id ORDER BY id")
+        let districts = sqlx::query_as("SELECT districts.id AS district_id, districts.name AS district_name, districts.state_id, states.name AS state_name FROM districts JOIN states ON districts.state_id = states.id ORDER BY district_id")
             .fetch_all(db)
             .await?;
 

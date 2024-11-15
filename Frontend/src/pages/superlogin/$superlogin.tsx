@@ -28,6 +28,7 @@ import { createSignal } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { getErrorMessage } from "@/utils/error";
 import showErrorToast from "@/components/error-toast";
+import { Eye, EyeOff } from "lucide-solid";
 
 function SuperLogin() {
   const { setUser, setRole, setIsAuthenticated, setError } = useUser();
@@ -41,6 +42,11 @@ function SuperLogin() {
 
   const [adminEmailError, setAdminEmailError] = createSignal("");
   const [adminPasswordError, setAdminPasswordError] = createSignal("");
+
+  const [isPasswordVisible, setIsPasswordVisible] = createSignal(false);
+  function togglePasswordVisibility() {
+    setIsPasswordVisible(!isPasswordVisible());
+  }
 
   function handleFacilityEmailChange(email: string) {
     setFacilityEmailError("");
@@ -87,12 +93,12 @@ function SuperLogin() {
         } else if (response.error.message === "INCORRECT_PASSWORD") {
           setFacilityPasswordError(getErrorMessage(response.error));
         } else {
-          showErrorToast(response.error);
+          showErrorToast({errorTitle: "Error during facility login.", error: response.error});
         }
       }
     } catch (error) {
       setError({ message: "UNKNOWN_ERROR" });
-      showErrorToast({ message: "UNKNOWN_ERROR" });
+      showErrorToast({ errorTitle: "Error during facility login.", error: { message: "UNKNOWN_ERROR" } });
       console.error(error);
     }
   }
@@ -122,12 +128,12 @@ function SuperLogin() {
         } else if (response.error.message === "INCORRECT_PASSWORD") {
           setAdminPasswordError(getErrorMessage(response.error));
         } else {
-          showErrorToast(response.error);
+          showErrorToast({errorTitle: "Error during admin login.", error: response.error});
         }
       }
     } catch (error) {
       setError({ message: "UNKNOWN_ERROR" });
-      showErrorToast({ message: "UNKNOWN_ERROR" });
+      showErrorToast({ errorTitle: "Error during admin login.", error: { message: "UNKNOWN_ERROR" } });
       console.error(error);
     }
   }
@@ -151,7 +157,7 @@ function SuperLogin() {
           >
             <TabsList>
               <TabsTrigger value="facility">
-                Blood Collection Facility
+                Facility
               </TabsTrigger>
               <TabsTrigger value="admin">Admin</TabsTrigger>
               <TabsIndicator />
@@ -188,7 +194,29 @@ function SuperLogin() {
                     onChange={handleFacilityPasswordChange}
                   >
                     <TextFieldLabel>Password</TextFieldLabel>
-                    <TextField type="password" />
+                    <div class="relative">
+                      <TextField type={isPasswordVisible() ? "text" : "password"} />
+                      <button
+                        class="absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-lg text-muted-foreground/80 ring-offset-background transition-shadow hover:text-foreground focus-visible:border focus-visible:border-ring focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        aria-label={
+                          isPasswordVisible() ? "Hide password" : "Show password"
+                        }
+                        aria-pressed={isPasswordVisible()}
+                        aria-controls="password"
+                      >
+                        {isPasswordVisible() ? (
+                          <EyeOff
+                            size={16}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <Eye size={16} strokeWidth={2} aria-hidden="true" />
+                        )}
+                      </button>
+                    </div>
                     <TextFieldErrorMessage>
                       {facilityPasswordError()}
                     </TextFieldErrorMessage>
@@ -229,7 +257,29 @@ function SuperLogin() {
                     onChange={handleAdminPasswordChange}
                   >
                     <TextFieldLabel>Password</TextFieldLabel>
-                    <TextField type="password" />
+                    <div class="relative">
+                      <TextField type={isPasswordVisible() ? "text" : "password"} />
+                      <button
+                        class="absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-lg text-muted-foreground/80 ring-offset-background transition-shadow hover:text-foreground focus-visible:border focus-visible:border-ring focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        aria-label={
+                          isPasswordVisible() ? "Hide password" : "Show password"
+                        }
+                        aria-pressed={isPasswordVisible()}
+                        aria-controls="password"
+                      >
+                        {isPasswordVisible() ? (
+                          <EyeOff
+                            size={16}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <Eye size={16} strokeWidth={2} aria-hidden="true" />
+                        )}
+                      </button>
+                    </div>
                     <TextFieldErrorMessage>
                       {adminPasswordError()}
                     </TextFieldErrorMessage>

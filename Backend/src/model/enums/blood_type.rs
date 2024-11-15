@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
 use sqlx::Type;
-use strum_macros::EnumString;
+use strum_macros::{EnumString, EnumIter};
+use strum::IntoEnumIterator;
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone, Type, EnumString)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone, Type, EnumString, EnumIter)]
 #[sqlx(type_name = "blood_type_enum")]
 pub enum BloodType {
     #[sqlx(rename = "A+")]
@@ -37,4 +38,12 @@ pub enum BloodType {
     #[serde(rename = "AB-")]
     #[strum(serialize = "AB-")]
     ABNegative,
+}
+
+pub struct BloodTypeModelController;
+
+impl BloodTypeModelController {
+    pub fn list() -> Vec<BloodType> {
+        BloodType::iter().collect()
+    }
 }

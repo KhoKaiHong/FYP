@@ -98,7 +98,8 @@ export const ComboboxContent = <T extends ValidComponent = "div">(
 		<ComboboxPrimitive.Portal>
 			<ComboboxPrimitive.Content
 				class={cn(
-					"relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[expanded]:animate-in data-[closed]:animate-out data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 origin-[--kb-combobox-content-transform-origin]",
+					"relative z-50 min-w-[8rem] overflow-hidden overscroll-contain rounded-md border bg-popover text-popover-foreground shadow-md data-[expanded]:animate-in data-[closed]:animate-out data-[closed]:fade-out-0 data-[expanded]:fade-in-0 data-[closed]:zoom-out-95 data-[expanded]:zoom-in-95 origin-[--kb-combobox-content-transform-origin]",
+					"max-h-60 overflow-y-auto overscroll-contain",
 					local.class,
 				)}
 				{...rest}

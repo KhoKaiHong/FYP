@@ -29,6 +29,7 @@ import { createSignal } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { getErrorMessage } from "@/utils/error";
 import showErrorToast from "@/components/error-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function Register() {
   return (
@@ -65,7 +66,17 @@ function Register() {
                     Register as an event organiser here.
                   </CardDescription>
                 </CardHeader>
-                <CardContent class="space-y-2">Placeholder</CardContent>
+                <CardContent class="space-y-2">
+                  <div class="grid grid-cols-1 space-y-8 h-full min-h-dvh py-3">
+                    <Skeleton class="w-full" />
+                    <Skeleton class="w-full" />
+                    <Skeleton class="w-full" />
+                    <Skeleton class="w-full" />
+                    <Skeleton class="w-full" />
+                    <Skeleton class="w-full" />
+                    <Skeleton class="w-full" />
+                  </div>
+                </CardContent>
                 <CardFooter>
                   <Button>Register</Button>
                 </CardFooter>

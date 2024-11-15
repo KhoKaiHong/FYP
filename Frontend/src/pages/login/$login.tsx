@@ -28,6 +28,7 @@ import { createSignal } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { getErrorMessage } from "@/utils/error";
 import showErrorToast from "@/components/error-toast";
+import { Eye, EyeOff } from "lucide-solid";
 
 function Login() {
   const { setUser, setRole, setIsAuthenticated, setError } = useUser();
@@ -41,6 +42,11 @@ function Login() {
 
   const [organiserEmailError, setOrganiserEmailError] = createSignal("");
   const [organiserPasswordError, setOrganiserPasswordError] = createSignal("");
+
+  const [isPasswordVisible, setIsPasswordVisible] = createSignal(false);
+  function togglePasswordVisibility() {
+    setIsPasswordVisible(!isPasswordVisible());
+  }
 
   function handleUserIcChange(ic: string) {
     setUserIcError("");
@@ -87,12 +93,18 @@ function Login() {
         } else if (response.error.message === "INCORRECT_PASSWORD") {
           setUserPasswordError(getErrorMessage(response.error));
         } else {
-          showErrorToast(response.error);
+          showErrorToast({
+            errorTitle: "Error during user login.",
+            error: response.error,
+          });
         }
       }
     } catch (error) {
       setError({ message: "UNKNOWN_ERROR" });
-      showErrorToast({ message: "UNKNOWN_ERROR" });
+      showErrorToast({
+        errorTitle: "Error during user login.",
+        error: { message: "UNKNOWN_ERROR" },
+      });
       console.error(error);
     }
   }
@@ -122,12 +134,18 @@ function Login() {
         } else if (response.error.message === "INCORRECT_PASSWORD") {
           setOrganiserPasswordError(getErrorMessage(response.error));
         } else {
-          showErrorToast(response.error);
+          showErrorToast({
+            errorTitle: "Error during organiser login.",
+            error: response.error,
+          });
         }
       }
     } catch (error) {
       setError({ message: "UNKNOWN_ERROR" });
-      showErrorToast({ message: "UNKNOWN_ERROR" });
+      showErrorToast({
+        errorTitle: "Error during organiser login.",
+        error: { message: "UNKNOWN_ERROR" },
+      });
       console.error(error);
     }
   }
@@ -147,11 +165,12 @@ function Login() {
               setUserPasswordError("");
               setOrganiserEmailError("");
               setOrganiserPasswordError("");
+              setIsPasswordVisible(false);
             }}
           >
             <TabsList>
               <TabsTrigger value="user">User</TabsTrigger>
-              <TabsTrigger value="organiser">Event Organiser</TabsTrigger>
+              <TabsTrigger value="organiser">Organiser</TabsTrigger>
               <TabsIndicator />
             </TabsList>
             <TabsContent value="user">
@@ -182,7 +201,33 @@ function Login() {
                     onChange={handleUserPasswordChange}
                   >
                     <TextFieldLabel>Password</TextFieldLabel>
-                    <TextField type="password" />
+                    <div class="relative">
+                      <TextField
+                        type={isPasswordVisible() ? "text" : "password"}
+                      />
+                      <button
+                        class="absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-lg text-muted-foreground/80 ring-offset-background transition-shadow hover:text-foreground focus-visible:border focus-visible:border-ring focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        aria-label={
+                          isPasswordVisible()
+                            ? "Hide password"
+                            : "Show password"
+                        }
+                        aria-pressed={isPasswordVisible()}
+                        aria-controls="password"
+                      >
+                        {isPasswordVisible() ? (
+                          <EyeOff
+                            size={16}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <Eye size={16} strokeWidth={2} aria-hidden="true" />
+                        )}
+                      </button>
+                    </div>
                     <TextFieldErrorMessage>
                       {userPasswordError()}
                     </TextFieldErrorMessage>
@@ -225,7 +270,33 @@ function Login() {
                     onChange={handleOrganiserPasswordChange}
                   >
                     <TextFieldLabel>Password</TextFieldLabel>
-                    <TextField type="password" />
+                    <div class="relative">
+                      <TextField
+                        type={isPasswordVisible() ? "text" : "password"}
+                      />
+                      <button
+                        class="absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-lg text-muted-foreground/80 ring-offset-background transition-shadow hover:text-foreground focus-visible:border focus-visible:border-ring focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        aria-label={
+                          isPasswordVisible()
+                            ? "Hide password"
+                            : "Show password"
+                        }
+                        aria-pressed={isPasswordVisible()}
+                        aria-controls="password"
+                      >
+                        {isPasswordVisible() ? (
+                          <EyeOff
+                            size={16}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <Eye size={16} strokeWidth={2} aria-hidden="true" />
+                        )}
+                      </button>
+                    </div>
                     <TextFieldErrorMessage>
                       {organiserPasswordError()}
                     </TextFieldErrorMessage>
