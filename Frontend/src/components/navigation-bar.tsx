@@ -65,7 +65,7 @@ function Navbar() {
         { name: "Myths & Facts", href: "#" },
         { name: "Donor Privileges", href: "#" },
         { name: "Event Organisation", href: "#" },
-        { name: "Blood Donation Statistics", href: "#" },
+        { name: "Blood Donation Statistics", href: "/blood-donation-statistics" },
       ],
     },
     {
