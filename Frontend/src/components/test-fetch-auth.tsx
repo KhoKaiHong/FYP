@@ -1,5 +1,5 @@
-import { createSignal } from 'solid-js';
-import { fetchWithAuth } from '@/utils/fetch';
+import { createSignal } from "solid-js";
+import { fetchWithAuth } from "@/utils/fetch-auth";
 
 function TestFetchButton() {
   const [result, setResult] = createSignal<string | null>(null);
@@ -7,13 +7,13 @@ function TestFetchButton() {
   const handleFetch = async () => {
     try {
       const response = await fetchWithAuth({
-        path: '/api/getcredentials',
-        method: 'GET',
+        path: "/api/getcredentials",
+        method: "GET",
       });
       setResult(JSON.stringify(response));
     } catch (error) {
-      setResult('Error occurred');
-      console.error('Fetch error:', error);
+      setResult("Error occurred");
+      console.error("Fetch error:", error);
     }
   };
 
@@ -32,6 +32,6 @@ function TestFetchButton() {
       )}
     </div>
   );
-};
+}
 
 export default TestFetchButton;

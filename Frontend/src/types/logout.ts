@@ -3,3 +3,7 @@ export type LogoutResponse = {
     success: boolean;
   };
 };
+
+export type LogoutPayload = {
+  refreshToken: string;
+};

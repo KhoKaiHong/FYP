@@ -31,3 +31,23 @@ export type AdminLoginResponse = {
     adminDetails: Admin;
   };
 };
+
+export type UserLoginPayload = {
+  icNumber: string;
+  password: string;
+};
+
+export type FacilityLoginPayload = {
+  email: string;
+  password: string;
+};
+
+export type OrganiserLoginPayload = {
+  email: string;
+  password: string;
+};
+
+export type AdminLoginPayload = {
+  email: string;
+  password: string;
+};

@@ -1,12 +1,9 @@
 import Navbar from "@/components/navigation-bar";
-import { useUser } from "@/context/user-context";
 import RegisterRedirectDialog from "./redirect-dialog";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -17,31 +14,43 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import {
-  TextField,
-  TextFieldErrorMessage,
-  TextFieldLabel,
-  TextFieldRoot,
-} from "@/components/ui/text-field";
+import { useNavigate, useLocation } from "@solidjs/router";
 import UserRegisterForm from "./user-register-form";
-import { userLogin, organiserLogin } from "@/routes/login";
-import { createSignal } from "solid-js";
-import { useNavigate } from "@solidjs/router";
-import { getErrorMessage } from "@/utils/error";
-import showErrorToast from "@/components/error-toast";
-import { Skeleton } from "@/components/ui/skeleton";
+import OrganiserRegisterForm from "./organiser-register-form";
 
 function Register() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get the current tab from the URL path
+  const getCurrentTab = () => {
+    const path = location.pathname;
+    if (path === "/register/organiser") {
+      return "organiser";
+    } else {
+      return "user";
+    }
+  };
+
+  // Handle tab changes
+  const handleTabChange = (value: string) => {
+    if (value === "user") {
+      navigate("/register/user");
+    } else {
+      navigate("/register/organiser");
+    }
+  };
+
   return (
     <div>
       <Navbar />
       <RegisterRedirectDialog />
-      <div class="flex justify-center items-center">
+      <div class="flex justify-center items-center min-h-[calc(100dvh-4rem)]">
         <div class="w-full max-w-4xl p-8">
-          <Tabs defaultValue="user">
+          <Tabs defaultValue="user" value={getCurrentTab()} onChange={handleTabChange}>
             <TabsList>
               <TabsTrigger value="user">User</TabsTrigger>
-              <TabsTrigger value="organiser">Event Organiser</TabsTrigger>
+              <TabsTrigger value="organiser">Organiser</TabsTrigger>
               <TabsIndicator />
             </TabsList>
             <TabsContent value="user">
@@ -64,15 +73,7 @@ function Register() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent class="space-y-2">
-                  <div class="grid grid-cols-1 space-y-8 h-full min-h-dvh py-3">
-                    <Skeleton class="w-full" />
-                    <Skeleton class="w-full" />
-                    <Skeleton class="w-full" />
-                    <Skeleton class="w-full" />
-                    <Skeleton class="w-full" />
-                    <Skeleton class="w-full" />
-                    <Skeleton class="w-full" />
-                  </div>
+                  <OrganiserRegisterForm />
                 </CardContent>
               </Card>
             </TabsContent>

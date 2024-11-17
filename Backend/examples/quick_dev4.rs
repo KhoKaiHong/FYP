@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .post("http://localhost:3001/api/logoutall")
+        .post("http://localhost:3001/api/logout")
         .json(&map)
         .bearer_auth(user_access_token);
 

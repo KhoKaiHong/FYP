@@ -25,14 +25,43 @@ import {
 } from "@/components/ui/text-field";
 import { userLogin, organiserLogin } from "@/routes/login";
 import { createSignal } from "solid-js";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useLocation } from "@solidjs/router";
 import { getErrorMessage } from "@/utils/error";
 import showErrorToast from "@/components/error-toast";
 import { Eye, EyeOff } from "lucide-solid";
+import { UserLoginPayload, OrganiserLoginPayload } from "@/types/login";
 
 function Login() {
-  const { setUser, setRole, setIsAuthenticated, setError } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get the current tab from the URL path
+  const getCurrentTab = () => {
+    const path = location.pathname;
+    if (path === "/login/organiser") {
+      return "organiser";
+    } else {
+      return "user"
+    }
+  };
+
+  // Handle tab changes
+  const handleTabChange = (value: string) => {
+    setId("");
+    setPassword("");
+    setUserIcError("");
+    setUserPasswordError("");
+    setOrganiserEmailError("");
+    setOrganiserPasswordError("");
+    setIsPasswordVisible(false);
+    if (value === "user") {
+      navigate("/login/user");
+    } else {
+      navigate("/login/organiser");
+    }
+  };
+
+  const { setUser, setRole, setIsAuthenticated, setError } = useUser();
 
   const [id, setId] = createSignal("");
   const [password, setPassword] = createSignal("");
@@ -79,7 +108,12 @@ function Login() {
       if (id() === "" || password() === "") {
         return;
       }
-      const response = await userLogin(id(), password());
+
+      const response = await userLogin({
+        icNumber: id(),
+        password: password(),
+      } as UserLoginPayload);
+
       if (response.isOk()) {
         setIsAuthenticated(true);
         setRole("User");
@@ -120,7 +154,10 @@ function Login() {
       if (id() === "" || password() === "") {
         return;
       }
-      const response = await organiserLogin(id(), password());
+      const response = await organiserLogin({
+        email: id(),
+        password: password(),
+      } as OrganiserLoginPayload);
       if (response.isOk()) {
         setIsAuthenticated(true);
         setRole("Organiser");
@@ -156,18 +193,7 @@ function Login() {
       <LoginRedirectDialog />
       <div class="flex h-[calc(100dvh-4rem)] justify-center items-center">
         <div class="w-full max-w-4xl px-8">
-          <Tabs
-            defaultValue="user"
-            onChange={() => {
-              setId("");
-              setPassword("");
-              setUserIcError("");
-              setUserPasswordError("");
-              setOrganiserEmailError("");
-              setOrganiserPasswordError("");
-              setIsPasswordVisible(false);
-            }}
-          >
+          <Tabs defaultValue="user" value={getCurrentTab()} onChange={handleTabChange}>
             <TabsList>
               <TabsTrigger value="user">User</TabsTrigger>
               <TabsTrigger value="organiser">Organiser</TabsTrigger>

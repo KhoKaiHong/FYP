@@ -1,16 +1,17 @@
 import { err, ok, Result } from "neverthrow";
 import { AppError } from "@/types/error";
-import { LogoutResponse } from "@/types/logout";
-import { fetchWithAuth } from "@/utils/fetch";
+import { LogoutResponse, LogoutPayload } from "@/types/logout";
+import { fetchWithAuth } from "@/utils/fetch-auth";
 
 export async function logout(
-  refreshToken: string
+  logoutPayload: LogoutPayload
 ): Promise<Result<LogoutResponse, AppError>> {
   try {
+    console.log(JSON.stringify(logoutPayload));
     const result = await fetchWithAuth<LogoutResponse>({
       path: "/api/logout",
       method: "POST",
-      body: { refreshToken },
+      body: JSON.stringify(logoutPayload),
     });
 
     if (result.isOk()) {

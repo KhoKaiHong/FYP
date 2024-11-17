@@ -5,6 +5,10 @@ import {
   FacilityLoginResponse,
   OrganiserLoginResponse,
   AdminLoginResponse,
+  UserLoginPayload,
+  FacilityLoginPayload,
+  OrganiserLoginPayload,
+  AdminLoginPayload,
 } from "@/types/login";
 import { parseErrorResponse } from "@/utils/error";
 
@@ -12,8 +16,7 @@ const BACKEND_PATH =
   import.meta.env.VITE_BACKEND_PATH || "http://localhost:3001";
 
 export async function userLogin(
-  icNumber: string,
-  password: string
+  userLoginPayload: UserLoginPayload
 ): Promise<Result<UserLoginResponse, AppError>> {
   try {
     const response = await fetch(`${BACKEND_PATH}/api/userlogin`, {
@@ -21,7 +24,7 @@ export async function userLogin(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ icNumber, password }),
+      body: JSON.stringify(userLoginPayload),
     });
 
     const result = await response.json();
@@ -42,8 +45,7 @@ export async function userLogin(
 
 // Updated facilityLogin function with ApiResult<FacilityLoginResponse>
 export async function facilityLogin(
-  email: string,
-  password: string
+  facilityLoginPayload: FacilityLoginPayload
 ): Promise<Result<FacilityLoginResponse, AppError>> {
   try {
     const response = await fetch(`${BACKEND_PATH}/api/facilitylogin`, {
@@ -51,7 +53,7 @@ export async function facilityLogin(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(facilityLoginPayload),
     });
 
     const result = await response.json();
@@ -72,8 +74,7 @@ export async function facilityLogin(
 
 // Updated organiserLogin function with ApiResult<OrganiserLoginResponse>
 export async function organiserLogin(
-  email: string,
-  password: string
+  organiserLoginPayload: OrganiserLoginPayload
 ): Promise<Result<OrganiserLoginResponse, AppError>> {
   try {
     const response = await fetch(`${BACKEND_PATH}/api/organiserlogin`, {
@@ -81,7 +82,7 @@ export async function organiserLogin(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(organiserLoginPayload),
     });
 
     const result = await response.json();
@@ -102,8 +103,7 @@ export async function organiserLogin(
 
 // Updated adminLogin function with ApiResult<AdminLoginResponse>
 export async function adminLogin(
-  email: string,
-  password: string
+  adminLoginPayload: AdminLoginPayload
 ): Promise<Result<AdminLoginResponse, AppError>> {
   try {
     const response = await fetch(`${BACKEND_PATH}/api/adminlogin`, {
@@ -111,7 +111,7 @@ export async function adminLogin(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(adminLoginPayload),
     });
 
     const result = await response.json();

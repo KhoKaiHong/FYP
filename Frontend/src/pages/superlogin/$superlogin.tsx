@@ -25,14 +25,43 @@ import {
 } from "@/components/ui/text-field";
 import { facilityLogin, adminLogin } from "@/routes/login";
 import { createSignal } from "solid-js";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useLocation } from "@solidjs/router";
 import { getErrorMessage } from "@/utils/error";
 import showErrorToast from "@/components/error-toast";
 import { Eye, EyeOff } from "lucide-solid";
+import { FacilityLoginPayload, AdminLoginPayload } from "@/types/login";
 
 function SuperLogin() {
-  const { setUser, setRole, setIsAuthenticated, setError } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get the current tab from the URL path
+  const getCurrentTab = () => {
+    const path = location.pathname;
+    if (path === "/superlogin/admin") {
+      return "admin";
+    } else {
+      return "facility";
+    }
+  };
+
+  // Handle tab changes
+  const handleTabChange = (value: string) => {
+    setEmail("");
+    setPassword("");
+    setFacilityEmailError("");
+    setFacilityPasswordError("");
+    setAdminEmailError("");
+    setAdminPasswordError("");
+    setIsPasswordVisible(false);
+    if (value === "facility") {
+      navigate("/superlogin/facility");
+    } else {
+      navigate("/superlogin/admin");
+    }
+  };
+
+  const { setUser, setRole, setIsAuthenticated, setError } = useUser();
 
   const [email, setEmail] = createSignal("");
   const [password, setPassword] = createSignal("");
@@ -79,7 +108,12 @@ function SuperLogin() {
       if (email() === "" || password() === "") {
         return;
       }
-      const response = await facilityLogin(email(), password());
+
+      const response = await facilityLogin({
+        email: email(),
+        password: password(),
+      } as FacilityLoginPayload);
+
       if (response.isOk()) {
         setIsAuthenticated(true);
         setRole("Facility");
@@ -93,12 +127,18 @@ function SuperLogin() {
         } else if (response.error.message === "INCORRECT_PASSWORD") {
           setFacilityPasswordError(getErrorMessage(response.error));
         } else {
-          showErrorToast({errorTitle: "Error during facility login.", error: response.error});
+          showErrorToast({
+            errorTitle: "Error during facility login.",
+            error: response.error,
+          });
         }
       }
     } catch (error) {
       setError({ message: "UNKNOWN_ERROR" });
-      showErrorToast({ errorTitle: "Error during facility login.", error: { message: "UNKNOWN_ERROR" } });
+      showErrorToast({
+        errorTitle: "Error during facility login.",
+        error: { message: "UNKNOWN_ERROR" },
+      });
       console.error(error);
     }
   }
@@ -114,7 +154,12 @@ function SuperLogin() {
       if (email() === "" || password() === "") {
         return;
       }
-      const response = await adminLogin(email(), password());
+
+      const response = await adminLogin({
+        email: email(),
+        password: password(),
+      } as AdminLoginPayload);
+
       if (response.isOk()) {
         setIsAuthenticated(true);
         setRole("Admin");
@@ -128,12 +173,18 @@ function SuperLogin() {
         } else if (response.error.message === "INCORRECT_PASSWORD") {
           setAdminPasswordError(getErrorMessage(response.error));
         } else {
-          showErrorToast({errorTitle: "Error during admin login.", error: response.error});
+          showErrorToast({
+            errorTitle: "Error during admin login.",
+            error: response.error,
+          });
         }
       }
     } catch (error) {
       setError({ message: "UNKNOWN_ERROR" });
-      showErrorToast({ errorTitle: "Error during admin login.", error: { message: "UNKNOWN_ERROR" } });
+      showErrorToast({
+        errorTitle: "Error during admin login.",
+        error: { message: "UNKNOWN_ERROR" },
+      });
       console.error(error);
     }
   }
@@ -146,19 +197,11 @@ function SuperLogin() {
         <div class="w-full max-w-4xl px-8">
           <Tabs
             defaultValue="facility"
-            onChange={() => {
-              setEmail("");
-              setPassword("");
-              setFacilityEmailError("");
-              setFacilityPasswordError("");
-              setAdminEmailError("");
-              setAdminPasswordError("");
-            }}
+            value={getCurrentTab()}
+            onChange={handleTabChange}
           >
             <TabsList>
-              <TabsTrigger value="facility">
-                Facility
-              </TabsTrigger>
+              <TabsTrigger value="facility">Facility</TabsTrigger>
               <TabsTrigger value="admin">Admin</TabsTrigger>
               <TabsIndicator />
             </TabsList>
@@ -195,13 +238,17 @@ function SuperLogin() {
                   >
                     <TextFieldLabel>Password</TextFieldLabel>
                     <div class="relative">
-                      <TextField type={isPasswordVisible() ? "text" : "password"} />
+                      <TextField
+                        type={isPasswordVisible() ? "text" : "password"}
+                      />
                       <button
                         class="absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-lg text-muted-foreground/80 ring-offset-background transition-shadow hover:text-foreground focus-visible:border focus-visible:border-ring focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
                         type="button"
                         onClick={togglePasswordVisibility}
                         aria-label={
-                          isPasswordVisible() ? "Hide password" : "Show password"
+                          isPasswordVisible()
+                            ? "Hide password"
+                            : "Show password"
                         }
                         aria-pressed={isPasswordVisible()}
                         aria-controls="password"
@@ -258,13 +305,17 @@ function SuperLogin() {
                   >
                     <TextFieldLabel>Password</TextFieldLabel>
                     <div class="relative">
-                      <TextField type={isPasswordVisible() ? "text" : "password"} />
+                      <TextField
+                        type={isPasswordVisible() ? "text" : "password"}
+                      />
                       <button
                         class="absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-lg text-muted-foreground/80 ring-offset-background transition-shadow hover:text-foreground focus-visible:border focus-visible:border-ring focus-visible:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
                         type="button"
                         onClick={togglePasswordVisibility}
                         aria-label={
-                          isPasswordVisible() ? "Hide password" : "Show password"
+                          isPasswordVisible()
+                            ? "Hide password"
+                            : "Show password"
                         }
                         aria-pressed={isPasswordVisible()}
                         aria-controls="password"

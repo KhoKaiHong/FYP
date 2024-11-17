@@ -12,7 +12,7 @@ export async function fetchWithAuth<T = unknown>({
 }: {
   path: string;
   method?: string;
-  body?: unknown;
+  body?: string | null;
 }): Promise<Result<T, AppError>> {
   // Check if accessToken and refreshToken are in localStorage
   const accessToken = localStorage.getItem("accessToken");
@@ -31,7 +31,7 @@ export async function fetchWithAuth<T = unknown>({
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: body ? JSON.stringify(body) : null,
+        body: body ? body : null,
       });
 
       if (response.ok) {

@@ -36,58 +36,74 @@ import { UserRegisterPayload } from "@/types/register";
 import { userRegister } from "@/routes/register";
 import showSuccessToast from "@/components/success-toast";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "@solidjs/router";
 
 function UserRegisterForm() {
-  const [bloodTypes] = createResource(getBloodTypes);
-  const [statesDistricts] = createResource(getStatesDistricts);
+  const navigate = useNavigate();
 
-  async function getBloodTypes() {
-    const response = await listBloodTypes();
+  async function getFormData() {
+    try {
+      const [bloodTypesResponse, districtsResponse] = await Promise.all([
+        listBloodTypes(),
+        listDistricts(),
+      ]);
 
-    return response.match(
-      (data) => {
-        return data.data.bloodTypes;
-      },
-      (error) => {
-        console.error("Error fetching blood types.", error);
+      const bloodTypes = bloodTypesResponse.match(
+        (data) => data.data.bloodTypes,
+        (error) => {
+          console.error("Error fetching states and districts.", error);
+          return null;
+        }
+      );
+
+      const statesAndDistricts = districtsResponse.match(
+        (data) => {
+          const districts = data.data.districts;
+          const statesMap = districts.reduce((map, district) => {
+            map.set(district.stateId, district.stateName);
+            return map;
+          }, new Map<number, string>());
+
+          const states = Array.from(statesMap, ([id, name]) => ({
+            id,
+            name,
+          })) as State[];
+
+          return { states, districts };
+        },
+        (error) => {
+          console.error("Error fetching states and districts.", error);
+          return null;
+        }
+      );
+
+      if (!bloodTypes || !statesAndDistricts) {
         showErrorToast({
           errorTitle: "Error loading registration form.",
-          error: error,
+          error: { message: "SERVICE_ERROR" },
         });
         return null;
       }
-    );
+
+      return {
+        bloodTypes,
+        states: statesAndDistricts.states,
+        districts: statesAndDistricts.districts,
+      };
+    } catch (err) {
+      console.error("Error loading registration form: ", err);
+      showErrorToast({
+        errorTitle: "Error loading registration form.",
+        error: { message: "UNKNOWN_ERROR" },
+      });
+      return null;
+    }
   }
 
-  async function getStatesDistricts() {
-    const response = await listDistricts();
-
-    return response.match(
-      (data) => {
-        const districts = data.data.districts;
-
-        const statesMap = districts.reduce((map, district) => {
-          map.set(district.stateId, district.stateName);
-          return map;
-        }, new Map<number, string>());
-
-        const states = Array.from(statesMap, ([id, name]) => ({
-          id,
-          name,
-        })) as State[];
-
-        return { states, districts };
-      },
-      (error) => {
-        console.error("Error fetching states and districts.", error);
-        showErrorToast({
-          errorTitle: "Error loading registration form.",
-          error: error,
-        });
-        return null;
-      }
-    );
-  }
+  const [formData] = createResource(getFormData);
+  const bloodTypes = () => formData()?.bloodTypes ?? null;
+  const states = () => formData()?.states ?? null;
+  const districts = () => formData()?.districts ?? null;
 
   const [duplicateIcNumber, setDuplicateIcNumber] = createSignal(false);
   const [duplicateEmail, setDuplicateEmail] = createSignal(false);
@@ -120,7 +136,7 @@ function UserRegisterForm() {
       response.match(
         () => {
           showSuccessToast({ successTitle: "Register successful" });
-          return;
+          navigate("/login/user");
         },
         (error) => {
           if (error.message === "DUPLICATE_RECORD") {
@@ -142,7 +158,6 @@ function UserRegisterForm() {
               error: error,
             });
           }
-          return;
         }
       );
     },
@@ -160,7 +175,11 @@ function UserRegisterForm() {
   const passwordSchema = z
     .string()
     .min(8, "Password must be at least 8 characters")
-    .max(32, "Password must be at most 32 characters");
+    .max(32, "Password must be at most 32 characters")
+    .regex(
+      /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[#?!@$%^&*-]).{8,32}$/,
+      "Password must include at least one uppercase letter and one lowercase letter as well as one special character"
+    );
 
   const passwordConfirmSchema = z
     .string()
@@ -200,7 +219,7 @@ function UserRegisterForm() {
   });
 
   const stateIdSchema = createMemo(() => {
-    const data = statesDistricts();
+    const data = states();
 
     if (!data) {
       return z.number();
@@ -208,20 +227,20 @@ function UserRegisterForm() {
       return z
         .number()
         .min(1, { message: "This field is required" })
-        .max(data.states.length);
+        .max(data.length);
     }
   });
 
   const [stateIdChosen, setStateIdChosen] = createSignal(0);
 
   const districtsAvailable = createMemo(() => {
-    const data = statesDistricts();
+    const data = districts();
     const stateId = stateIdChosen();
 
     if (!data || stateId === 0) {
       return [];
     } else {
-      const districtsInState = data.districts.filter(
+      const districtsInState = data.filter(
         (district) => district.stateId === stateId
       );
 
@@ -250,14 +269,24 @@ function UserRegisterForm() {
     <div>
       <Suspense
         fallback={
-          <div class="grid grid-cols-1 space-y-8 h-full min-h-dvh py-3">
-            <Skeleton class="w-full" />
-            <Skeleton class="w-full" />
-            <Skeleton class="w-full" />
-            <Skeleton class="w-full" />
-            <Skeleton class="w-full" />
-            <Skeleton class="w-full" />
-            <Skeleton class="w-full" />
+          <div class="space-y-8 h-full min-h-80 py-3 ">
+            <div class="space-y-8 md:space-y-0 md:grid md:grid-cols-2 md:gap-6">
+              <Skeleton class="w-full h-14" />
+              <Skeleton class="w-full h-14" />
+            </div>
+            <div class="space-y-8 md:space-y-0 md:grid md:grid-cols-2 md:gap-6">
+              <Skeleton class="w-full h-14" />
+              <Skeleton class="w-full h-14" />
+            </div>
+            <div class="space-y-8 md:space-y-0 md:grid md:grid-cols-2 md:gap-6">
+              <Skeleton class="w-full h-14" />
+              <Skeleton class="w-full h-14" />
+            </div>
+            <div class="space-y-8 md:space-y-0 md:grid md:grid-cols-3 md:gap-6">
+              <Skeleton class="w-full h-14" />
+              <Skeleton class="w-full h-14" />
+              <Skeleton class="w-full h-14" />
+            </div>
           </div>
         }
       >
@@ -269,88 +298,90 @@ function UserRegisterForm() {
           }}
         >
           <div class="space-y-2">
-            <form.Field
-              name="icNumber"
-              validators={{ onChange: icNumberSchema }}
-              children={(field) => {
-                const hasError = createMemo(() => {
+            <div class="space-y-2 md:space-y-0 md:grid md:grid-cols-2 md:gap-6">
+              <form.Field
+                name="icNumber"
+                validators={{ onChange: icNumberSchema }}
+                children={(field) => {
+                  const hasError = createMemo(() => {
+                    return (
+                      (field().state.meta.errors.length > 0 &&
+                        field().state.meta.isTouched) ||
+                      duplicateIcNumber()
+                    );
+                  });
+
                   return (
-                    (field().state.meta.errors.length > 0 &&
-                      field().state.meta.isTouched) ||
-                    duplicateIcNumber()
+                    <TextFieldRoot
+                      class="space-y-1"
+                      name={field().name}
+                      validationState={hasError() ? "invalid" : "valid"}
+                      value={field().state.value}
+                      onBlur={field().handleBlur}
+                      onChange={(e) => {
+                        field().handleChange(e);
+                        setDuplicateIcNumber(false);
+                      }}
+                    >
+                      <TextFieldLabel>IC Number</TextFieldLabel>
+                      <TextField placeholder="e.g. 123456-78-9012" />
+                      <TextFieldErrorMessage>
+                        {duplicateIcNumber()
+                          ? "IC Number already registered"
+                          : field().state.meta.errors.join(", ").split(", ")[0]}
+                      </TextFieldErrorMessage>
+                    </TextFieldRoot>
                   );
-                });
+                }}
+              />
+              <form.Field
+                name="name"
+                validators={{ onChange: nameSchema }}
+                children={(field) => {
+                  const hasError = createMemo(() => {
+                    return (
+                      field().state.meta.errors.length > 0 &&
+                      field().state.meta.isTouched
+                    );
+                  });
 
-                return (
-                  <TextFieldRoot
-                    class="space-y-1"
-                    name={field().name}
-                    validationState={hasError() ? "invalid" : "valid"}
-                    value={field().state.value}
-                    onBlur={field().handleBlur}
-                    onChange={(e) => {
-                      field().handleChange(e);
-                      setDuplicateIcNumber(false);
-                    }}
-                  >
-                    <TextFieldLabel>IC Number</TextFieldLabel>
-                    <TextField placeholder="e.g. 123456-78-9012" />
-                    <TextFieldErrorMessage>
-                      {duplicateIcNumber()
-                        ? "IC Number already registered"
-                        : field().state.meta.errors.join(", ").split(", ")[0]}
-                    </TextFieldErrorMessage>
-                  </TextFieldRoot>
-                );
-              }}
-            />
-            <form.Field
-              name="name"
-              validators={{ onChange: nameSchema }}
-              children={(field) => {
-                const hasError = createMemo(() => {
                   return (
-                    field().state.meta.errors.length > 0 &&
-                    field().state.meta.isTouched
+                    <TextFieldRoot
+                      class="space-y-1"
+                      name={field().name}
+                      validationState={hasError() ? "invalid" : "valid"}
+                      value={field().state.value}
+                      onBlur={field().handleBlur}
+                      onChange={field().handleChange}
+                    >
+                      <TextFieldLabel>Name</TextFieldLabel>
+                      <TextField />
+                      <TextFieldErrorMessage>
+                        {field().state.meta.errors.join(", ").split(", ")[0]}
+                      </TextFieldErrorMessage>
+                    </TextFieldRoot>
                   );
-                });
+                }}
+              />
+            </div>
+            <div class="space-y-2 md:space-y-0 md:grid md:grid-cols-2 md:gap-6">
+              <form.Field
+                name="password"
+                validators={{ onChange: passwordSchema }}
+                children={(field) => {
+                  const hasError = createMemo(() => {
+                    return (
+                      field().state.meta.errors.length > 0 &&
+                      field().state.meta.isTouched
+                    );
+                  });
 
-                return (
-                  <TextFieldRoot
-                    class="space-y-1"
-                    name={field().name}
-                    validationState={hasError() ? "invalid" : "valid"}
-                    value={field().state.value}
-                    onBlur={field().handleBlur}
-                    onChange={field().handleChange}
-                  >
-                    <TextFieldLabel>Name</TextFieldLabel>
-                    <TextField />
-                    <TextFieldErrorMessage>
-                      {field().state.meta.errors.join(", ").split(", ")[0]}
-                    </TextFieldErrorMessage>
-                  </TextFieldRoot>
-                );
-              }}
-            />
-            <form.Field
-              name="password"
-              validators={{ onChange: passwordSchema }}
-              children={(field) => {
-                const hasError = createMemo(() => {
+                  const [isVisible, setIsVisible] = createSignal(false);
+                  function toggleVisibility() {
+                    setIsVisible(!isVisible());
+                  }
+
                   return (
-                    field().state.meta.errors.length > 0 &&
-                    field().state.meta.isTouched
-                  );
-                });
-
-                const [isVisible, setIsVisible] = createSignal(false);
-                function toggleVisibility() {
-                  setIsVisible(!isVisible());
-                }
-
-                return (
-                  <div>
                     <TextFieldRoot
                       class="space-y-1"
                       name={field().name}
@@ -387,31 +418,29 @@ function UserRegisterForm() {
                         {field().state.meta.errors.join(", ").split(", ")[0]}
                       </TextFieldErrorMessage>
                     </TextFieldRoot>
-                  </div>
-                );
-              }}
-            />
-            <form.Field
-              name="passwordConfirm"
-              validators={{
-                onChangeListenTo: ["password"],
-                onChange: passwordConfirmSchema,
-              }}
-              children={(field) => {
-                const hasError = createMemo(() => {
-                  return (
-                    field().state.meta.errors.length > 0 &&
-                    field().state.meta.isTouched
                   );
-                });
+                }}
+              />
+              <form.Field
+                name="passwordConfirm"
+                validators={{
+                  onChangeListenTo: ["password"],
+                  onChange: passwordConfirmSchema,
+                }}
+                children={(field) => {
+                  const hasError = createMemo(() => {
+                    return (
+                      field().state.meta.errors.length > 0 &&
+                      field().state.meta.isTouched
+                    );
+                  });
 
-                const [isVisible, setIsVisible] = createSignal(false);
-                function toggleVisibility() {
-                  setIsVisible(!isVisible());
-                }
+                  const [isVisible, setIsVisible] = createSignal(false);
+                  function toggleVisibility() {
+                    setIsVisible(!isVisible());
+                  }
 
-                return (
-                  <div>
+                  return (
                     <TextFieldRoot
                       class="space-y-1"
                       name={field().name}
@@ -448,275 +477,278 @@ function UserRegisterForm() {
                         {field().state.meta.errors.join(", ").split(", ")[0]}
                       </TextFieldErrorMessage>
                     </TextFieldRoot>
-                  </div>
-                );
-              }}
-            />
-
-            <form.Field
-              name="email"
-              validators={{ onChange: emailSchema }}
-              children={(field) => {
-                const hasError = createMemo(() => {
-                  return (
-                    (field().state.meta.errors.length > 0 &&
-                      field().state.meta.isTouched) ||
-                    duplicateEmail()
                   );
-                });
+                }}
+              />
+            </div>
 
-                return (
-                  <TextFieldRoot
-                    class="space-y-1"
-                    name={field().name}
-                    validationState={hasError() ? "invalid" : "valid"}
-                    value={field().state.value}
-                    onBlur={field().handleBlur}
-                    onChange={(e) => {
-                      field().handleChange(e);
-                      setDuplicateEmail(false);
-                    }}
-                  >
-                    <TextFieldLabel>Email</TextFieldLabel>
-                    <TextField type="email" />
-                    <TextFieldErrorMessage>
-                      {duplicateEmail()
-                        ? "Email already registered"
-                        : field().state.meta.errors.join(", ").split(", ")[0]}
-                    </TextFieldErrorMessage>
-                  </TextFieldRoot>
-                );
-              }}
-            />
-            <form.Field
-              name="phoneNumber"
-              validators={{ onChange: phoneNumberSchema }}
-              children={(field) => {
-                const hasError = createMemo(() => {
+            <div class="space-y-2 md:space-y-0 md:grid md:grid-cols-2 md:gap-6">
+              <form.Field
+                name="email"
+                validators={{ onChange: emailSchema }}
+                children={(field) => {
+                  const hasError = createMemo(() => {
+                    return (
+                      (field().state.meta.errors.length > 0 &&
+                        field().state.meta.isTouched) ||
+                      duplicateEmail()
+                    );
+                  });
+
                   return (
-                    (field().state.meta.errors.length > 0 &&
-                      field().state.meta.isTouched) ||
-                    duplicatePhoneNumber()
-                  );
-                });
-
-                return (
-                  <TextFieldRoot
-                    class="space-y-1"
-                    name={field().name}
-                    validationState={hasError() ? "invalid" : "valid"}
-                    value={field().state.value}
-                    onBlur={field().handleBlur}
-                    onChange={(e) => {
-                      field().handleChange(e);
-                      setDuplicatePhoneNumber(false);
-                    }}
-                  >
-                    <TextFieldLabel>Phone Number</TextFieldLabel>
-                    <div class="flex rounded-lg">
-                      <div class="flex h-9 rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm text-foreground rounded-e-none justify-center items-center">
-                        +60
-                      </div>
-                      <TextField
-                        class="rounded-s-none"
-                        type="tel"
-                        placeholder="12-3456789"
-                      />
-                    </div>
-                    <TextFieldErrorMessage>
-                    {duplicatePhoneNumber()
-                        ? "Phone number already registered"
-                        : field().state.meta.errors.join(", ").split(", ")[0]}
-                    </TextFieldErrorMessage>
-                  </TextFieldRoot>
-                );
-              }}
-            />
-            <form.Field
-              name="bloodType"
-              validators={{ onChange: bloodTypeSchema() }}
-              children={(field) => {
-                const hasError = createMemo(() => {
-                  return (
-                    field().state.meta.errors.length > 0 &&
-                    field().state.meta.isTouched
-                  );
-                });
-
-                const fieldValue = createMemo(() => {
-                  if (field().state.value === "") {
-                    return null;
-                  } else {
-                    return field().state.value;
-                  }
-                });
-
-                return (
-                  <div class="space-y-1">
-                    <label
-                      class={`text-sm font-medium ${
-                        !bloodTypes() ? "cursor-not-allowed opacity-70" : ""
-                      } ${hasError() ? "text-destructive" : ""}`}
-                    >
-                      Blood Type
-                    </label>
-                    <Select
+                    <TextFieldRoot
                       class="space-y-1"
                       name={field().name}
-                      options={bloodTypes() ?? []}
-                      disabled={bloodTypes() ? false : true}
                       validationState={hasError() ? "invalid" : "valid"}
-                      value={fieldValue()}
-                      onChange={(e) => field().handleChange(e ?? "")}
+                      value={field().state.value}
                       onBlur={field().handleBlur}
-                      placeholder="--"
-                      itemComponent={(props) => (
-                        <SelectItem item={props.item}>
-                          {props.item.rawValue}
-                        </SelectItem>
-                      )}
-                    >
-                      <SelectTrigger class="w-[180px]">
-                        <SelectValue<string>>
-                          {(state) => state.selectedOption()}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectErrorMessage class="font-medium text-destructive text-xs">
-                        {field().state.meta.errors.join(", ").split(", ")[0]}
-                      </SelectErrorMessage>
-                      <SelectContent />
-                    </Select>
-                  </div>
-                );
-              }}
-            />
-            <form.Field
-              name="stateId"
-              validators={{ onChange: stateIdSchema() }}
-              children={(field) => {
-                const hasError = createMemo(() => {
-                  return (
-                    field().state.meta.errors.length > 0 &&
-                    field().state.meta.isTouched
-                  );
-                });
-
-                return (
-                  <div class="space-y-1">
-                    <label
-                      class={`text-sm font-medium ${
-                        !statesDistricts()?.states
-                          ? "cursor-not-allowed opacity-70"
-                          : ""
-                      } ${hasError() ? "text-destructive" : ""}`}
-                    >
-                      State
-                    </label>
-                    <Select
-                      class="space-y-1"
-                      name={field().name}
-                      options={statesDistricts()?.states ?? []}
-                      optionValue="id"
-                      optionTextValue="name"
-                      disabled={statesDistricts()?.states ? false : true}
-                      validationState={hasError() ? "invalid" : "valid"}
                       onChange={(e) => {
-                        field().handleChange(e?.id ?? 0);
-                        setStateIdChosen(e?.id ?? 0);
-                        setDistrictInput(null);
+                        field().handleChange(e);
+                        setDuplicateEmail(false);
                       }}
-                      onBlur={field().handleBlur}
-                      placeholder="--"
-                      itemComponent={(props) => (
-                        <SelectItem item={props.item}>
-                          {props.item.rawValue.name}
-                        </SelectItem>
-                      )}
                     >
-                      <SelectTrigger class="w-[180px]">
-                        <SelectValue<State>>
-                          {(state) => state.selectedOption().name}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectErrorMessage class="font-medium text-destructive text-xs">
-                        {field().state.meta.errors.join(", ").split(", ")[0]}
-                      </SelectErrorMessage>
-                      <SelectContent />
-                    </Select>
-                  </div>
-                );
-              }}
-            />
-            <form.Field
-              name="districtId"
-              validators={{
-                onChange: districtIdSchema(),
-              }}
-              children={(field) => {
-                const hasError = createMemo(() => {
-                  return (
-                    field().state.meta.errors.length > 0 &&
-                    field().state.meta.isTouched
+                      <TextFieldLabel>Email</TextFieldLabel>
+                      <TextField type="email" />
+                      <TextFieldErrorMessage>
+                        {duplicateEmail()
+                          ? "Email already registered"
+                          : field().state.meta.errors.join(", ").split(", ")[0]}
+                      </TextFieldErrorMessage>
+                    </TextFieldRoot>
                   );
-                });
+                }}
+              />
+              <form.Field
+                name="phoneNumber"
+                validators={{ onChange: phoneNumberSchema }}
+                children={(field) => {
+                  const hasError = createMemo(() => {
+                    return (
+                      (field().state.meta.errors.length > 0 &&
+                        field().state.meta.isTouched) ||
+                      duplicatePhoneNumber()
+                    );
+                  });
 
-                const disabled = createMemo(() => {
                   return (
-                    !statesDistricts() || districtsAvailable().length === 0
-                  );
-                });
-
-                return (
-                  <div class="space-y-1">
-                    <label
-                      class={`text-sm font-medium ${
-                        disabled() ? "cursor-not-allowed opacity-70" : ""
-                      } ${hasError() ? "text-destructive" : ""}`}
-                    >
-                      District
-                    </label>
-                    <Combobox
+                    <TextFieldRoot
                       class="space-y-1"
                       name={field().name}
-                      options={districtsAvailable()}
-                      value={districtInput()}
-                      onChange={(selectedOption) => {
-                        setDistrictInput(selectedOption);
-                        field().handleChange(selectedOption?.districtId ?? 0);
-                      }}
-                      optionValue="districtId"
-                      optionTextValue="districtName"
-                      optionLabel="districtName"
-                      disabled={disabled()}
                       validationState={hasError() ? "invalid" : "valid"}
+                      value={field().state.value}
                       onBlur={field().handleBlur}
-                      placeholder="Enter district..."
-                      itemComponent={(props) => (
-                        <ComboboxItem item={props.item}>
-                          {props.item.rawValue.districtName}
-                        </ComboboxItem>
-                      )}
+                      onChange={(e) => {
+                        field().handleChange(e);
+                        setDuplicatePhoneNumber(false);
+                      }}
                     >
-                      <ComboboxTrigger>
-                        <ComboboxInput
-                          onBlur={(e) => {
-                            e.currentTarget.value =
-                              districtInput()?.districtName ?? "";
-                          }}
+                      <TextFieldLabel>Phone Number</TextFieldLabel>
+                      <div class="flex rounded-lg ">
+                        <div class="flex h-9 rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm text-foreground rounded-e-none justify-center items-center">
+                          +60
+                        </div>
+                        <TextField
+                          class="rounded-s-none"
+                          type="tel"
+                          placeholder="12-3456789"
                         />
-                      </ComboboxTrigger>
-                      <ComboboxErrorMessage class="font-medium text-destructive text-xs">
-                        {field().state.meta.errors.join(", ").split(", ")[0]}
-                      </ComboboxErrorMessage>
-                      <ComboboxContent />
-                    </Combobox>
-                  </div>
-                );
-              }}
-            />
+                      </div>
+                      <TextFieldErrorMessage>
+                        {duplicatePhoneNumber()
+                          ? "Phone number already registered"
+                          : field().state.meta.errors.join(", ").split(", ")[0]}
+                      </TextFieldErrorMessage>
+                    </TextFieldRoot>
+                  );
+                }}
+              />
+            </div>
+
+            <div class="space-y-2 md:space-y-0 md:grid md:grid-cols-3 md:gap-6">
+              <form.Field
+                name="bloodType"
+                validators={{ onChange: bloodTypeSchema() }}
+                children={(field) => {
+                  const hasError = createMemo(() => {
+                    return (
+                      field().state.meta.errors.length > 0 &&
+                      field().state.meta.isTouched
+                    );
+                  });
+
+                  const fieldValue = createMemo(() => {
+                    if (field().state.value === "") {
+                      return null;
+                    } else {
+                      return field().state.value;
+                    }
+                  });
+
+                  return (
+                    <div class="space-y-1">
+                      <label
+                        class={`text-sm font-medium ${
+                          !bloodTypes() ? "cursor-not-allowed opacity-70" : ""
+                        } ${hasError() ? "text-destructive" : ""}`}
+                      >
+                        Blood Type
+                      </label>
+                      <Select
+                        class="space-y-1 w-full"
+                        name={field().name}
+                        options={bloodTypes() ?? []}
+                        disabled={bloodTypes() ? false : true}
+                        validationState={hasError() ? "invalid" : "valid"}
+                        value={fieldValue()}
+                        onChange={(e) => field().handleChange(e ?? "")}
+                        onBlur={field().handleBlur}
+                        placeholder="--"
+                        itemComponent={(props) => (
+                          <SelectItem item={props.item}>
+                            {props.item.rawValue}
+                          </SelectItem>
+                        )}
+                      >
+                        <SelectTrigger class="w-full">
+                          <SelectValue<string>>
+                            {(state) => state.selectedOption()}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectErrorMessage class="font-medium text-destructive text-xs">
+                          {field().state.meta.errors.join(", ").split(", ")[0]}
+                        </SelectErrorMessage>
+                        <SelectContent />
+                      </Select>
+                    </div>
+                  );
+                }}
+              />
+              <form.Field
+                name="stateId"
+                validators={{ onChange: stateIdSchema() }}
+                children={(field) => {
+                  const hasError = createMemo(() => {
+                    return (
+                      field().state.meta.errors.length > 0 &&
+                      field().state.meta.isTouched
+                    );
+                  });
+
+                  return (
+                    <div class="space-y-1">
+                      <label
+                        class={`text-sm font-medium ${
+                          !states() ? "cursor-not-allowed opacity-70" : ""
+                        } ${hasError() ? "text-destructive" : ""}`}
+                      >
+                        State
+                      </label>
+                      <Select
+                        class="space-y-1 w-full"
+                        name={field().name}
+                        options={states() ?? []}
+                        optionValue="id"
+                        optionTextValue="name"
+                        disabled={states() ? false : true}
+                        validationState={hasError() ? "invalid" : "valid"}
+                        onChange={(e) => {
+                          field().handleChange(e?.id ?? 0);
+                          setStateIdChosen(e?.id ?? 0);
+                          setDistrictInput(null);
+                        }}
+                        onBlur={field().handleBlur}
+                        placeholder="--"
+                        itemComponent={(props) => (
+                          <SelectItem item={props.item}>
+                            {props.item.rawValue.name}
+                          </SelectItem>
+                        )}
+                      >
+                        <SelectTrigger class="w-full">
+                          <SelectValue<State>>
+                            {(state) => state.selectedOption().name}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectErrorMessage class="font-medium text-destructive text-xs">
+                          {field().state.meta.errors.join(", ").split(", ")[0]}
+                        </SelectErrorMessage>
+                        <SelectContent />
+                      </Select>
+                    </div>
+                  );
+                }}
+              />
+              <form.Field
+                name="districtId"
+                validators={{
+                  onChange: districtIdSchema(),
+                }}
+                children={(field) => {
+                  const hasError = createMemo(() => {
+                    return (
+                      field().state.meta.errors.length > 0 &&
+                      field().state.meta.isTouched
+                    );
+                  });
+
+                  const disabled = createMemo(() => {
+                    return !districts() || districtsAvailable().length === 0;
+                  });
+
+                  return (
+                    <div class="space-y-1">
+                      <label
+                        class={`text-sm font-medium ${
+                          disabled() ? "cursor-not-allowed opacity-70" : ""
+                        } ${hasError() ? "text-destructive" : ""}`}
+                      >
+                        District
+                      </label>
+                      <Combobox
+                        class="space-y-1"
+                        name={field().name}
+                        options={districtsAvailable()}
+                        value={districtInput()}
+                        onChange={(selectedOption) => {
+                          setDistrictInput(selectedOption);
+                          field().handleChange(selectedOption?.districtId ?? 0);
+                        }}
+                        optionValue="districtId"
+                        optionTextValue="districtName"
+                        optionLabel="districtName"
+                        disabled={disabled()}
+                        validationState={hasError() ? "invalid" : "valid"}
+                        onBlur={field().handleBlur}
+                        placeholder="Enter district..."
+                        itemComponent={(props) => (
+                          <ComboboxItem item={props.item}>
+                            {props.item.rawValue.districtName}
+                          </ComboboxItem>
+                        )}
+                      >
+                        <ComboboxTrigger>
+                          <ComboboxInput
+                            onBlur={(e) => {
+                              e.currentTarget.value =
+                                districtInput()?.districtName ?? "";
+                            }}
+                          />
+                        </ComboboxTrigger>
+                        <ComboboxErrorMessage class="font-medium text-destructive text-xs">
+                          {field().state.meta.errors.join(", ").split(", ")[0]}
+                        </ComboboxErrorMessage>
+                        <ComboboxContent />
+                      </Combobox>
+                    </div>
+                  );
+                }}
+              />
+            </div>
           </div>
           <div class="flex items-center pt-6">
-            <Button type="submit">Register</Button>
+            <Button type="submit" disabled={formData() ? false : true}>
+              Register
+            </Button>
           </div>
         </form>
       </Suspense>

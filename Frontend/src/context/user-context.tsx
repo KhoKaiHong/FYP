@@ -7,7 +7,7 @@ import {
   JSXElement,
 } from "solid-js";
 import { createResource } from "solid-js";
-import { fetchWithAuth } from "@/utils/fetch";
+import { fetchWithAuth } from "@/utils/fetch-auth";
 import { createEffect } from "solid-js";
 import { Users } from "@/types/users";
 import { AppError } from "@/types/error";
@@ -15,6 +15,7 @@ import { GetCredentialsResponse } from "@/types/get-credentials";
 import { Result, err } from "neverthrow";
 import { logout } from "@/routes/logout";
 import showErrorToast from "@/components/error-toast";
+import { LogoutPayload } from "@/types/logout";
 
 type Role = "User" | "Facility" | "Organiser" | "Admin";
 
@@ -86,7 +87,10 @@ export function UserProvider(props: UserProviderProps) {
 
     if (userData.error) {
       setError({ message: "UNKNOWN_ERROR" });
-      showErrorToast({ errorTitle: "Error loading user data.", error: { message: "UNKNOWN_ERROR" } });
+      showErrorToast({
+        errorTitle: "Error loading user data.",
+        error: { message: "UNKNOWN_ERROR" },
+      });
       return;
     }
 
@@ -123,7 +127,10 @@ export function UserProvider(props: UserProviderProps) {
           setError(null);
         } else {
           setError({ message: "UNKNOWN_ERROR" });
-          showErrorToast({ errorTitle: "Error loading user data.", error: { message: "UNKNOWN_ERROR" } });
+          showErrorToast({
+            errorTitle: "Error loading user data.",
+            error: { message: "UNKNOWN_ERROR" },
+          });
         }
       },
       (error) => {
@@ -151,11 +158,16 @@ export function UserProvider(props: UserProviderProps) {
         setRole(null);
         setUser(null);
         setError({ message: "NO_AUTH" });
-        showErrorToast({ errorTitle: "Error during log out.", error: { message: "NO_AUTH" } });
+        showErrorToast({
+          errorTitle: "Error during log out.",
+          error: { message: "NO_AUTH" },
+        });
         return;
       }
 
-      const result = await logout(refreshToken);
+      const result = await logout({
+        refreshToken: refreshToken,
+      } as LogoutPayload);
 
       if (result.isOk()) {
         setIsAuthenticated(false);
@@ -173,11 +185,17 @@ export function UserProvider(props: UserProviderProps) {
           setRole(null);
           setUser(null);
         }
-        showErrorToast({ errorTitle: "Error during log out.", error: result.error });
+        showErrorToast({
+          errorTitle: "Error during log out.",
+          error: result.error,
+        });
       }
     } catch (err) {
       setError({ message: "UNKNOWN_ERROR" });
-      showErrorToast({ errorTitle: "Error during log out.", error: { message: "UNKNOWN_ERROR" } });
+      showErrorToast({
+        errorTitle: "Error during log out.",
+        error: { message: "UNKNOWN_ERROR" },
+      });
       console.error("Error during user logout:", err);
     }
   }
@@ -204,7 +222,10 @@ export function UserProvider(props: UserProviderProps) {
 export function useUser() {
   const context = useContext(UserContext);
   if (!context) {
-    showErrorToast({ errorTitle: "Error loading user data.", error: { message: "UNKNOWN_ERROR" } });
+    showErrorToast({
+      errorTitle: "Error loading user data.",
+      error: { message: "UNKNOWN_ERROR" },
+    });
     console.error("Cannot find UserContext");
     throw new Error("Cannot find UserContext");
   }
