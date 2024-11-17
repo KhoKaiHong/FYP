@@ -13,7 +13,7 @@ import { Users } from "@/types/users";
 import { AppError } from "@/types/error";
 import { GetCredentialsResponse } from "@/types/get-credentials";
 import { Result, err } from "neverthrow";
-import { logout } from "@/routes/logout";
+import { logout } from "@/api/logout";
 import showErrorToast from "@/components/error-toast";
 import { LogoutPayload } from "@/types/logout";
 

@@ -23,7 +23,7 @@ import {
   TextFieldLabel,
   TextFieldRoot,
 } from "@/components/ui/text-field";
-import { userLogin, organiserLogin } from "@/routes/login";
+import { userLogin, organiserLogin } from "@/api/login";
 import { createSignal } from "solid-js";
 import { useNavigate, useLocation } from "@solidjs/router";
 import { getErrorMessage } from "@/utils/error";
@@ -41,7 +41,7 @@ function Login() {
     if (path === "/login/organiser") {
       return "organiser";
     } else {
-      return "user"
+      return "user";
     }
   };
 
@@ -193,7 +193,11 @@ function Login() {
       <LoginRedirectDialog />
       <div class="flex h-[calc(100dvh-4rem)] justify-center items-center">
         <div class="w-full max-w-4xl px-8">
-          <Tabs defaultValue="user" value={getCurrentTab()} onChange={handleTabChange}>
+          <Tabs
+            defaultValue="user"
+            value={getCurrentTab()}
+            onChange={handleTabChange}
+          >
             <TabsList>
               <TabsTrigger value="user">User</TabsTrigger>
               <TabsTrigger value="organiser">Organiser</TabsTrigger>

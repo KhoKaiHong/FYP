@@ -23,7 +23,7 @@ import {
   TextFieldLabel,
   TextFieldRoot,
 } from "@/components/ui/text-field";
-import { facilityLogin, adminLogin } from "@/routes/login";
+import { facilityLogin, adminLogin } from "@/api/login";
 import { createSignal } from "solid-js";
 import { useNavigate, useLocation } from "@solidjs/router";
 import { getErrorMessage } from "@/utils/error";

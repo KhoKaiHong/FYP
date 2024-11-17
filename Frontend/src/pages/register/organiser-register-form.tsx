@@ -11,7 +11,7 @@ import { createMemo, createSignal } from "solid-js";
 import { Eye, EyeOff } from "lucide-solid";
 import showErrorToast from "@/components/error-toast";
 import { OrganiserRegisterPayload } from "@/types/register";
-import { organiserRegister } from "@/routes/register";
+import { organiserRegister } from "@/api/register";
 import showSuccessToast from "@/components/success-toast";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "@solidjs/router";
