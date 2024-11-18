@@ -40,6 +40,9 @@ tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 # Email
 resend-rs = { version = "0.9.1", default-features = false, features = ["rustls-tls"] }
 
+# Scheduling
+tokio-cron-scheduler = { version = "0.13.0" }
+
 # Others
 base64-url = "3.0.0"
 lazy-regex = "3.3.0"

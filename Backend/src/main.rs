@@ -22,9 +22,10 @@ use model::ModelManager;
 use resend_rs::Resend;
 use state::AppState;
 use tokio::net::TcpListener;
+use tokio_cron_scheduler::{Job, JobScheduler, JobToRun};
 use tower_cookies::CookieManagerLayer;
 use tower_http::cors::{Any, CorsLayer};
-use tracing::info;
+use tracing::{debug, info};
 use tracing_subscriber::{self, EnvFilter};
 
 #[tokio::main]
@@ -44,6 +45,31 @@ async fn main() -> Result<()> {
         model_manager: ModelManager::new().await?,
         email_manager: Resend::new(config().RESEND_API_KEY.as_str()),
     };
+
+    let mut sched = JobScheduler::new()
+        .await
+        .map_err(|_| Error::SchedulerError)?;
+    // Add basic cron job
+    sched
+        .add(
+            Job::new_async("1/7 * * * * *", |uuid, mut l| {
+                Box::pin(async move {
+                    debug!("I run async every 7 seconds");
+
+                    // Query the next execution time for this job
+                    let next_tick = l.next_tick_for_job(uuid).await;
+                    match next_tick {
+                        Ok(Some(ts)) => debug!("Next time for 7s job is {:?}", ts),
+                        _ => debug!("Could not get next tick for 7s job"),
+                    }
+                })
+            })
+            .map_err(|_| Error::SchedulerError)?,
+        )
+        .await
+        .map_err(|_| Error::SchedulerError)?;
+
+    sched.start().await.map_err(|_| Error::SchedulerError)?;
 
     // Initialize CORS
     let cors_layer = CorsLayer::new()

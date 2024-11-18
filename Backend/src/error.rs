@@ -10,6 +10,8 @@ pub enum Error {
     
 	// -- Modules
 	Model(model::Error),
+
+	SchedulerError,
 }
 
 // region:    --- Froms
