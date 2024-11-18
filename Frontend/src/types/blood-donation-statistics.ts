@@ -18,5 +18,6 @@ export type MonthlyDonation = {
 
 export type DailyDonationsByYear = {
   year: number;
+  months: number[];
   data: DailyDonation[];
 }
