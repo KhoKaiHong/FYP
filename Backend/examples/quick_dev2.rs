@@ -5,7 +5,7 @@ use serde_json::json;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let hc = httpc_test::new_client("http://localhost:3001")?;
+    let hc = httpc_test::new_client("http://localhost:8000")?;
 
     // User login test
     let req_login = hc.do_post(
@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .post("http://localhost:3001/api/refresh")
+        .post("http://localhost:8000/api/refresh")
         .json(&map)
         .bearer_auth(access_token);
 
@@ -41,7 +41,7 @@ async fn main() -> Result<()> {
 
     // let req = hc
     //     .reqwest_client()
-    //     .get("http://localhost:3001/api/hello2/John")
+    //     .get("http://localhost:8000/api/hello2/John")
     //     .bearer_auth("gtfhtgrhgthntg");
 
     // let res = req.send().await?;

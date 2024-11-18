@@ -63,7 +63,7 @@ function Navbar() {
       subpages: [
         { name: "Blood Donation Guide", href: "#" },
         { name: "Myths & Facts", href: "#" },
-        { name: "Donor Privileges", href: "#" },
+        { name: "Donor Privileges", href: "/donor-privileges" },
         { name: "Event Organisation", href: "#" },
         { name: "Blood Donation Statistics", href: "/blood-donation-statistics" },
       ],

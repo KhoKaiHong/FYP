@@ -78,23 +78,23 @@ function BloodDonationStatistics() {
     scales: {
       x: {
         ticks: {
-          color: "rgba(107, 114, 128, 0.8)",
+          color: "rgba(100, 116, 139, 0.8)",
         },
         border: { display: false },
         grid: { display: false },
       },
       y: {
         border: {
-          color: "rgba(107, 114, 128, 0.4)",
+          color: "rgba(100, 116, 139, 0.4)",
           dash: [3],
           dashOffset: 5,
           display: false,
         },
         grid: {
-          color: "rgba(107, 114, 128, 0.4)",
+          color: "rgba(100, 116, 139, 0.4)",
         },
         ticks: {
-          color: "rgba(107, 114, 128, 0.8)",
+          color: "rgba(100, 116, 139, 0.8)",
         },
       },
     },
@@ -126,13 +126,13 @@ function BloodDonationStatistics() {
             dailyStatistics={dailyStatistics()}
             chartOptions={chartOptions}
           />
-          <div class="text-gray-500 space-y-2">
+          <div class="text-muted-foreground space-y-2">
             <p>
               This data is brought to you by{" "}
               <A
                 href="https://data.gov.my/"
                 target="_blank"
-                class="text-blue-500 hover:underline"
+                class="text-blue-500 hover:underline hover:text-blue-600"
               >
                 data.gov.my
               </A>
@@ -143,7 +143,7 @@ function BloodDonationStatistics() {
               <A
                 href="https://data.moh.gov.my/dashboard/blood-donation"
                 target="_blank"
-                class="text-blue-500 hover:underline"
+                class="text-blue-500 hover:underline hover:text-blue-600"
               >
                 data.moh.gov.my
               </A>

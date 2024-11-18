@@ -4,9 +4,11 @@ import { BloodTypesResponse } from "@/types/blood-types";
 import { parseErrorResponse } from "@/utils/error";
 
 const BACKEND_PATH =
-  import.meta.env.VITE_BACKEND_PATH || "http://localhost:3001";
+  import.meta.env.VITE_BACKEND_PATH || "http://localhost:8000";
 
-export async function listBloodTypes(): Promise<Result<BloodTypesResponse, AppError>> {
+export async function listBloodTypes(): Promise<
+  Result<BloodTypesResponse, AppError>
+> {
   try {
     const response = await fetch(`${BACKEND_PATH}/api/bloodtypes`, {
       method: "GET",

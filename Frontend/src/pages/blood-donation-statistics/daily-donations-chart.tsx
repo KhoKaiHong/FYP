@@ -1,6 +1,5 @@
 import { createEffect, createMemo, createSignal, Show } from "solid-js";
 import { ChartOptions } from "chart.js";
-import { ChartData } from "chart.js";
 import {
   Card,
   CardContent,

@@ -59,7 +59,7 @@ async fn main() -> Result<()> {
         .allow_methods([Method::GET, Method::POST])
         .allow_origin([config().FRONTEND_URL.parse().expect("Invalid frontend URL")])
         .expose_headers(Any);
-    
+
     // Initialize routes
     let routes_all = Router::new()
         .merge(web::routes::login::routes(app_state.clone()))
@@ -88,7 +88,7 @@ async fn main() -> Result<()> {
         .fallback_service(web::routes::fallback::serve_dir());
 
     // region:    --- Start Server
-    let listener = TcpListener::bind("127.0.0.1:3001").await.unwrap();
+    let listener = TcpListener::bind("127.0.0.1:8000").await.unwrap();
 
     info!(
         "{:<12} - {:?}\n",

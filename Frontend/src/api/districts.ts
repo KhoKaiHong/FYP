@@ -4,9 +4,11 @@ import { parseErrorResponse } from "@/utils/error";
 import { DistrictsResponse } from "@/types/districts";
 
 const BACKEND_PATH =
-  import.meta.env.VITE_BACKEND_PATH || "http://localhost:3001";
+  import.meta.env.VITE_BACKEND_PATH || "http://localhost:8000";
 
-export async function listDistricts(): Promise<Result<DistrictsResponse, AppError>> {
+export async function listDistricts(): Promise<
+  Result<DistrictsResponse, AppError>
+> {
   try {
     const response = await fetch(`${BACKEND_PATH}/api/districts`, {
       method: "GET",

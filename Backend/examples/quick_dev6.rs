@@ -3,7 +3,7 @@ use serde_json::json;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let hc = httpc_test::new_client("http://localhost:3001")?;
+    let hc = httpc_test::new_client("http://localhost:8000")?;
 
     // User login test
     let req_login = hc.do_post(
@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:3001/api/getcredentials")
+        .get("http://localhost:8000/api/getcredentials")
         .header("Accept", "text/html")
         .bearer_auth(access_token);
     println!("{:?}", req);
@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:3001/api/getcredentials")
+        .get("http://localhost:8000/api/getcredentials")
         .bearer_auth("figrniughjnrfi");
     println!("{:?}", req);
     println!();
@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:3001/api/getcredentials")
+        .get("http://localhost:8000/api/getcredentials")
         .bearer_auth(access_token);
 
     let res = req.send().await?;
@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:3001/api/getcredentials")
+        .get("http://localhost:8000/api/getcredentials")
         .bearer_auth("figrniughjnrfi");
 
     let res = req.send().await?;
@@ -87,7 +87,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:3001/api/getcredentials")
+        .get("http://localhost:8000/api/getcredentials")
         .bearer_auth(access_token);
 
     let res = req.send().await?;
@@ -97,7 +97,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:3001/api/getcredentials")
+        .get("http://localhost:8000/api/getcredentials")
         .bearer_auth("figrniughjnrfi");
 
     let res = req.send().await?;
@@ -118,7 +118,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:3001/api/getcredentials")
+        .get("http://localhost:8000/api/getcredentials")
         .bearer_auth(access_token);
 
     let res = req.send().await?;
@@ -128,7 +128,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:3001/api/getcredentials")
+        .get("http://localhost:8000/api/getcredentials")
         .bearer_auth("figrniughjnrfi");
 
     let res = req.send().await?;

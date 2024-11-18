@@ -5,7 +5,7 @@ use serde_json::json;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let hc = httpc_test::new_client("http://localhost:3001")?;
+    let hc = httpc_test::new_client("http://localhost:8000")?;
 
     // User login test
     let user_req_login = hc.do_post(
@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
     let user_access_token = res["data"]["accessToken"].as_str().unwrap();
     let user_refresh_token = res["data"]["refreshToken"].as_str().unwrap();
 
-    let hc = httpc_test::new_client("http://localhost:3001")?;
+    let hc = httpc_test::new_client("http://localhost:8000")?;
 
     // User login test
     let user_req_login2 = hc.do_post(
@@ -40,7 +40,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .post("http://localhost:3001/api/logout")
+        .post("http://localhost:8000/api/logout")
         .json(&map)
         .bearer_auth(user_access_token);
 
@@ -54,7 +54,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .post("http://localhost:3001/api/logoutall")
+        .post("http://localhost:8000/api/logoutall")
         .json(&map)
         .bearer_auth(user_access_token2);
 
@@ -65,7 +65,7 @@ async fn main() -> Result<()> {
 
     // let req = hc
     //     .reqwest_client()
-    //     .get("http://localhost:3001/api/hello2/John")
+    //     .get("http://localhost:8000/api/hello2/John")
     //     .bearer_auth("gtfhtgrhgthntg");
 
     // let res = req.send().await?;
