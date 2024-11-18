@@ -1,10 +1,10 @@
 use crate::context::Context;
-use crate::model::{Error, ModelManager, Result};
 use crate::model::EntityErrorField::I64Error;
+use crate::model::{Error, ModelManager, Result};
+use chrono::prelude::*;
 use serde::Deserialize;
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
-use chrono::prelude::*;
 
 // region:    --- Event Types
 #[derive(Debug, FromRow)]
@@ -14,6 +14,8 @@ pub struct Event {
     pub start_time: DateTime<Utc>,
     pub end_time: DateTime<Utc>,
     pub max_attendees: i32,
+    pub latitude: f64,
+    pub longitude: f64,
     pub facility_id: i64,
     pub state_id: i32,
     pub district_id: i32,
@@ -27,6 +29,8 @@ pub struct EventWithInformation {
     pub start_time: DateTime<Utc>,
     pub end_time: DateTime<Utc>,
     pub max_attendees: i32,
+    pub latitude: f64,
+    pub longitude: f64,
     pub facility_id: i64,
     pub facility_email: String,
     pub facility_name: String,
@@ -50,6 +54,8 @@ impl<'r> FromRow<'r, PgRow> for EventWithInformation {
             start_time: row.try_get::<NaiveDateTime, _>("start_time")?.and_utc(),
             end_time: row.try_get::<NaiveDateTime, _>("end_time")?.and_utc(),
             max_attendees: row.try_get("max_attendees")?,
+            latitude: row.try_get("latitude")?,
+            longitude: row.try_get("longitude")?,
             facility_id: row.try_get("facility_id")?,
             facility_email: row.try_get("facility_email")?,
             facility_name: row.try_get("facility_name")?,
@@ -73,6 +79,8 @@ pub struct EventForCreate {
     pub start_time: DateTime<Utc>,
     pub end_time: DateTime<Utc>,
     pub max_attendees: i32,
+    pub latitude: f64,
+    pub longitude: f64,
     pub facility_id: i64,
     pub organiser_id: i64,
     pub state_id: i32,
@@ -85,6 +93,8 @@ pub struct EventForUpdate {
     pub start_time: Option<DateTime<Utc>>,
     pub end_time: Option<DateTime<Utc>>,
     pub max_attendees: Option<i32>,
+    pub latitude: Option<f64>,
+    pub longitude: Option<f64>,
 }
 
 // endregion:    --- Event Types
@@ -101,12 +111,14 @@ impl EventModelController {
         let db = model_manager.db();
 
         let (id,) = sqlx::query_as(
-            "INSERT INTO blood_donation_events (address, start_time, end_time, max_attendees, facility_id, organiser_id, state_id, district_id) values ($1, $2, $3, $4, $5, $6, $7, $8) returning id",
+            "INSERT INTO blood_donation_events (address, start_time, end_time, max_attendees, latitude, longitude, facility_id, organiser_id, state_id, district_id) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning id",
         )
         .bind(event_created.address)
         .bind(event_created.start_time.naive_utc())
         .bind(event_created.end_time.naive_utc())
         .bind(event_created.max_attendees)
+        .bind(event_created.latitude)
+        .bind(event_created.longitude)
         .bind(event_created.facility_id)
         .bind(event_created.organiser_id)
         .bind(event_created.state_id)
@@ -134,7 +146,7 @@ impl EventModelController {
             entity: "event",
             field: I64Error(id),
         })?;
-        
+
         Ok(event)
     }
 
@@ -199,6 +211,24 @@ impl EventModelController {
             first = false;
         }
 
+        if let Some(latitude) = event_updated.latitude {
+            if !first {
+                query_builder.push(", ");
+            }
+            query_builder.push("latitude = ");
+            query_builder.push_bind(latitude);
+            first = false;
+        }
+
+        if let Some(longitude) = event_updated.longitude {
+            if !first {
+                query_builder.push(", ");
+            }
+            query_builder.push("longitude = ");
+            query_builder.push_bind(longitude);
+            first = false;
+        }
+
         // If no fields were updated, return early
         if first {
             return Ok(());
@@ -213,11 +243,7 @@ impl EventModelController {
         Ok(())
     }
 
-    pub async fn delete(
-        context: &Context,
-        model_manager: &ModelManager,
-        id: i64,
-    ) -> Result<()> {
+    pub async fn delete(context: &Context, model_manager: &ModelManager, id: i64) -> Result<()> {
         let db = model_manager.db();
 
         let count = sqlx::query("DELETE from blood_donation_events where id = $1")
@@ -239,7 +265,7 @@ impl EventModelController {
 
 // region:    --- Event Model Controller
 
-// region:    --- Tests 
+// region:    --- Tests
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -254,12 +280,16 @@ mod tests {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
-        let test_time = Utc::now().duration_trunc(TimeDelta::microseconds(1)).unwrap();
+        let test_time = Utc::now()
+            .duration_trunc(TimeDelta::microseconds(1))
+            .unwrap();
         let event_created = EventForCreate {
             address: "test_create_ok@example.com".to_string(),
             start_time: test_time,
             end_time: test_time,
             max_attendees: 10,
+            latitude: 3.1732962387784367,
+            longitude: 101.70668106095312,
             facility_id: 1,
             organiser_id: 1,
             state_id: 1,
@@ -321,12 +351,16 @@ mod tests {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
-        let test_time = Utc::now().duration_trunc(TimeDelta::microseconds(1)).unwrap();
+        let test_time = Utc::now()
+            .duration_trunc(TimeDelta::microseconds(1))
+            .unwrap();
         let event_created1 = EventForCreate {
             address: "test_list_ok-event 01".to_string(),
             start_time: test_time,
             end_time: test_time,
             max_attendees: 10,
+            latitude: 3.1732962387784367,
+            longitude: 101.70668106095312,
             facility_id: 1,
             organiser_id: 1,
             state_id: 1,
@@ -337,6 +371,8 @@ mod tests {
             start_time: test_time,
             end_time: test_time,
             max_attendees: 20,
+            latitude: 3.1732962387784367,
+            longitude: 101.70668106095312,
             facility_id: 2,
             organiser_id: 2,
             state_id: 2,
@@ -368,12 +404,16 @@ mod tests {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
-        let non_updated_time = Utc::now().duration_trunc(TimeDelta::microseconds(1)).unwrap();
+        let non_updated_time = Utc::now()
+            .duration_trunc(TimeDelta::microseconds(1))
+            .unwrap();
         let event_created = EventForCreate {
             address: "test_update_ok@example.com".to_string(),
             start_time: non_updated_time,
             end_time: non_updated_time,
             max_attendees: 10,
+            latitude: 3.1732962387784367,
+            longitude: 101.70668106095312,
             facility_id: 1,
             organiser_id: 1,
             state_id: 1,
@@ -383,13 +423,17 @@ mod tests {
         // -- Exec
         let id = EventModelController::create(&context, &model_manager, event_created).await?;
 
-        let updated_time = crate::utils::now_add_sec(300).duration_trunc(TimeDelta::microseconds(1)).unwrap();
+        let updated_time = crate::utils::now_add_sec(300)
+            .duration_trunc(TimeDelta::microseconds(1))
+            .unwrap();
 
         let event_updated = EventForUpdate {
             address: Some("new_address@example.com".to_string()),
             start_time: None,
             end_time: Some(updated_time),
             max_attendees: None,
+            latitude: Some(5.1732962387784367),
+            longitude: Some(90.70668106095312),
         };
 
         EventModelController::update(&context, &model_manager, id, event_updated).await?;
@@ -401,6 +445,8 @@ mod tests {
         assert_eq!(event.start_time, non_updated_time);
         assert_eq!(event.end_time, updated_time);
         assert_eq!(event.max_attendees, 10);
+        assert_eq!(event.latitude, 5.1732962387784367);
+        assert_eq!(event.longitude, 90.70668106095312);
 
         // Clean
         EventModelController::delete(&context, &model_manager, id).await?;
@@ -408,7 +454,7 @@ mod tests {
         Ok(())
     }
 
-    #[tokio::test]    
+    #[tokio::test]
     #[serial]
     async fn test_delete_err_not_found() -> Result<()> {
         // -- Setup & Fixtures

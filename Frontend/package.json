@@ -34,7 +34,7 @@
     "chart.js": "^4.4.6",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "lucide-solid": "^0.456.0",
+    "lucide-solid": "^0.460.0",
     "neverthrow": "^8.1.1",
     "solid-js": "^1.9.3",
     "tailwind-merge": "^2.5.4",

@@ -6,7 +6,6 @@ import {
   DailyDonationsByYear,
 } from "@/types/blood-donation-statistics";
 import { ChartData } from "chart.js";
-import { LineChart } from "@/components/ui/charts";
 
 // Aggregate donations by year
 export function aggregateByYear(

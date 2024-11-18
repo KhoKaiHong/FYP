@@ -15,6 +15,7 @@ CREATE TABLE task (
 
 -- App schema
 -- INTEGER is i32, BIGINT is i64
+-- REAL is f32, DOUBLE PRECISION is f64
 
 -- States
 CREATE TABLE "states" (
@@ -81,6 +82,8 @@ CREATE TABLE "blood_donation_events" (
     start_time timestamp NOT NULL,
     end_time timestamp NOT NULL,
     max_attendees INTEGER NOT NULL,
+    latitude DOUBLE PRECISION NOT NULL,
+    longitude DOUBLE PRECISION NOT NULL,
     facility_id BIGINT REFERENCES blood_collection_facilities(id) NOT NULL,
     organiser_id BIGINT REFERENCES event_organisers(id) NOT NULL,
     state_id INTEGER REFERENCES states(id) NOT NULL,
