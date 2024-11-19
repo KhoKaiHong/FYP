@@ -25,10 +25,10 @@ use uuid::Uuid;
 
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
-        .route("/api/userlogin", post(user_login_handler))
-        .route("/api/facilitylogin", post(facility_login_handler))
-        .route("/api/organiserlogin", post(organiser_login_handler))
-        .route("/api/adminlogin", post(admin_login_handler))
+        .route("/userlogin", post(user_login_handler))
+        .route("/facilitylogin", post(facility_login_handler))
+        .route("/organiserlogin", post(organiser_login_handler))
+        .route("/adminlogin", post(admin_login_handler))
         .with_state(app_state)
 }
 

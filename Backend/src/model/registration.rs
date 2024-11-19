@@ -1,6 +1,7 @@
 use crate::context::Context;
 use crate::model::EntityErrorField::I64Error;
 use crate::model::{Error, ModelManager, Result};
+use crate::model::enums::BloodType;
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
@@ -30,7 +31,7 @@ pub struct RegistrationWithInformation {
     pub user_name: String,
     pub user_email: String,
     pub user_phone_number: String,
-    pub user_blood_type: String,
+    pub user_blood_type: BloodType,
     pub registered_at: DateTime<Utc>,
 }
 

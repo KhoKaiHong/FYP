@@ -1,8 +1,6 @@
 mod dev_db;
 
-use crate::context::Context;
-use crate::model::task::{Task, TaskBmc, TaskForCreate};
-use crate::model::{self, ModelManager};
+use crate::model::ModelManager;
 use tokio::sync::OnceCell;
 use tracing::info;
 
@@ -33,28 +31,4 @@ pub async fn init_test() -> ModelManager {
         .await;
 
     model_manager.clone()
-}
-
-pub async fn seed_tasks(
-    context: &Context,
-    model_manager: &ModelManager,
-    titles: &[&str],
-) -> model::Result<Vec<Task>> {
-    let mut tasks = Vec::new();
-
-    for title in titles {
-        let id = TaskBmc::create(
-            context,
-            model_manager,
-            TaskForCreate {
-                title: title.to_string(),
-            },
-        )
-        .await?;
-        let task = TaskBmc::get(context, model_manager, id).await?;
-
-        tasks.push(task);
-    }
-
-    Ok(tasks)
 }

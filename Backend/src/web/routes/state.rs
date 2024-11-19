@@ -10,7 +10,7 @@ use tracing::debug;
 
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
-        .route("/api/states", get(list_states_handler))
+        .route("/states", get(list_states_handler))
         .with_state(app_state)
 }
 

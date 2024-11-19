@@ -24,7 +24,7 @@ use uuid::Uuid;
 
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
-        .route("/api/refresh", post(refresh_handler))
+        .route("/refresh", post(refresh_handler))
         .with_state(app_state)
 }
 

@@ -2,6 +2,8 @@ use axum::extract::FromRef;
 use resend_rs::Resend;
 
 use crate::model::ModelManager;
+use crate::Result;
+use crate::config;
 
 
 #[derive(Clone)]
@@ -10,6 +12,17 @@ pub struct AppState {
     pub model_manager: ModelManager,
     // Cloning the Resend client is cheap as the internal HTTP client is not cloned.
     pub email_manager: Resend,
+}
+
+impl AppState {
+    pub async fn new() -> Result<Self> {
+        let app_state = AppState {
+            model_manager: ModelManager::new().await?,
+            email_manager: Resend::new(config().email_client.resend_api_key.as_str()),
+        };
+
+        Ok(app_state)
+    }
 }
 
 // Converts AppState to ModelManager for handlers to access substate for model.

@@ -5,13 +5,18 @@ pub type Result<T> = core::result::Result<T, Error>;
 #[derive(Debug)]
 pub enum Error {
     // -- Config
-    ConfigMissingEnv(&'static str),
-	ConfigWrongFormat(&'static str),
+    // ConfigMissingEnv(&'static str),
+	// ConfigWrongFormat(&'static str),
+	FailToBuildConfig,
     
 	// -- Modules
 	Model(model::Error),
 
+	// -- Scheduler Error
 	SchedulerError,
+
+	// -- Application Error
+	ApplicationError,
 }
 
 // region:    --- Froms

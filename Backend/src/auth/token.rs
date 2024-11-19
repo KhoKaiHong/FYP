@@ -56,7 +56,7 @@ pub fn generate_access_token(jti: &str, id: i64, role: &Role) -> Result<String> 
     jsonwebtoken::encode(
         &Header::new(Algorithm::HS512),
         &AccessTokenClaims::new(jti, id, &role),
-        &EncodingKey::from_secret(&config().ACCESS_TOKEN_KEY),
+        &EncodingKey::from_secret(&config().application.access_token_key),
     )
     .map_err(|_| Error::FailGenerateAccessToken)
 }
@@ -64,7 +64,7 @@ pub fn generate_access_token(jti: &str, id: i64, role: &Role) -> Result<String> 
 pub fn validate_access_token(access_token: &str) -> Result<AccessTokenClaims> {
     let claims = jsonwebtoken::decode::<AccessTokenClaims>(
         access_token,
-        &DecodingKey::from_secret(&config().ACCESS_TOKEN_KEY),
+        &DecodingKey::from_secret(&config().application.access_token_key),
         &Validation::new(Algorithm::HS512),
     )
     .map_err(|err| match err.kind() {
@@ -82,7 +82,7 @@ pub fn parse_access_token(access_token: &str) -> Result<AccessTokenClaims> {
 
     let claims = jsonwebtoken::decode::<AccessTokenClaims>(
         access_token,
-        &DecodingKey::from_secret(&config().ACCESS_TOKEN_KEY),
+        &DecodingKey::from_secret(&config().application.access_token_key),
         &validation_strategy,
     )
     .map_err(|_| Error::AccessTokenInvalidFormat)?
@@ -143,7 +143,7 @@ pub fn generate_refresh_token(jti: &str, role: &Role) -> Result<String> {
     jsonwebtoken::encode(
         &Header::new(Algorithm::HS512),
         &RefreshTokenClaims::new(jti, role),
-        &EncodingKey::from_secret(&config().REFRESH_TOKEN_KEY),
+        &EncodingKey::from_secret(&config().application.refresh_token_key),
     )
     .map_err(|_| Error::FailGenerateRefreshToken)
 }
@@ -152,7 +152,7 @@ pub fn renew_refresh_token(jti: &str, duration: i64) -> Result<String> {
     jsonwebtoken::encode(
         &Header::new(Algorithm::HS512),
         &RefreshTokenClaims::new_with_duration(jti, duration),
-        &EncodingKey::from_secret(&config().REFRESH_TOKEN_KEY),
+        &EncodingKey::from_secret(&config().application.refresh_token_key),
     )
     .map_err(|_| Error::FailGenerateRefreshToken)
 }
@@ -160,7 +160,7 @@ pub fn renew_refresh_token(jti: &str, duration: i64) -> Result<String> {
 pub fn validate_refresh_token(refresh_token: &str) -> Result<RefreshTokenClaims> {
     let claims = jsonwebtoken::decode::<RefreshTokenClaims>(
         refresh_token,
-        &DecodingKey::from_secret(&config().REFRESH_TOKEN_KEY),
+        &DecodingKey::from_secret(&config().application.refresh_token_key),
         &Validation::new(Algorithm::HS512),
     )
     .map_err(|err| match err.kind() {
@@ -178,7 +178,7 @@ pub fn parse_refresh_token(refresh_token: &str) -> Result<RefreshTokenClaims> {
 
     let claims = jsonwebtoken::decode::<RefreshTokenClaims>(
         refresh_token,
-        &DecodingKey::from_secret(&config().REFRESH_TOKEN_KEY),
+        &DecodingKey::from_secret(&config().application.refresh_token_key),
         &validation_strategy,
     )
     .map_err(|_| Error::RefreshTokenInvalidFormat)?

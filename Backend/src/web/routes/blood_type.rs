@@ -7,7 +7,7 @@ use tracing::debug;
 
 pub fn routes() -> Router {
     Router::new()
-        .route("/api/bloodtypes", get(list_blood_types_handler))
+        .route("/bloodtypes", get(list_blood_types_handler))
 }
 
 async fn list_blood_types_handler() -> Result<Json<Value>> {

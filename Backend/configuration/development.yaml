@@ -1,0 +1,19 @@
+application:
+  port: 8000
+  host: 127.0.0.1
+  base_url: "http://127.0.0.1"
+  access_token_key: "3FfRZM3zUDkrE3HCmomcH9hrCdr3M8IKi_wHjzWQmlVPD9ljyAuiUN0i3ZfY4SatztRXh3GvsTmnpCqc6YeVhQ"
+  refresh_token_key: "uuqY7SNuIFtkuXUXzgrPJrqc2jJTYt1y9YInr8g0n_dkxKXJSjXDGENyqOkeufLv4bFLpshxt1yB7s2v4w8vCw"
+database:
+  host: "localhost"
+  username: "dev"
+  password: "dev_only_pwd"
+  port: 5432
+  database_name: "dev_db"
+  require_ssl: false
+email_client:
+  resend_api_key: "re_ELknmXim_BxyHR5XiNCAu92pk51Lmwg7A"
+file_serving:
+  web_folder: "web-folder/"
+frontend:
+  frontend_url: "http://localhost:3000"

@@ -17,10 +17,10 @@ use tracing::debug;
 
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
-        .route("/api/userregister", post(user_register_handler))
-        .route("/api/facilityregister", post(facility_register_handler))
-        .route("/api/organiserregister", post(organiser_register_handler))
-        .route("/api/adminregister", post(admin_register_handler))
+        .route("/userregister", post(user_register_handler))
+        .route("/facilityregister", post(facility_register_handler))
+        .route("/organiserregister", post(organiser_register_handler))
+        .route("/adminregister", post(admin_register_handler))
         .with_state(app_state)
 }
 
