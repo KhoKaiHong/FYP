@@ -38,9 +38,9 @@ pub mod organiser_session;
 pub mod admin_session;
 pub mod enums;
 pub mod user_notification;
-// pub mod facility_notification;
-// pub mod organiser_notification;
-// pub mod admin_notification;
+pub mod facility_notification;
+pub mod organiser_notification;
+pub mod admin_notification;
 
 pub use self::error::{Error, Result};
 pub use self::error::EntityErrorField;

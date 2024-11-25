@@ -6,58 +6,58 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 
-// region:    --- Admin Notification Types
+// region:    --- Facility Notification Types
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AdminNotification {
+pub struct FacilityNotification {
     pub id: i64,
     pub description: String,
     pub redirect: Option<String>,
     pub is_read: bool,
     pub created_at: DateTime<Utc>,
-    pub admin_id: i64,
+    pub facility_id: i64,
 }
 
-impl<'r> FromRow<'r, PgRow> for AdminNotification {
+impl<'r> FromRow<'r, PgRow> for FacilityNotification {
     fn from_row(row: &'r PgRow) -> core::result::Result<Self, sqlx::Error> {
-        Ok(AdminNotification {
+        Ok(FacilityNotification {
             id: row.try_get("id")?,
             description: row.try_get("description")?,
             redirect: row.try_get("redirect")?,
             is_read: row.try_get("is_read")?,
             created_at: row.try_get::<NaiveDateTime, _>("created_at")?.and_utc(),
-            admin_id: row.try_get("admin_id")?,
+            facility_id: row.try_get("facility_id")?,
         })
     }
 }
 
 #[derive(Deserialize)]
-pub struct AdminNotificationForCreate {
+pub struct FacilityNotificationForCreate {
     pub description: String,
     pub redirect: Option<String>,
-    pub admin_id: i64,
+    pub facility_id: i64,
 }
 
-// endregion:    --- Admin Notification Types
+// endregion:    --- Facility Notification Types
 
-// region:    --- Admin Notification Model Controller
-pub struct AdminNotificationModelController;
+// region:    --- Facility Notification Model Controller
+pub struct FacilityNotificationModelController;
 
-impl AdminNotificationModelController {
+impl FacilityNotificationModelController {
     pub async fn create(
         context: &Context,
         model_manager: &ModelManager,
-        notification_created: AdminNotificationForCreate,
+        notification_created: FacilityNotificationForCreate,
     ) -> Result<i64> {
         let db = model_manager.db();
 
         let (id,) = sqlx::query_as(
-            "INSERT INTO admin_notifications (description, redirect, admin_id) values ($1, $2, $3) returning id",
+            "INSERT INTO facility_notifications (description, redirect, facility_id) values ($1, $2, $3) returning id",
         )
         .bind(notification_created.description)
         .bind(notification_created.redirect)
-        .bind(notification_created.admin_id)
+        .bind(notification_created.facility_id)
         .fetch_one(db)
         .await?;
 
@@ -68,15 +68,15 @@ impl AdminNotificationModelController {
         context: &Context,
         model_manager: &ModelManager,
         id: i64,
-    ) -> Result<AdminNotification> {
+    ) -> Result<FacilityNotification> {
         let db = model_manager.db();
 
-        let notification = sqlx::query_as("SELECT * FROM admin_notifications WHERE id = $1")
+        let notification = sqlx::query_as("SELECT * FROM facility_notifications WHERE id = $1")
             .bind(id)
             .fetch_optional(db)
             .await?
             .ok_or(Error::EntityNotFound {
-                entity: "admin_notification",
+                entity: "facility_notification",
                 field: I64Error(id),
             })?;
 
@@ -86,24 +86,24 @@ impl AdminNotificationModelController {
     pub async fn list(
         context: &Context,
         model_manager: &ModelManager,
-    ) -> Result<Vec<AdminNotification>> {
+    ) -> Result<Vec<FacilityNotification>> {
         let db = model_manager.db();
 
-        let notifications = sqlx::query_as("SELECT * FROM admin_notifications ORDER BY id")
+        let notifications = sqlx::query_as("SELECT * FROM facility_notifications ORDER BY id")
             .fetch_all(db)
             .await?;
 
         Ok(notifications)
     }
 
-    pub async fn list_by_admin_id(
+    pub async fn list_by_facility_id(
         context: &Context,
         model_manager: &ModelManager,
-    ) -> Result<Vec<AdminNotification>> {
+    ) -> Result<Vec<FacilityNotification>> {
         let db = model_manager.db();
 
         let notifications =
-            sqlx::query_as("SELECT * FROM admin_notifications WHERE admin_id = $1 ORDER BY id")
+            sqlx::query_as("SELECT * FROM facility_notifications WHERE facility_id = $1 ORDER BY id")
                 .bind(context.user_id())
                 .fetch_all(db)
                 .await?;
@@ -118,7 +118,7 @@ impl AdminNotificationModelController {
     ) -> Result<()> {
         let db = model_manager.db();
 
-        let count = sqlx::query("UPDATE admin_notifications SET is_read = true WHERE id = $1")
+        let count = sqlx::query("UPDATE facility_notifications SET is_read = true WHERE id = $1")
             .bind(id)
             .execute(db)
             .await?
@@ -126,7 +126,7 @@ impl AdminNotificationModelController {
 
         if count == 0 {
             return Err(Error::EntityNotFound {
-                entity: "admin_notification",
+                entity: "facility_notification",
                 field: I64Error(id),
             });
         }
@@ -134,9 +134,9 @@ impl AdminNotificationModelController {
         Ok(())
     }
 }
-// endregion: --- Admin Notification Model Controller
+// endregion: --- Facility Notification Model Controller
 
-// Backend/src/model/Admin.rs
+// Backend/src/model/Facility.rs
 // region:    --- Tests
 #[cfg(test)]
 mod tests {
@@ -152,30 +152,30 @@ mod tests {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
-        let notification_created = AdminNotificationForCreate {
+        let notification_created = FacilityNotificationForCreate {
             description: "test_description".to_string(),
             redirect: None,
-            admin_id: 1,
+            facility_id: 1,
         };
 
         // -- Exec
         let id =
-            AdminNotificationModelController::create(&context, &model_manager, notification_created)
+            FacilityNotificationModelController::create(&context, &model_manager, notification_created)
                 .await?;
 
         // -- Check
         let notification =
-            AdminNotificationModelController::get(&context, &model_manager, id).await?;
+            FacilityNotificationModelController::get(&context, &model_manager, id).await?;
         assert_eq!(notification.id, id);
         assert_eq!(notification.redirect, None);
         assert_eq!(notification.description, "test_description");
-        assert_eq!(notification.admin_id, 1);
+        assert_eq!(notification.facility_id, 1);
         assert_eq!(notification.is_read, false);
 
         println!("\n\nnotification: {:?}", notification);
 
         // Clean
-        sqlx::query("DELETE FROM admin_notifications WHERE id = $1")
+        sqlx::query("DELETE FROM facility_notifications WHERE id = $1")
             .bind(id)
             .execute(model_manager.db())
             .await?;
@@ -192,14 +192,14 @@ mod tests {
         let id = 100;
 
         // -- Exec
-        let res = AdminNotificationModelController::get(&context, &model_manager, id).await;
+        let res = FacilityNotificationModelController::get(&context, &model_manager, id).await;
 
         // -- Check
         assert!(
             matches!(
                 res,
                 Err(Error::EntityNotFound {
-                    entity: "admin_notification",
+                    entity: "facility_notification",
                     field: I64Error(100),
                 })
             ),
@@ -216,31 +216,31 @@ mod tests {
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
 
-        let notification_created1 = AdminNotificationForCreate {
+        let notification_created1 = FacilityNotificationForCreate {
             description: "test_description1".to_string(),
             redirect: None,
-            admin_id: 1,
+            facility_id: 1,
         };
-        let notification_created2 = AdminNotificationForCreate {
+        let notification_created2 = FacilityNotificationForCreate {
             description: "test_description2".to_string(),
             redirect: Some(String::from("event")),
-            admin_id: 2,
+            facility_id: 2,
         };
 
-        let id1 = AdminNotificationModelController::create(
+        let id1 = FacilityNotificationModelController::create(
             &context,
             &model_manager,
             notification_created1,
         )
         .await?;
-        let id2 = AdminNotificationModelController::create(
+        let id2 = FacilityNotificationModelController::create(
             &context,
             &model_manager,
             notification_created2,
         )
         .await?;
-        let notifications: Vec<AdminNotification> =
-            AdminNotificationModelController::list(&context, &model_manager).await?;
+        let notifications: Vec<FacilityNotification> =
+            FacilityNotificationModelController::list(&context, &model_manager).await?;
 
         // Check
         assert_eq!(notifications.len(), 2);
@@ -250,8 +250,8 @@ mod tests {
         assert_eq!(notifications[1].description, "test_description2");
         assert_eq!(notifications[0].redirect, None);
         assert_eq!(notifications[1].redirect, Some(String::from("event")));
-        assert_eq!(notifications[0].admin_id, 1);
-        assert_eq!(notifications[1].admin_id, 2);
+        assert_eq!(notifications[0].facility_id, 1);
+        assert_eq!(notifications[1].facility_id, 2);
         assert_eq!(notifications[0].is_read, false);
         assert_eq!(notifications[1].is_read, false);
 
@@ -260,11 +260,11 @@ mod tests {
         }
 
         // Clean
-        sqlx::query("DELETE FROM admin_notifications WHERE id = $1")
+        sqlx::query("DELETE FROM facility_notifications WHERE id = $1")
             .bind(id1)
             .execute(model_manager.db())
             .await?;
-        sqlx::query("DELETE FROM admin_notifications WHERE id = $1")
+        sqlx::query("DELETE FROM facility_notifications WHERE id = $1")
             .bind(id2)
             .execute(model_manager.db())
             .await?;
@@ -274,47 +274,47 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn test_list_by_admin_id() -> Result<()> {
+    async fn test_list_by_facility_id() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::new(1, Role::Admin, Uuid::new_v4());
+        let context = Context::new(1, Role::BloodCollectionFacility, Uuid::new_v4());
 
-        let notification_created1 = AdminNotificationForCreate {
+        let notification_created1 = FacilityNotificationForCreate {
             description: "test_description1".to_string(),
             redirect: None,
-            admin_id: 1,
+            facility_id: 1,
         };
-        let notification_created2 = AdminNotificationForCreate {
+        let notification_created2 = FacilityNotificationForCreate {
             description: "test_description2".to_string(),
             redirect: Some(String::from("event")),
-            admin_id: 2,
+            facility_id: 2,
         };
-        let notification_created3 = AdminNotificationForCreate {
+        let notification_created3 = FacilityNotificationForCreate {
             description: "test_description3".to_string(),
             redirect: Some(String::from("event")),
-            admin_id: 1,
+            facility_id: 1,
         };
 
-        let id1 = AdminNotificationModelController::create(
+        let id1 = FacilityNotificationModelController::create(
             &context,
             &model_manager,
             notification_created1,
         )
         .await?;
-        let id2 = AdminNotificationModelController::create(
+        let id2 = FacilityNotificationModelController::create(
             &context,
             &model_manager,
             notification_created2,
         )
         .await?;
-        let id3 = AdminNotificationModelController::create(
+        let id3 = FacilityNotificationModelController::create(
             &context,
             &model_manager,
             notification_created3,
         )
         .await?;
-        let notifications: Vec<AdminNotification> =
-            AdminNotificationModelController::list_by_admin_id(&context, &model_manager).await?;
+        let notifications: Vec<FacilityNotification> =
+            FacilityNotificationModelController::list_by_facility_id(&context, &model_manager).await?;
 
         // Check
         assert_eq!(notifications.len(), 2);
@@ -324,8 +324,8 @@ mod tests {
         assert_eq!(notifications[1].description, "test_description3");
         assert_eq!(notifications[0].redirect, None);
         assert_eq!(notifications[1].redirect, Some(String::from("event")));
-        assert_eq!(notifications[0].admin_id, 1);
-        assert_eq!(notifications[1].admin_id, 1);
+        assert_eq!(notifications[0].facility_id, 1);
+        assert_eq!(notifications[1].facility_id, 1);
         assert_eq!(notifications[0].is_read, false);
         assert_eq!(notifications[1].is_read, false);
 
@@ -334,15 +334,15 @@ mod tests {
         }
 
         // Clean
-        sqlx::query("DELETE FROM admin_notifications WHERE id = $1")
+        sqlx::query("DELETE FROM facility_notifications WHERE id = $1")
             .bind(id1)
             .execute(model_manager.db())
             .await?;
-        sqlx::query("DELETE FROM admin_notifications WHERE id = $1")
+        sqlx::query("DELETE FROM facility_notifications WHERE id = $1")
             .bind(id2)
             .execute(model_manager.db())
             .await?;
-        sqlx::query("DELETE FROM admin_notifications WHERE id = $1")
+        sqlx::query("DELETE FROM facility_notifications WHERE id = $1")
             .bind(id3)
             .execute(model_manager.db())
             .await?;
@@ -357,31 +357,31 @@ mod tests {
         let model_manager = _dev_utils::init_test().await;
         let context = Context::root_ctx();
 
-        let notification_created = AdminNotificationForCreate {
+        let notification_created = FacilityNotificationForCreate {
             description: "test_description".to_string(),
             redirect: Some(String::from("event")),
-            admin_id: 1,
+            facility_id: 1,
         };
 
         // -- Exec
         let id =
-            AdminNotificationModelController::create(&context, &model_manager, notification_created)
+            FacilityNotificationModelController::create(&context, &model_manager, notification_created)
                 .await?;
 
-        AdminNotificationModelController::read_notification(&context, &model_manager, id).await?;
+        FacilityNotificationModelController::read_notification(&context, &model_manager, id).await?;
 
         // -- Check
-        let notification = AdminNotificationModelController::get(&context, &model_manager, id).await?;
+        let notification = FacilityNotificationModelController::get(&context, &model_manager, id).await?;
         assert_eq!(notification.id, id);
         assert_eq!(notification.description, "test_description");
         assert_eq!(notification.redirect, Some(String::from("event")));
-        assert_eq!(notification.admin_id, 1);
+        assert_eq!(notification.facility_id, 1);
         assert_eq!(notification.is_read, true);
 
         println!("\n\nnotification: {:?}", notification);
 
         // Clean
-        sqlx::query("DELETE FROM admin_notifications WHERE id = $1")
+        sqlx::query("DELETE FROM facility_notifications WHERE id = $1")
             .bind(id)
             .execute(model_manager.db())
             .await?;
