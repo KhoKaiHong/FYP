@@ -28,6 +28,8 @@ pub mod facility;
 pub mod organiser;
 pub mod admin;
 pub mod event;
+pub mod new_event_request;
+pub mod change_event_request;
 pub mod registration;
 pub mod donation_history;
 pub mod user_session;
