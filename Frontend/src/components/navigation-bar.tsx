@@ -70,11 +70,7 @@ function Navbar() {
     },
     {
       name: "Contact",
-      href: null,
-      subpages: [
-        { name: "Blood Donation Facilities", href: "#" },
-        { name: "Provide Feedback", href: "#" },
-      ],
+      href: "#",
     },
   ] as const;
 

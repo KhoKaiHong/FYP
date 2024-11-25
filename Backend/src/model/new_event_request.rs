@@ -406,7 +406,7 @@ mod tests {
             max_attendees: 20,
             latitude: 3.1732962387784367,
             longitude: 101.70668106095312,
-            facility_id: 2,
+            facility_id: 1,
             organiser_id: 2,
             state_id: 2,
             district_id: 2,
@@ -418,7 +418,7 @@ mod tests {
             max_attendees: 20,
             latitude: 3.1732962387784367,
             longitude: 101.70668106095312,
-            facility_id: 2,
+            facility_id: 1,
             organiser_id: 1,
             state_id: 2,
             district_id: 2,
@@ -486,7 +486,7 @@ mod tests {
             latitude: 3.1732962387784367,
             longitude: 101.70668106095312,
             facility_id: 2,
-            organiser_id: 2,
+            organiser_id: 1,
             state_id: 2,
             district_id: 2,
         };
@@ -511,7 +511,7 @@ mod tests {
         let id3 = NewEventRequestModelController::create(&context, &model_manager, event_created3)
             .await?;
         let events =
-            NewEventRequestModelController::list_by_organiser(&context, &model_manager).await?;
+            NewEventRequestModelController::list_by_facility(&context, &model_manager).await?;
 
         assert_eq!(events.len(), 2, "number of seeded requests.");
         assert_eq!(events[0].address, "test_list_ok-event 01");
