@@ -17,8 +17,17 @@ import {
   SliderValueLabel,
 } from "@/components/ui/slider";
 import { DailyDonationsByYear } from "@/types/blood-donation-statistics";
-import { convertDailyToChartData, filterDailyByMonthRange } from "@/utils/blood-donation-statistics";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  convertDailyToChartData,
+  filterDailyByMonthRange,
+} from "@/utils/blood-donation-statistics";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type DailyDonationsProps = {
   dailyStatistics: {
@@ -41,7 +50,8 @@ function DailyDonationsChart(props: DailyDonationsProps) {
   });
 
   const selectedYearData = createMemo(
-    () => props.dailyStatistics?.data.find((d) => d.year === selectedYear()) || null
+    () =>
+      props.dailyStatistics?.data.find((d) => d.year === selectedYear()) || null
   );
 
   const availableMonths = createMemo(() => {
@@ -103,72 +113,70 @@ function DailyDonationsChart(props: DailyDonationsProps) {
   }
   return (
     <Card>
-            <CardHeader class="flex flex-row justify-between items-center">
-              <CardTitle>Daily Donations</CardTitle>
-              <Show when={props.dailyStatistics}>
-                <Select
-                  class="w-32"
-                  options={props.dailyStatistics?.years ?? []}
-                  value={selectedYear()}
-                  onChange={(e) => {
-                    setSelectedYear(e);
-                  }}
-                  itemComponent={(props) => (
-                    <SelectItem item={props.item}>
-                      {props.item.rawValue}
-                    </SelectItem>
-                  )}
-                >
-                  <SelectTrigger>
-                    <SelectValue<number>>
-                      {(state) => state.selectedOption()}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent />
-                </Select>
-              </Show>
-            </CardHeader>
-            <CardContent class="h-80 w-full">
-              <Show when={props.dailyStatistics}>
-                <LineChart
-                  data={dailyChartData() ?? { labels: [], datasets: [] }}
-                  options={props.chartOptions}
-                />
-              </Show>
-            </CardContent>
-            <CardFooter>
-              <Show when={monthRange().end !== 0}>
-                <Slider
-                  minValue={availableMonths().min}
-                  maxValue={availableMonths().max}
-                  defaultValue={[monthRange().start, monthRange().end]}
-                  value={[sliderMonth().start, sliderMonth().end]}
-                  onChange={(values) => {
-                    setSliderMonth({ start: values[0], end: values[1] });
-                  }}
-                  onChangeEnd={(values) => {
-                    setMonthRange({ start: values[0], end: values[1] });
-                  }}
-                  getValueLabel={(params) =>
-                    `${getMonthLabel(params.values[0])} - ${getMonthLabel(
-                      params.values[1]
-                    )}`
-                  }
-                  class="w-full space-y-3"
-                >
-                  <div class="flex w-full justify-between">
-                    <SliderLabel>Month</SliderLabel>
-                    <SliderValueLabel />
-                  </div>
-                  <SliderTrack>
-                    <SliderFill />
-                    <SliderThumb />
-                    <SliderThumb />
-                  </SliderTrack>
-                </Slider>
-              </Show>
-            </CardFooter>
-          </Card>
+      <CardHeader class="flex flex-row justify-between items-center">
+        <CardTitle>Daily Donations</CardTitle>
+        <Show when={props.dailyStatistics}>
+          <Select
+            class="w-32"
+            options={props.dailyStatistics?.years ?? []}
+            value={selectedYear()}
+            onChange={(e) => {
+              setSelectedYear(e);
+            }}
+            itemComponent={(props) => (
+              <SelectItem item={props.item}>{props.item.rawValue}</SelectItem>
+            )}
+          >
+            <SelectTrigger>
+              <SelectValue<number>>
+                {(state) => state.selectedOption()}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent />
+          </Select>
+        </Show>
+      </CardHeader>
+      <CardContent class="h-80 w-full">
+        <Show when={props.dailyStatistics}>
+          <LineChart
+            data={dailyChartData() ?? { labels: [], datasets: [] }}
+            options={props.chartOptions}
+          />
+        </Show>
+      </CardContent>
+      <CardFooter>
+        <Show when={monthRange().end !== 0}>
+          <Slider
+            minValue={availableMonths().min}
+            maxValue={availableMonths().max}
+            defaultValue={[monthRange().start, monthRange().end]}
+            value={[sliderMonth().start, sliderMonth().end]}
+            onChange={(values) => {
+              setSliderMonth({ start: values[0], end: values[1] });
+            }}
+            onChangeEnd={(values) => {
+              setMonthRange({ start: values[0], end: values[1] });
+            }}
+            getValueLabel={(params) =>
+              `${getMonthLabel(params.values[0])} - ${getMonthLabel(
+                params.values[1]
+              )}`
+            }
+            class="w-full space-y-3"
+          >
+            <div class="flex w-full justify-between">
+              <SliderLabel>Month</SliderLabel>
+              <SliderValueLabel />
+            </div>
+            <SliderTrack>
+              <SliderFill />
+              <SliderThumb />
+              <SliderThumb />
+            </SliderTrack>
+          </Slider>
+        </Show>
+      </CardFooter>
+    </Card>
   );
 }
 

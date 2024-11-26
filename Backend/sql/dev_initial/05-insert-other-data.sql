@@ -18,9 +18,9 @@ INSERT INTO admins (email, password, name) VALUES
 
 -- Insert data into blood_donation_events
 INSERT INTO blood_donation_events (address, start_time, end_time, max_attendees, latitude, longitude, facility_id, state_id, district_id, organiser_id) VALUES
-('Jalan Hospital, Johor Bahru', '2024-10-15 08:00:00', '2024-10-15 16:00:00', 100, 3.1732962387784367, 101.70668106095312, 1, 1, 1, 1),
-('Jalan Langgar, Alor Setar', '2024-10-18 09:00:00', '2024-10-18 17:00:00', 150, 3.1732962387784367, 101.70668106095312, 2, 1, 1, 2),
-('Jalan Tun Razak, Kuala Lumpur', '2024-12-01 10:00:00', '2024-12-01 18:00:00', 200, 3.1732962387784367, 101.70668106095312, 3, 1, 1, 3);
+('Jalan Hospital, Johor Bahru', '2024-12-01 3:00:00', '2024-12-01 10:00:00', 100, 3.1732962387784367, 101.70668106095312, 1, 1, 1, 1),
+('Jalan Langgar, Alor Setar', '2024-12-02 4:00:00', '2024-12-02 11:00:00', 150, 3.1742962387784367, 101.70768106095312, 2, 1, 1, 2),
+('Jalan Tun Razak, Kuala Lumpur', '2024-12-03 5:00:00', '2024-12-03 12:00:00', 200, 3.1752962387784367, 101.70868106095312, 3, 1, 1, 3);
 
 -- Insert data into registrations
 INSERT INTO registrations (status, event_id, user_id) VALUES

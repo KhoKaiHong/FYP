@@ -1,6 +1,12 @@
 import Navbar from "@/components/navigation-bar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNavigate, useLocation } from "@solidjs/router";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { A } from "@solidjs/router";
 import {
   DatePicker,
   DatePickerContent,
@@ -21,8 +27,24 @@ import {
   DatePickerViewControl,
   DatePickerViewTrigger,
 } from "@/components/ui/date-picker";
-import { createMemo, createSignal, For, Index } from "solid-js";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  createEffect,
+  createMemo,
+  createSignal,
+  For,
+  Index,
+  onMount,
+} from "solid-js";
 import { Portal } from "solid-js/web";
+import { Event } from "@/types/events";
 import { listDistricts } from "@/api/districts";
 import { listFutureEvents } from "@/api/events";
 import { State } from "@/types/states";
@@ -46,6 +68,8 @@ import {
 import { District } from "@/types/districts";
 import { today } from "@internationalized/date";
 import { DateValue } from "@ark-ui/solid";
+import { MapPin, Calendar, Clock, UsersRound } from "lucide-solid";
+import { DialogTriggerProps } from "@kobalte/core/dialog";
 
 function Events() {
   async function getEventsData() {
@@ -112,11 +136,56 @@ function Events() {
   const states = () => eventsData()?.states ?? null;
   const districts = () => eventsData()?.districts ?? null;
 
-  const [stateIdChosen, setStateIdChosen] = createSignal(0);
+  let map: google.maps.Map | undefined;
+  let infoWindow: google.maps.InfoWindow | undefined;
+  const markers: google.maps.marker.AdvancedMarkerElement[] = [];
+
+  onMount(async () => {
+    const { Map, InfoWindow } = (await google.maps.importLibrary(
+      "maps"
+    )) as google.maps.MapsLibrary;
+
+    map = new Map(document.getElementById("map") as HTMLElement, {
+      center: { lat: 3.1732962387784367, lng: 101.70668106095312 },
+      zoom: 10,
+      mapId: "f7a7a21c7ed4070e",
+    });
+
+    infoWindow = new InfoWindow();
+  });
+
+  createEffect(async () => {
+    const eventsPin = events();
+
+    if (map && infoWindow && eventsPin && eventsPin.length > 0) {
+      const { AdvancedMarkerElement } = (await google.maps.importLibrary(
+        "marker"
+      )) as google.maps.MarkerLibrary;
+
+      eventsPin.forEach((event) => {
+        const marker = new AdvancedMarkerElement({
+          map,
+          position: { lat: event.latitude, lng: event.longitude },
+          title: event.address,
+          gmpClickable: true,
+        });
+
+        marker.addListener("click", () => {
+          infoWindow?.close();
+          infoWindow?.setContent(`<p class="text-slate-600">${marker.title}</p>`);
+          infoWindow?.open(marker.map, marker);
+        });
+
+        markers.push(marker);
+      });
+    }
+  });
+
+  const [stateChosen, setStateChosen] = createSignal<State | null>(null);
 
   const districtsAvailable = createMemo(() => {
     const data = districts();
-    const stateId = stateIdChosen();
+    const stateId = stateChosen()?.id ?? 0;
 
     if (!data || stateId === 0) {
       return [];
@@ -133,18 +202,100 @@ function Events() {
     return !districts() || districtsAvailable().length === 0;
   });
 
-  const [districtInput, setDistrictInput] = createSignal<District | null>(null);
+  const [districtChosen, setDistrictChosen] = createSignal<District | null>(
+    null
+  );
 
   const [selectedDateRange, setSelectedDateRange] = createSignal<
     DateValue[] | null
   >(null);
 
+  const [filteredEvents, setFilteredEvents] = createSignal<Event[]>([]);
+
+  createEffect(() => {
+    setFilteredEvents(events() ?? []);
+  });
+
+  async function filterEvents() {
+    const allEvents = events();
+    const selectedState = stateChosen();
+    const selectedDistrict = districtChosen();
+    const dateRange = selectedDateRange();
+
+    if (!allEvents) return []; // Return an empty array if no events data is available
+
+    const filteredEvents = allEvents.filter((event) => {
+      const eventStartTime = new Date(event.startTime);
+      const eventEndTime = new Date(event.endTime);
+
+      function endOfDay(date: Date): Date {
+        const modifiedDate = new Date(date);
+        modifiedDate.setHours(23, 59, 59, 999);
+        return modifiedDate;
+      }
+
+      const matchesState = !selectedState || event.stateId === selectedState.id;
+      const matchesDistrict =
+        !selectedDistrict || event.districtId === selectedDistrict.districtId;
+      const matchesDateRange =
+        !dateRange ||
+        dateRange.length !== 2 ||
+        (dateRange[0] &&
+          dateRange[1] &&
+          eventStartTime >= dateRange[0].toDate("Asia/Kuala_Lumpur") &&
+          eventEndTime <= endOfDay(dateRange[1].toDate("Asia/Kuala_Lumpur")));
+
+      return matchesState && matchesDistrict && matchesDateRange;
+    });
+
+    setFilteredEvents(filteredEvents);
+
+    markers.forEach((marker) => (marker.map = null));
+    markers.splice(0, markers.length);
+
+    const { AdvancedMarkerElement } = (await google.maps.importLibrary(
+      "marker"
+    )) as google.maps.MarkerLibrary;
+
+    // Add markers for the filtered events
+    if (map && filteredEvents.length > 0) {
+      filteredEvents.forEach((event) => {
+        const marker = new AdvancedMarkerElement({
+          map,
+          position: { lat: event.latitude, lng: event.longitude },
+          title: event.address,
+          gmpClickable: true,
+        });
+
+        marker.addListener("click", () => {
+          infoWindow?.close();
+          infoWindow?.setContent(`<p class="text-slate-600">${marker.title}</p>`);
+          infoWindow?.open(marker.map, marker);
+        });
+
+        markers.push(marker);
+      });
+    }
+  }
+
+  function expandMarkerPin(event: Event) {
+    markers.forEach((marker) => {
+      if (marker.title === event.address) {
+        map?.setCenter({ lat: event.latitude, lng: event.longitude });
+        map?.setZoom(18);
+        infoWindow?.setContent(marker.title);
+        infoWindow?.open(marker.map, marker);
+        return;
+      }
+    });
+  }
+
   return (
     <div>
       <Navbar />
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 p-8">
-        <div class="lg:col-span-1 space-y-4">
-          <Card>
+        <div class="lg:col-span-1 space-y-8">
+          <Card class="border-brand border-2">
             <CardHeader>
               <CardTitle>Filters</CardTitle>
             </CardHeader>
@@ -159,7 +310,7 @@ function Events() {
                   setSelectedDateRange(value.value);
                 }}
               >
-                <DatePickerControl>
+                <DatePickerControl class="w-full">
                   <DatePickerInput index={0} />
                   <DatePickerInput index={1} />
                   <DatePickerTrigger />
@@ -338,13 +489,14 @@ function Events() {
               </DatePicker>
               <Select
                 class="space-y-1 w-full"
+                value={stateChosen()}
                 options={states() ?? []}
                 optionValue="id"
                 optionTextValue="name"
                 disabled={states() ? false : true}
                 onChange={(e) => {
-                  setStateIdChosen(e?.id ?? 0);
-                  setDistrictInput(null);
+                  setStateChosen(e);
+                  setDistrictChosen(null);
                 }}
                 placeholder="Select a state..."
                 itemComponent={(props) => (
@@ -363,9 +515,9 @@ function Events() {
               <Combobox
                 class="space-y-1 w-full"
                 options={districtsAvailable()}
-                value={districtInput()}
+                value={districtChosen()}
                 onChange={(selectedOption) => {
-                  setDistrictInput(selectedOption);
+                  setDistrictChosen(selectedOption);
                 }}
                 optionValue="districtId"
                 optionTextValue="districtName"
@@ -382,31 +534,163 @@ function Events() {
                   <ComboboxInput
                     onBlur={(e) => {
                       e.currentTarget.value =
-                        districtInput()?.districtName ?? "";
+                        districtChosen()?.districtName ?? "";
                     }}
                   />
                 </ComboboxTrigger>
                 <ComboboxContent />
               </Combobox>
-              <Button class="w-full">Apply Filters</Button>
+              <Button class="w-full" onClick={filterEvents}>
+                Apply Filters
+              </Button>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card class="border-brand border-2">
             <CardHeader>
               <CardTitle>Events</CardTitle>
             </CardHeader>
-            <CardContent class="space-y-4 h-full max-h-64 overflow-auto">
-              <For each={events()}>
+            <CardContent class="space-y-4 h-full max-h-64 overflow-auto overscroll-contain">
+              <For
+                each={filteredEvents()}
+                fallback={<p class="text-muted-foreground">No events found</p>}
+              >
                 {(event) => (
-                  <Card>
+                  <Card class="border-brand">
                     <CardHeader>
-                      <CardTitle>{event.address}</CardTitle>
+                      <CardTitle>
+                        <div class="flex gap-x-2 items-center">
+                          <MapPin size={20} class="shrink-0" />
+                          <p>{event.address}</p>
+                        </div>
+                      </CardTitle>
                     </CardHeader>
-                    <CardContent>
-                      <p>{event.currentAttendees}/{event.maxAttendees}</p>
-                      <p>{event.startTime} - {event.endTime}</p>
+                    <CardContent class="space-y-2">
+                      <div class="flex gap-x-2 items-center text-muted-foreground">
+                        <Calendar size={20} class="shrink-0" />
+                        <p>
+                          {new Date(event.startTime).toLocaleDateString(
+                            "en-GB",
+                            {
+                              timeZone: "Asia/Kuala_Lumpur",
+                            }
+                          )}
+                        </p>
+                      </div>
+                      <div class="flex gap-x-2 items-center text-muted-foreground">
+                        <Clock size={20} class="shrink-0" />
+                        <p>
+                          {new Date(event.startTime).toLocaleTimeString(
+                            "en-GB",
+                            {
+                              timeZone: "Asia/Kuala_Lumpur",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            }
+                          )}{" "}
+                          -{" "}
+                          {new Date(event.endTime).toLocaleTimeString("en-GB", {
+                            timeZone: "Asia/Kuala_Lumpur",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}
+                        </p>
+                      </div>
+                      <div class="flex gap-x-2 items-center text-muted-foreground">
+                        <UsersRound size={20} class="shrink-0" />
+                        <p>
+                          {event.currentAttendees}/{event.maxAttendees}
+                        </p>
+                      </div>
                     </CardContent>
+                    <CardFooter class="grid grid-cols-2 gap-x-4 gap-y-4">
+                      <Dialog>
+                        <DialogTrigger
+                          as={(props: DialogTriggerProps) => (
+                            <Button variant="outline" {...props}>
+                              Details
+                            </Button>
+                          )}
+                        />
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Details</DialogTitle>
+                            <div class="space-y-2">
+                              <p>Address: {event.address}</p>
+                              <p>
+                                Date:{" "}
+                                {new Date(event.startTime).toLocaleDateString(
+                                  "en-GB",
+                                  {
+                                    timeZone: "Asia/Kuala_Lumpur",
+                                  }
+                                )}
+                              </p>
+                              <p>
+                                Time:{" "}
+                                {new Date(event.startTime).toLocaleTimeString(
+                                  "en-GB",
+                                  {
+                                    timeZone: "Asia/Kuala_Lumpur",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  }
+                                )}{" "}
+                                -{" "}
+                                {new Date(event.endTime).toLocaleTimeString(
+                                  "en-GB",
+                                  {
+                                    timeZone: "Asia/Kuala_Lumpur",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                  }
+                                )}
+                              </p>
+                              <p>
+                                Attendees: {event.currentAttendees}/
+                                {event.maxAttendees}
+                              </p>
+                              <p>Facility: {event.facilityName}</p>
+                              <p>Facility Email: {event.facilityEmail}</p>
+                              <p>
+                                Facility Phone Number:{" "}
+                                {event.facilityPhoneNumber}
+                              </p>
+                              <p>Facility Address: {event.facilityAddress}</p>
+                              <p>Organiser: {event.organiserName}</p>
+                              <p>Organiser Email: {event.organiserEmail}</p>
+                              <p>
+                                Organiser Phone Number:{" "}
+                                {event.organiserPhoneNumber}
+                              </p>
+                            </div>
+                          </DialogHeader>
+                        </DialogContent>
+                      </Dialog>
+                      <Button
+                        variant={"outline"}
+                        onClick={() => expandMarkerPin(event)}
+                      >
+                        Show on Map
+                      </Button>
+                      <A
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${event.latitude},${event.longitude}&travelmode=driving`}
+                        target="_blank"
+                      >
+                        <Button variant={"outline"} class="w-full">
+                          Directions
+                        </Button>
+                      </A>
+                      <Button
+                        disabled={event.currentAttendees >= event.maxAttendees}
+                      >
+                        Register
+                      </Button>
+                    </CardFooter>
                   </Card>
                 )}
               </For>
@@ -415,11 +699,17 @@ function Events() {
         </div>
 
         <div class="lg:col-span-2">
-          <Card>
+          <Card class="border-brand border-2">
             <CardHeader>
               <CardTitle>Event Map</CardTitle>
             </CardHeader>
-            <CardContent></CardContent>
+            <CardContent class="flex h-[572px]">
+              <div
+                class="w-full h-full"
+                id="map"
+                ref={map as unknown as HTMLDivElement}
+              ></div>
+            </CardContent>
           </Card>
         </div>
       </div>
