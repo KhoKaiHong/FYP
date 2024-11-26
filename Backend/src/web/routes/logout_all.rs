@@ -18,7 +18,7 @@ use uuid::Uuid;
 
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
-        .route("/logoutall", post(logout_all_handler))
+        .route("/logout-all", post(logout_all_handler))
         .with_state(app_state)
 }
 
@@ -51,7 +51,7 @@ async fn logout_all_handler(
     }
 
     let body = Json(json!({
-        "data": { 
+        "data": {
             "success": true
         }
     }));

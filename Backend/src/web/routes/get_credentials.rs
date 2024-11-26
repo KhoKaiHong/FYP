@@ -16,7 +16,7 @@ use tracing::debug;
 
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
-        .route("/getcredentials", get(get_credentials_handler))
+        .route("/get-credentials", get(get_credentials_handler))
         .with_state(app_state)
 }
 

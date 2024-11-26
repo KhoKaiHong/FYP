@@ -8,4 +8,5 @@ pub mod register;
 pub mod get_credentials;
 pub mod district;
 pub mod state;
+pub mod event;
 pub mod blood_type;

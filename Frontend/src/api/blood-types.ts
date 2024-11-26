@@ -10,7 +10,7 @@ export async function listBloodTypes(): Promise<
   Result<BloodTypesResponse, AppError>
 > {
   try {
-    const response = await fetch(`${BACKEND_PATH}/api/bloodtypes`, {
+    const response = await fetch(`${BACKEND_PATH}/api/blood-types`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

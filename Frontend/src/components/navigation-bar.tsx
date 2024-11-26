@@ -46,7 +46,7 @@ function Navbar() {
     },
     {
       name: "Events",
-      href: "#",
+      href: "/events",
       subpages: null,
     },
     {

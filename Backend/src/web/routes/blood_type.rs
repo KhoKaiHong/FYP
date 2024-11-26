@@ -6,8 +6,7 @@ use serde_json::{json, Value};
 use tracing::debug;
 
 pub fn routes() -> Router {
-    Router::new()
-        .route("/bloodtypes", get(list_blood_types_handler))
+    Router::new().route("/blood-types", get(list_blood_types_handler))
 }
 
 async fn list_blood_types_handler() -> Result<Json<Value>> {

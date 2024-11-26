@@ -40,6 +40,7 @@ impl Application {
             .merge(web::routes::refresh::routes(app_state.clone()))
             .merge(web::routes::district::routes(app_state.clone()))
             .merge(web::routes::state::routes(app_state.clone()))
+            .merge(web::routes::event::routes(app_state.clone()))
             .merge(web::routes::blood_type::routes());
 
         let routes_require_user: Router = Router::new()

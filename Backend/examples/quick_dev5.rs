@@ -7,7 +7,7 @@ async fn main() -> Result<()> {
 
     // User register test
     // let req_login = hc.do_post(
-    //     "/api/userlogin",
+    //     "/api/user-login",
     //     json!({
     //         "icNumber": "031120-07-0559",
     //         "password": "testpassword",
@@ -44,7 +44,7 @@ async fn main() -> Result<()> {
 
     // User Register tests
     let req_register = hc.do_post(
-        "/api/userregister",
+        "/api/user-register",
         json!({
             "icNumber": "031120-07-0559",
             "password": "testpassword",
@@ -59,7 +59,7 @@ async fn main() -> Result<()> {
     req_register.await?.print().await?;
 
     let req_register = hc.do_post(
-        "/api/userregister",
+        "/api/user-register",
         json!({
             "icNumber": "0311fe20-07-0559",
             "password": "testpassword",
@@ -74,7 +74,7 @@ async fn main() -> Result<()> {
     req_register.await?.print().await?;
 
     let req_login = hc.do_post(
-        "/api/userlogin",
+        "/api/user-login",
         json!({
             "icNumber": "031120-07-0559",
             "password": "testpassword"
@@ -83,7 +83,7 @@ async fn main() -> Result<()> {
     req_login.await?.print().await?;
 
     let req_login = hc.do_post(
-        "/api/userlogin",
+        "/api/user-login",
         json!({
             "icNumber": "031120-07-0559",
             "password": "htrhbgthtr"
@@ -93,7 +93,7 @@ async fn main() -> Result<()> {
 
     // Facility register test
     let req_register = hc.do_post(
-        "/api/facilityregister",
+        "/api/facility-register",
         json!({
             "email": "testfacility@hotmail.com",
             "password": "testpassword",
@@ -106,7 +106,7 @@ async fn main() -> Result<()> {
     req_register.await?.print().await?;
 
     let req_register = hc.do_post(
-        "/api/facilityregister",
+        "/api/facility-register",
         json!({
             "email": "testfacility2@hotmail.com",
             "password": "testpassword2",
@@ -119,7 +119,7 @@ async fn main() -> Result<()> {
     req_register.await?.print().await?;
 
     let req_login = hc.do_post(
-        "/api/facilitylogin",
+        "/api/facility-login",
         json!({
             "email": "testfacility@hotmail.com",
             "password": "testpassword"
@@ -128,7 +128,7 @@ async fn main() -> Result<()> {
     req_login.await?.print().await?;
 
     let req_login = hc.do_post(
-        "/api/facilitylogin",
+        "/api/facility-login",
         json!({
             "email": "testfacility@hotmail.com",
             "password": "htryhtrdghftg"
@@ -138,7 +138,7 @@ async fn main() -> Result<()> {
 
     // Organiser register test
     let req_register = hc.do_post(
-        "/api/organiserregister",
+        "/api/organiser-register",
         json!({
             "email": "testorganiser@hotmail.com",
             "password": "testpassword",
@@ -149,7 +149,7 @@ async fn main() -> Result<()> {
     req_register.await?.print().await?;
 
     let req_register = hc.do_post(
-        "/api/organiserregister",
+        "/api/organiser-register",
         json!({
             "email": "testorganiser2@hotmail.com",
             "password": "testpassword",
@@ -160,7 +160,7 @@ async fn main() -> Result<()> {
     req_register.await?.print().await?;
 
     let req_login = hc.do_post(
-        "/api/organiserlogin",
+        "/api/organiser-login",
         json!({
             "email": "testorganiser@hotmail.com",
             "password": "testpassword"
@@ -169,7 +169,7 @@ async fn main() -> Result<()> {
     req_login.await?.print().await?;
 
     let req_login = hc.do_post(
-        "/api/organiserlogin",
+        "/api/organiser-login",
         json!({
             "email": "testorganiser2@hotmail.com",
             "password": "testpassword"
@@ -179,7 +179,7 @@ async fn main() -> Result<()> {
 
     // Admin register test
     let req_register = hc.do_post(
-        "/api/adminregister",
+        "/api/admin-register",
         json!({
             "email": "testadmin@hotmail.com",
             "password": "testpassword",
@@ -189,7 +189,7 @@ async fn main() -> Result<()> {
     req_register.await?.print().await?;
 
     let req_register = hc.do_post(
-        "/api/adminregister",
+        "/api/admin-register",
         json!({
             "email": "testadmin@hotmail.com",
             "password": "testpassword",
@@ -199,7 +199,7 @@ async fn main() -> Result<()> {
     req_register.await?.print().await?;
 
     let req_login = hc.do_post(
-        "/api/adminlogin",
+        "/api/admin-login",
         json!({
             "email": "testadmin@hotmail.com",
             "password": "testpassword"
@@ -208,7 +208,7 @@ async fn main() -> Result<()> {
     req_login.await?.print().await?;
 
     let req_login = hc.do_post(
-        "/api/adminlogin",
+        "/api/admin-login",
         json!({
             "email": "testadmin2@hotmail.com",
             "password": "testpassword"

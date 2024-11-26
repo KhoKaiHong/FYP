@@ -16,7 +16,7 @@ export async function userRegister(
   userRegisterPayload: UserRegisterPayload
 ): Promise<Result<RegisterResponse, AppError>> {
   try {
-    const response = await fetch(`${BACKEND_PATH}/api/userregister`, {
+    const response = await fetch(`${BACKEND_PATH}/api/user-register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -42,7 +42,7 @@ export async function organiserRegister(
   organiserRegisterPayload: OrganiserRegisterPayload
 ): Promise<Result<RegisterResponse, AppError>> {
   try {
-    const response = await fetch(`${BACKEND_PATH}/api/organiserregister`, {
+    const response = await fetch(`${BACKEND_PATH}/api/organiser-register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

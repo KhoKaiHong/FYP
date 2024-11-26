@@ -2,7 +2,7 @@ use crate::context::Context;
 use crate::model::EntityErrorField::I64Error;
 use crate::model::{Error, ModelManager, Result};
 use chrono::prelude::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 
@@ -22,12 +22,14 @@ pub struct Event {
     pub organiser_id: i64,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct EventWithInformation {
     pub id: i64,
     pub address: String,
     pub start_time: DateTime<Utc>,
     pub end_time: DateTime<Utc>,
+    pub current_attendees: i32,
     pub max_attendees: i32,
     pub latitude: f64,
     pub longitude: f64,
@@ -53,6 +55,7 @@ impl<'r> FromRow<'r, PgRow> for EventWithInformation {
             address: row.try_get("address")?,
             start_time: row.try_get::<NaiveDateTime, _>("start_time")?.and_utc(),
             end_time: row.try_get::<NaiveDateTime, _>("end_time")?.and_utc(),
+            current_attendees: row.try_get("current_attendees")?,
             max_attendees: row.try_get("max_attendees")?,
             latitude: row.try_get("latitude")?,
             longitude: row.try_get("longitude")?,
@@ -137,8 +140,39 @@ impl EventModelController {
         let db = model_manager.db();
 
         let event = sqlx::query_as(
-            "SELECT blood_donation_events.*, blood_collection_facilities.email AS facility_email, blood_collection_facilities.name AS facility_name, blood_collection_facilities.address AS facility_address, blood_collection_facilities.phone_number AS facility_phone_number, event_organisers.email AS organiser_email, event_organisers.name AS organiser_name, event_organisers.phone_number AS organiser_phone_number, states.name AS state_name, districts.name AS district_name FROM blood_donation_events JOIN blood_collection_facilities ON blood_donation_events.facility_id = blood_collection_facilities.id JOIN event_organisers ON blood_donation_events.organiser_id = event_organisers.id JOIN states ON blood_donation_events.state_id = states.id JOIN districts ON blood_donation_events.district_id = districts.id WHERE blood_donation_events.id = $1",
-        )
+            "SELECT 
+                blood_donation_events.*, 
+                blood_collection_facilities.email AS facility_email, 
+                blood_collection_facilities.name AS facility_name, 
+                blood_collection_facilities.address AS facility_address, 
+                blood_collection_facilities.phone_number AS facility_phone_number, 
+                event_organisers.email AS organiser_email, 
+                event_organisers.name AS organiser_name, 
+                event_organisers.phone_number AS organiser_phone_number, 
+                states.name AS state_name, 
+                districts.name AS district_name, 
+                COALESCE(registration_counts.current_attendees, 0) AS current_attendees 
+            FROM 
+                blood_donation_events 
+            JOIN 
+                blood_collection_facilities ON blood_donation_events.facility_id = blood_collection_facilities.id 
+            JOIN 
+                event_organisers ON blood_donation_events.organiser_id = event_organisers.id 
+            JOIN 
+                states ON blood_donation_events.state_id = states.id 
+            JOIN 
+                districts ON blood_donation_events.district_id = districts.id
+            LEFT JOIN (
+                SELECT 
+                    event_id, 
+                    COUNT(*)::INTEGER AS current_attendees
+                FROM 
+                    registrations
+                GROUP BY 
+                    event_id
+            ) AS registration_counts ON blood_donation_events.id = registration_counts.event_id 
+            WHERE 
+                blood_donation_events.id = $1")
         .bind(id)
         .fetch_optional(db)
         .await?
@@ -156,7 +190,88 @@ impl EventModelController {
     ) -> Result<Vec<EventWithInformation>> {
         let db = model_manager.db();
 
-        let events = sqlx::query_as("SELECT blood_donation_events.*, blood_collection_facilities.email AS facility_email, blood_collection_facilities.name AS facility_name, blood_collection_facilities.address AS facility_address, blood_collection_facilities.phone_number AS facility_phone_number, event_organisers.email AS organiser_email, event_organisers.name AS organiser_name, event_organisers.phone_number AS organiser_phone_number, states.name AS state_name, districts.name AS district_name FROM blood_donation_events JOIN blood_collection_facilities ON blood_donation_events.facility_id = blood_collection_facilities.id JOIN event_organisers ON blood_donation_events.organiser_id = event_organisers.id JOIN states ON blood_donation_events.state_id = states.id JOIN districts ON blood_donation_events.district_id = districts.id ORDER BY id")
+        let events = sqlx::query_as(
+            "SELECT 
+                blood_donation_events.*, 
+                blood_collection_facilities.email AS facility_email, 
+                blood_collection_facilities.name AS facility_name, 
+                blood_collection_facilities.address AS facility_address, 
+                blood_collection_facilities.phone_number AS facility_phone_number, 
+                event_organisers.email AS organiser_email, 
+                event_organisers.name AS organiser_name, 
+                event_organisers.phone_number AS organiser_phone_number, 
+                states.name AS state_name, 
+                districts.name AS district_name, 
+                COALESCE(registration_counts.current_attendees, 0) AS current_attendees 
+            FROM 
+                blood_donation_events 
+            JOIN 
+                blood_collection_facilities ON blood_donation_events.facility_id = blood_collection_facilities.id 
+            JOIN 
+                event_organisers ON blood_donation_events.organiser_id = event_organisers.id 
+            JOIN 
+                states ON blood_donation_events.state_id = states.id 
+            JOIN 
+                districts ON blood_donation_events.district_id = districts.id
+            LEFT JOIN (
+                SELECT 
+                    event_id, 
+                    COUNT(*)::INTEGER AS current_attendees
+                FROM 
+                    registrations
+                GROUP BY 
+                    event_id
+            ) AS registration_counts ON blood_donation_events.id = registration_counts.event_id 
+            ORDER BY 
+                id")
+            .fetch_all(db)
+            .await?;
+
+        Ok(events)
+    }
+
+    pub async fn list_future_events(
+        context: &Context,
+        model_manager: &ModelManager,
+    ) -> Result<Vec<EventWithInformation>> {
+        let db = model_manager.db();
+
+        let events = sqlx::query_as("
+            SELECT 
+                blood_donation_events.*, 
+                blood_collection_facilities.email AS facility_email, 
+                blood_collection_facilities.name AS facility_name, 
+                blood_collection_facilities.address AS facility_address, 
+                blood_collection_facilities.phone_number AS facility_phone_number, 
+                event_organisers.email AS organiser_email, 
+                event_organisers.name AS organiser_name, 
+                event_organisers.phone_number AS organiser_phone_number, 
+                states.name AS state_name, 
+                districts.name AS district_name, 
+                COALESCE(registration_counts.current_attendees, 0) AS current_attendees 
+            FROM 
+                blood_donation_events 
+            JOIN 
+                blood_collection_facilities ON blood_donation_events.facility_id = blood_collection_facilities.id 
+            JOIN 
+                event_organisers ON blood_donation_events.organiser_id = event_organisers.id 
+            JOIN 
+                states ON blood_donation_events.state_id = states.id 
+            JOIN 
+                districts ON blood_donation_events.district_id = districts.id 
+            LEFT JOIN (
+                SELECT 
+                    event_id, 
+                    COUNT(*)::INTEGER AS current_attendees
+                FROM 
+                    registrations
+                GROUP BY 
+                    event_id
+            ) AS registration_counts ON blood_donation_events.id = registration_counts.event_id 
+            WHERE 
+                start_time > CURRENT_TIMESTAMP 
+            ORDER BY 
+                id")
             .fetch_all(db)
             .await?;
 

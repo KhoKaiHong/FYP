@@ -7,7 +7,7 @@ function TestFetchButton() {
   const handleFetch = async () => {
     try {
       const response = await fetchWithAuth({
-        path: "/api/getcredentials",
+        path: "/api/get-credentials",
         method: "GET",
       });
       setResult(JSON.stringify(response));

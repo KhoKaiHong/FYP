@@ -1,26 +1,26 @@
-use std::str::FromStr;
 use crate::auth::password::encrypt_password;
 use crate::context::Context;
 use crate::model::admin::{AdminForCreate, AdminModelController};
+use crate::model::enums::BloodType;
 use crate::model::facility::{FacilityForCreate, FacilityModelController};
 use crate::model::organiser::{OrganiserForCreate, OrganiserModelController};
 use crate::model::user::{UserForCreate, UserModelController};
-use crate::model::enums::BloodType;
 use crate::state::AppState;
-use crate::web::{Result, Error};
+use crate::web::{Error, Result};
 use axum::extract::State;
 use axum::routing::post;
 use axum::{Json, Router};
 use serde::Deserialize;
 use serde_json::{json, Value};
+use std::str::FromStr;
 use tracing::debug;
 
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
-        .route("/userregister", post(user_register_handler))
-        .route("/facilityregister", post(facility_register_handler))
-        .route("/organiserregister", post(organiser_register_handler))
-        .route("/adminregister", post(admin_register_handler))
+        .route("/user-register", post(user_register_handler))
+        .route("/facility-register", post(facility_register_handler))
+        .route("/organiser-register", post(organiser_register_handler))
+        .route("/admin-register", post(admin_register_handler))
         .with_state(app_state)
 }
 
@@ -40,7 +40,8 @@ async fn user_register_handler(
         name: payload.name,
         email: payload.email,
         phone_number: payload.phone_number,
-        blood_type: BloodType::from_str(&payload.blood_type).map_err(|_| Error::InvalidData("blood type".to_string()))?,
+        blood_type: BloodType::from_str(&payload.blood_type)
+            .map_err(|_| Error::InvalidData("blood type".to_string()))?,
         state_id: payload.state_id,
         district_id: payload.district_id,
     };

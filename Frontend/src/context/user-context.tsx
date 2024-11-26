@@ -59,7 +59,7 @@ export function UserProvider(props: UserProviderProps) {
 
     try {
       const result = await fetchWithAuth<GetCredentialsResponse>({
-        path: "/api/getcredentials",
+        path: "/api/get-credentials",
         method: "GET",
       });
 

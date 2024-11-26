@@ -19,7 +19,7 @@ export async function userLogin(
   userLoginPayload: UserLoginPayload
 ): Promise<Result<UserLoginResponse, AppError>> {
   try {
-    const response = await fetch(`${BACKEND_PATH}/api/userlogin`, {
+    const response = await fetch(`${BACKEND_PATH}/api/user-login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -48,7 +48,7 @@ export async function facilityLogin(
   facilityLoginPayload: FacilityLoginPayload
 ): Promise<Result<FacilityLoginResponse, AppError>> {
   try {
-    const response = await fetch(`${BACKEND_PATH}/api/facilitylogin`, {
+    const response = await fetch(`${BACKEND_PATH}/api/facility-login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -77,7 +77,7 @@ export async function organiserLogin(
   organiserLoginPayload: OrganiserLoginPayload
 ): Promise<Result<OrganiserLoginResponse, AppError>> {
   try {
-    const response = await fetch(`${BACKEND_PATH}/api/organiserlogin`, {
+    const response = await fetch(`${BACKEND_PATH}/api/organiser-login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -106,7 +106,7 @@ export async function adminLogin(
   adminLoginPayload: AdminLoginPayload
 ): Promise<Result<AdminLoginResponse, AppError>> {
   try {
-    const response = await fetch(`${BACKEND_PATH}/api/adminlogin`, {
+    const response = await fetch(`${BACKEND_PATH}/api/admin-login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

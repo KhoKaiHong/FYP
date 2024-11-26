@@ -9,7 +9,7 @@ async fn main() -> Result<()> {
 
     // User login test
     let req_login = hc.do_post(
-        "/api/userlogin",
+        "/api/user-login",
         json!({
             "icNumber": "900101-01-1234",
             "password": "password123"
@@ -57,7 +57,7 @@ async fn main() -> Result<()> {
 
     // Login tests
     // let req_login = hc.do_post(
-    //     "/api/userlogin",
+    //     "/api/user-login",
     //     json!({
     //         "icNumber": "900101-01-1234",
     //         "password": "password123"
@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
     // req_login.await?.print().await?;
 
     // let req_login = hc.do_post(
-    //     "/api/userlogin",
+    //     "/api/user-login",
     //     json!({
     //         "icNumber": "900101-01-1234",
     //         "password": "htrghtghn"
@@ -76,7 +76,7 @@ async fn main() -> Result<()> {
 
     // // Facility login test
     // let req_login = hc.do_post(
-    //     "/api/facilitylogin",
+    //     "/api/facility-login",
     //     json!({
     //         "email": "sultanah.aminah@example.com",
     //         "password": "password123"
@@ -85,7 +85,7 @@ async fn main() -> Result<()> {
     // req_login.await?.print().await?;
 
     // let req_login = hc.do_post(
-    //     "/api/facilitylogin",
+    //     "/api/facility-login",
     //     json!({
     //         "email": "sultanah.aminah@example.com",
     //         "password": "welcome"
@@ -95,7 +95,7 @@ async fn main() -> Result<()> {
 
     // // Organiser login test
     // let req_login = hc.do_post(
-    //     "/api/organiserlogin",
+    //     "/api/organiser-login",
     //     json!({
     //         "email": "organiser1@example.com",
     //         "password": "password123"
@@ -104,7 +104,7 @@ async fn main() -> Result<()> {
     // req_login.await?.print().await?;
 
     // let req_login = hc.do_post(
-    //     "/api/organiserlogin",
+    //     "/api/organiser-login",
     //     json!({
     //         "email": "jyhmnhjmhjmku",
     //         "password": "password123"

@@ -7,7 +7,7 @@ async fn main() -> Result<()> {
 
     // User login test
     let req_login = hc.do_post(
-        "/api/userlogin",
+        "/api/user-login",
         json!({
             "icNumber": "900101-01-1234",
             "password": "password123"
@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:8000/api/getcredentials")
+        .get("http://localhost:8000/api/get-credentials")
         .header("Accept", "text/html")
         .bearer_auth(access_token);
     println!("{:?}", req);
@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:8000/api/getcredentials")
+        .get("http://localhost:8000/api/get-credentials")
         .bearer_auth("figrniughjnrfi");
     println!("{:?}", req);
     println!();
@@ -45,7 +45,7 @@ async fn main() -> Result<()> {
 
     // Facility login test
     let req_login = hc.do_post(
-        "/api/facilitylogin",
+        "/api/facility-login",
         json!({
             "email": "sultanah.aminah@example.com",
             "password": "password123"
@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:8000/api/getcredentials")
+        .get("http://localhost:8000/api/get-credentials")
         .bearer_auth(access_token);
 
     let res = req.send().await?;
@@ -66,7 +66,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:8000/api/getcredentials")
+        .get("http://localhost:8000/api/get-credentials")
         .bearer_auth("figrniughjnrfi");
 
     let res = req.send().await?;
@@ -76,7 +76,7 @@ async fn main() -> Result<()> {
 
     // Organiser login test
     let req_login = hc.do_post(
-        "/api/organiserlogin",
+        "/api/organiser-login",
         json!({
             "email": "organiser1@example.com",
             "password": "password123"
@@ -87,7 +87,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:8000/api/getcredentials")
+        .get("http://localhost:8000/api/get-credentials")
         .bearer_auth(access_token);
 
     let res = req.send().await?;
@@ -97,7 +97,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:8000/api/getcredentials")
+        .get("http://localhost:8000/api/get-credentials")
         .bearer_auth("figrniughjnrfi");
 
     let res = req.send().await?;
@@ -107,7 +107,7 @@ async fn main() -> Result<()> {
 
     // Admin login test
     let req_login = hc.do_post(
-        "/api/adminlogin",
+        "/api/admin-login",
         json!({
             "email": "admin1@example.com",
             "password": "password123"
@@ -118,7 +118,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:8000/api/getcredentials")
+        .get("http://localhost:8000/api/get-credentials")
         .bearer_auth(access_token);
 
     let res = req.send().await?;
@@ -128,7 +128,7 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .get("http://localhost:8000/api/getcredentials")
+        .get("http://localhost:8000/api/get-credentials")
         .bearer_auth("figrniughjnrfi");
 
     let res = req.send().await?;
