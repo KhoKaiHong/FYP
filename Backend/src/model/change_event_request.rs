@@ -11,6 +11,7 @@ use sqlx::{FromRow, Row};
 #[derive(Debug, FromRow)]
 pub struct ChangeEventRequest {
     pub id: i64,
+    pub location: String,
     pub address: String,
     pub start_time: DateTime<Utc>,
     pub end_time: DateTime<Utc>,
@@ -30,6 +31,7 @@ pub struct ChangeEventRequest {
 #[derive(Debug)]
 pub struct ChangeEventRequestWithInformation {
     pub id: i64,
+    pub location: String,
     pub address: String,
     pub start_time: DateTime<Utc>,
     pub end_time: DateTime<Utc>,
@@ -59,6 +61,7 @@ impl<'r> FromRow<'r, PgRow> for ChangeEventRequestWithInformation {
     fn from_row(row: &'r PgRow) -> core::result::Result<Self, sqlx::Error> {
         Ok(ChangeEventRequestWithInformation {
             id: row.try_get("id")?,
+            location: row.try_get("location")?,
             address: row.try_get("address")?,
             start_time: row.try_get::<NaiveDateTime, _>("start_time")?.and_utc(),
             end_time: row.try_get::<NaiveDateTime, _>("end_time")?.and_utc(),
@@ -88,6 +91,7 @@ impl<'r> FromRow<'r, PgRow> for ChangeEventRequestWithInformation {
 
 #[derive(Deserialize)]
 pub struct ChangeEventRequestForCreate {
+    pub location: String,
     pub address: String,
     pub start_time: DateTime<Utc>,
     pub end_time: DateTime<Utc>,
@@ -122,8 +126,9 @@ impl ChangeEventRequestModelController {
         let db = model_manager.db();
 
         let (id,) = sqlx::query_as(
-            "INSERT INTO change_blood_donation_events_requests (address, start_time, end_time, max_attendees, latitude, longitude, change_reason, event_id, facility_id, organiser_id, state_id, district_id) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) returning id",
+            "INSERT INTO change_blood_donation_events_requests (location, address, start_time, end_time, max_attendees, latitude, longitude, change_reason, event_id, facility_id, organiser_id, state_id, district_id) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) returning id",
         )
+        .bind(request_created.location)
         .bind(request_created.address)
         .bind(request_created.start_time.naive_utc())
         .bind(request_created.end_time.naive_utc())
@@ -259,6 +264,7 @@ mod tests {
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
         let change_request = ChangeEventRequestForCreate {
+            location: "test location 1".to_string(),
             address: "test_create_ok@example.com".to_string(),
             start_time: test_time,
             end_time: test_time,
@@ -340,6 +346,7 @@ mod tests {
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
         let change_request_1 = ChangeEventRequestForCreate {
+            location: "test location 1".to_string(),
             address: "test_list_ok-event 01".to_string(),
             start_time: test_time,
             end_time: test_time,
@@ -354,6 +361,7 @@ mod tests {
             district_id: 1,
         };
         let change_request_2 = ChangeEventRequestForCreate {
+            location: "test location 2".to_string(),
             address: "test_list_ok-event 02".to_string(),
             start_time: test_time,
             end_time: test_time,
@@ -408,6 +416,7 @@ mod tests {
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
         let change_request_1 = ChangeEventRequestForCreate {
+            location: "test location 1".to_string(),
             address: "test_list_ok-event 01".to_string(),
             start_time: test_time,
             end_time: test_time,
@@ -422,6 +431,7 @@ mod tests {
             district_id: 1,
         };
         let change_request_2 = ChangeEventRequestForCreate {
+            location: "test location 2".to_string(),
             address: "test_list_ok-event 02".to_string(),
             start_time: test_time,
             end_time: test_time,
@@ -436,6 +446,7 @@ mod tests {
             district_id: 2,
         };
         let change_request_3 = ChangeEventRequestForCreate {
+            location: "test location 3".to_string(),
             address: "test_list_ok-event 03".to_string(),
             start_time: test_time,
             end_time: test_time,
@@ -496,6 +507,7 @@ mod tests {
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
         let change_request_1 = ChangeEventRequestForCreate {
+            location: "test location 1".to_string(),
             address: "test_list_ok-event 01".to_string(),
             start_time: test_time,
             end_time: test_time,
@@ -510,6 +522,7 @@ mod tests {
             district_id: 1,
         };
         let change_request_2 = ChangeEventRequestForCreate {
+            location: "test location 2".to_string(),
             address: "test_list_ok-event 02".to_string(),
             start_time: test_time,
             end_time: test_time,
@@ -524,6 +537,7 @@ mod tests {
             district_id: 2,
         };
         let change_request_3 = ChangeEventRequestForCreate {
+            location: "test location 3".to_string(),
             address: "test_list_ok-event 03".to_string(),
             start_time: test_time,
             end_time: test_time,
@@ -584,6 +598,7 @@ mod tests {
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
         let change_request = ChangeEventRequestForCreate {
+            location: "test location 1".to_string(),
             address: "test_create_ok@example.com".to_string(),
             start_time: non_updated_time,
             end_time: non_updated_time,

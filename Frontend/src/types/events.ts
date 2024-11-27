@@ -1,5 +1,6 @@
 export type Event = {
     id: number,
+    location: string
     address: string,
     startTime: string,
     endTime: string,

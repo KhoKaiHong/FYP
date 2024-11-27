@@ -22,6 +22,7 @@ pub struct RegistrationWithInformation {
     pub id: i64,
     pub status: RegistrationStatus,
     pub event_id: i64,
+    pub event_location: String,
     pub event_address: String,
     pub event_start_time: DateTime<Utc>,
     pub event_end_time: DateTime<Utc>,
@@ -40,6 +41,7 @@ impl<'r> FromRow<'r, PgRow> for RegistrationWithInformation {
         Ok(RegistrationWithInformation {
             id: row.try_get("id")?,
             status: row.try_get("status")?,
+            event_location: row.try_get("event_location")?,
             event_id: row.try_get("event_id")?,
             event_address: row.try_get("event_address")?,
             event_start_time: row
@@ -78,6 +80,25 @@ pub enum RegistrationStatus {
 }
 // endregion:    --- Registration Types
 
+// region:    --- Registration Errors to propagate to client
+#[derive(Debug, Serialize)]
+pub enum RegistrationError {
+    UserNotEligible,
+    EventAtCapacity,
+    AlreadyRegistered,
+}
+// endregion:    --- Registration Errors to propagate to client
+
+// region:    --- Error Boilerplate
+impl core::fmt::Display for RegistrationError {
+    fn fmt(&self, fmt: &mut core::fmt::Formatter) -> core::result::Result<(), core::fmt::Error> {
+        write!(fmt, "{self:?}")
+    }
+}
+
+impl std::error::Error for RegistrationError {}
+// endregion: --- Error Boilerplate
+
 // region:    --- Registration Model Controller
 pub struct RegistrationModelController;
 
@@ -108,7 +129,7 @@ impl RegistrationModelController {
         let db = model_manager.db();
 
         let registration = sqlx::query_as(
-            "SELECT registrations.*, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id WHERE registrations.id = $1",
+            "SELECT registrations.*, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id WHERE registrations.id = $1",
         )
         .bind(id)
         .fetch_optional(db)
@@ -128,7 +149,7 @@ impl RegistrationModelController {
         let db = model_manager.db();
 
         let registrations = sqlx::query_as(
-            "SELECT registrations.*, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id ORDER BY id",
+            "SELECT registrations.*, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id ORDER BY id",
         )
         .fetch_all(db)
         .await?;
@@ -153,7 +174,7 @@ impl RegistrationModelController {
             })?;
 
         let registrations = sqlx::query_as(
-            "SELECT registrations.*, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id WHERE blood_donation_events.id = $1 ORDER BY id",
+            "SELECT registrations.*, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id WHERE blood_donation_events.id = $1 ORDER BY id",
         )
         .bind(event_id)
         .fetch_all(db)

@@ -1,4 +1,5 @@
 use crate::model::store;
+use crate::model::registration::RegistrationError;
 use serde::Serialize;
 use serde_with::{serde_as, DisplayFromStr};
 use uuid::Uuid;
@@ -26,6 +27,9 @@ pub enum Error {
         table: &'static str,
         column: &'static str,
     },
+
+    // -- Event Registration Errors
+    EventRegistration(RegistrationError),
 
     // -- Modules
     Store(store::Error),

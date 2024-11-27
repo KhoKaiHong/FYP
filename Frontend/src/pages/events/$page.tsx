@@ -70,8 +70,11 @@ import { today } from "@internationalized/date";
 import { DateValue } from "@ark-ui/solid";
 import { MapPin, Calendar, Clock, UsersRound } from "lucide-solid";
 import { DialogTriggerProps } from "@kobalte/core/dialog";
+import { useUser } from "@/context/user-context";
 
 function Events() {
+  const { isAuthenticated, user, role, isLoading, logout } = useUser();
+
   async function getEventsData() {
     try {
       const [districtsResponse, eventsResponse] = await Promise.all([
@@ -136,28 +139,40 @@ function Events() {
   const states = () => eventsData()?.states ?? null;
   const districts = () => eventsData()?.districts ?? null;
 
-  let map: google.maps.Map | undefined;
-  let infoWindow: google.maps.InfoWindow | undefined;
+  // let map: google.maps.Map | undefined;
+  // let infoWindow: google.maps.InfoWindow | undefined;
   const markers: google.maps.marker.AdvancedMarkerElement[] = [];
+
+  const [map, setMap] = createSignal<google.maps.Map | null>(null);
+  const [infoWindow, setInfoWindow] =
+    createSignal<google.maps.InfoWindow | null>(null);
 
   onMount(async () => {
     const { Map, InfoWindow } = (await google.maps.importLibrary(
       "maps"
     )) as google.maps.MapsLibrary;
 
-    map = new Map(document.getElementById("map") as HTMLElement, {
-      center: { lat: 3.1732962387784367, lng: 101.70668106095312 },
-      zoom: 10,
-      mapId: "f7a7a21c7ed4070e",
-    });
+    setMap(
+      new Map(document.getElementById("map") as HTMLElement, {
+        center: { lat: 3.1732962387784367, lng: 101.70668106095312 },
+        zoom: 10,
+        mapId: "f7a7a21c7ed4070e",
+      })
+    );
 
-    infoWindow = new InfoWindow();
+    setInfoWindow(new InfoWindow());
   });
 
-  createEffect(async () => {
+  createEffect(() => {
     const eventsPin = events();
+    const mapConst = map();
+    const infoWindowConst = infoWindow();
 
-    if (map && infoWindow && eventsPin && eventsPin.length > 0) {
+    async function initialiseMarkers(
+      map: google.maps.Map,
+      infoWindow: google.maps.InfoWindow,
+      eventsPin: Event[]
+    ) {
       const { AdvancedMarkerElement } = (await google.maps.importLibrary(
         "marker"
       )) as google.maps.MarkerLibrary;
@@ -166,18 +181,25 @@ function Events() {
         const marker = new AdvancedMarkerElement({
           map,
           position: { lat: event.latitude, lng: event.longitude },
-          title: event.address,
+          title: event.location,
           gmpClickable: true,
         });
 
         marker.addListener("click", () => {
-          infoWindow?.close();
-          infoWindow?.setContent(`<p class="text-slate-600">${marker.title}</p>`);
-          infoWindow?.open(marker.map, marker);
+          infoWindow.close();
+          infoWindow.setContent(
+            `<p class="text-slate-600">${marker.title}</p>`
+          );
+          infoWindow.open(marker.map, marker);
         });
 
         markers.push(marker);
       });
+    }
+
+    if (mapConst && infoWindowConst && eventsPin && eventsPin.length > 0) {
+      console.log("Initialising markers");
+      initialiseMarkers(mapConst, infoWindowConst, eventsPin);
     }
   });
 
@@ -257,20 +279,24 @@ function Events() {
       "marker"
     )) as google.maps.MarkerLibrary;
 
+    const mapConst = map();
+
     // Add markers for the filtered events
-    if (map && filteredEvents.length > 0) {
+    if (mapConst && filteredEvents.length > 0) {
       filteredEvents.forEach((event) => {
         const marker = new AdvancedMarkerElement({
-          map,
+          map: mapConst,
           position: { lat: event.latitude, lng: event.longitude },
-          title: event.address,
+          title: event.location,
           gmpClickable: true,
         });
 
         marker.addListener("click", () => {
-          infoWindow?.close();
-          infoWindow?.setContent(`<p class="text-slate-600">${marker.title}</p>`);
-          infoWindow?.open(marker.map, marker);
+          infoWindow()?.close();
+          infoWindow()?.setContent(
+            `<p class="text-slate-600">${marker.title}</p>`
+          );
+          infoWindow()?.open(marker.map, marker);
         });
 
         markers.push(marker);
@@ -280,11 +306,13 @@ function Events() {
 
   function expandMarkerPin(event: Event) {
     markers.forEach((marker) => {
-      if (marker.title === event.address) {
-        map?.setCenter({ lat: event.latitude, lng: event.longitude });
-        map?.setZoom(18);
-        infoWindow?.setContent(marker.title);
-        infoWindow?.open(marker.map, marker);
+      if (marker.title === event.location) {
+        map()?.setCenter({ lat: event.latitude, lng: event.longitude });
+        map()?.setZoom(18);
+        infoWindow()?.setContent(
+          `<p class="text-slate-600">${marker.title}</p>`
+        );
+        infoWindow()?.open(marker.map, marker);
         return;
       }
     });
@@ -561,7 +589,7 @@ function Events() {
                       <CardTitle>
                         <div class="flex gap-x-2 items-center">
                           <MapPin size={20} class="shrink-0" />
-                          <p>{event.address}</p>
+                          <p>{event.location}</p>
                         </div>
                       </CardTitle>
                     </CardHeader>
@@ -618,6 +646,7 @@ function Events() {
                           <DialogHeader>
                             <DialogTitle>Details</DialogTitle>
                             <div class="space-y-2">
+                              <p>Location: {event.location}</p>
                               <p>Address: {event.address}</p>
                               <p>
                                 Date:{" "}

@@ -18,6 +18,7 @@ pub struct DonationHistoryWithInformation {
     pub user_phone_number: String,
     pub user_blood_type: BloodType,
     pub event_id: Option<i64>,
+    pub event_location: Option<String>,
     pub event_address: Option<String>,
     pub event_start_time: Option<DateTime<Utc>>,
     pub event_end_time: Option<DateTime<Utc>>,
@@ -35,6 +36,7 @@ impl<'r> FromRow<'r, PgRow> for DonationHistoryWithInformation {
             user_phone_number: row.try_get("user_phone_number")?,
             user_blood_type: row.try_get("user_blood_type")?,
             event_id: row.try_get("event_id")?,
+            event_location: row.try_get("event_location")?,
             event_address: row.try_get("event_address")?,
             event_start_time: row
                 .try_get::<Option<NaiveDateTime>, _>("event_start_time")?
@@ -85,7 +87,7 @@ impl DonationHistoryModelController {
         let db = model_manager.db();
 
         let donation_history: DonationHistoryWithInformation = sqlx::query_as(
-            "SELECT donation_history.*, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time FROM donation_history JOIN users ON donation_history.user_id = users.id LEFT JOIN blood_donation_events ON donation_history.event_id = blood_donation_events.id WHERE donation_history.id = $1",
+            "SELECT donation_history.*, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time FROM donation_history JOIN users ON donation_history.user_id = users.id LEFT JOIN blood_donation_events ON donation_history.event_id = blood_donation_events.id WHERE donation_history.id = $1",
         )
         .bind(id)
         .fetch_optional(db)
@@ -105,7 +107,7 @@ impl DonationHistoryModelController {
         let db = model_manager.db();
 
         let donation_histories = sqlx::query_as(
-            "SELECT donation_history.*, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time FROM donation_history JOIN users ON donation_history.user_id = users.id LEFT JOIN blood_donation_events ON donation_history.event_id = blood_donation_events.id ORDER BY id",
+            "SELECT donation_history.*, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time FROM donation_history JOIN users ON donation_history.user_id = users.id LEFT JOIN blood_donation_events ON donation_history.event_id = blood_donation_events.id ORDER BY id",
         )
         .fetch_all(db)
         .await?;
@@ -130,7 +132,7 @@ impl DonationHistoryModelController {
             })?;
 
         let donation_histories = sqlx::query_as(
-            "SELECT donation_history.*, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time FROM donation_history JOIN users ON donation_history.user_id = users.id LEFT JOIN blood_donation_events ON donation_history.event_id = blood_donation_events.id WHERE users.id = $1 ORDER BY id",
+            "SELECT donation_history.*, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time FROM donation_history JOIN users ON donation_history.user_id = users.id LEFT JOIN blood_donation_events ON donation_history.event_id = blood_donation_events.id WHERE users.id = $1 ORDER BY id",
         )
         .bind(user_id)
         .fetch_all(db)
