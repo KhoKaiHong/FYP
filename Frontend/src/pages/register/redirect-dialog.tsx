@@ -1,9 +1,9 @@
 import {
   AlertDialog,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useUser } from "@/context/user-context";
 import { useNavigate } from "@solidjs/router";
@@ -18,10 +18,10 @@ function RegisterRedirectDialog() {
     <AlertDialog open={isAuthenticated()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogDescription>
+          <AlertDialogTitle>
             You are already logged in. Do you wish to log out? <br />
             Pressing no will redirect you to the home page.
-          </AlertDialogDescription>
+          </AlertDialogTitle>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <Button variant="destructive" onClick={async () => await logout()}>

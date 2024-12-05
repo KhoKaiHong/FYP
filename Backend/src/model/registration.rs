@@ -63,7 +63,6 @@ impl<'r> FromRow<'r, PgRow> for RegistrationWithInformation {
 #[derive(Deserialize)]
 pub struct RegistrationForCreate {
     pub event_id: i64,
-    pub user_id: i64,
 }
 
 #[derive(Deserialize)]
@@ -83,9 +82,8 @@ pub enum RegistrationStatus {
 // region:    --- Registration Errors to propagate to client
 #[derive(Debug, Serialize)]
 pub enum RegistrationError {
-    UserNotEligible,
     EventAtCapacity,
-    AlreadyRegistered,
+    ExistingEventRegistration,
 }
 // endregion:    --- Registration Errors to propagate to client
 
@@ -110,13 +108,52 @@ impl RegistrationModelController {
     ) -> Result<i64> {
         let db = model_manager.db();
 
+        let mut transaction = db.begin().await?;
+
+        let (max_attendees, current_attendees): (i32, i64) = sqlx::query_as(
+            "
+            SELECT max_attendees, 
+                   (SELECT COUNT(*) FROM registrations WHERE event_id = $1) AS current_attendees
+            FROM blood_donation_events
+            WHERE id = $1
+            FOR UPDATE
+            ",
+        )
+        .bind(registration_created.event_id)
+        .fetch_one(&mut *transaction)
+        .await?;
+
+        let already_registered: Option<i64> = sqlx::query_scalar(
+            "
+            SELECT id
+            FROM registrations
+            WHERE user_id = $1 AND status = 'Registered'
+            FOR UPDATE
+            ",
+        )
+        .bind(context.user_id())
+        .fetch_optional(&mut *transaction)
+        .await?;
+
+        if already_registered.is_some() {
+            transaction.rollback().await?;
+            return Err(Error::EventRegistration(RegistrationError::ExistingEventRegistration)); 
+        }
+    
+        if current_attendees >= max_attendees as i64 {
+            transaction.rollback().await?;
+            return Err(Error::EventRegistration(RegistrationError::EventAtCapacity));
+        }
+
         let (id,) = sqlx::query_as(
             "INSERT INTO registrations (event_id, user_id) values ($1, $2) returning id",
         )
         .bind(registration_created.event_id)
-        .bind(registration_created.user_id)
-        .fetch_one(db)
+        .bind(context.user_id())
+        .fetch_one(&mut *transaction)
         .await?;
+
+        transaction.commit().await?;
 
         Ok(id)
     }
@@ -268,19 +305,19 @@ impl RegistrationModelController {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::_dev_utils;
+    use crate::{_dev_utils, auth::Role};
     use anyhow::Result;
     use serial_test::serial;
+    use uuid::Uuid;
 
     #[tokio::test]
     #[serial]
     async fn test_create_ok() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
+        let context = Context::new(1000, Role::User, Uuid::new_v4());
         let registration_created = RegistrationForCreate {
             event_id: 1,
-            user_id: 1000,
         };
 
         // -- Exec
@@ -334,24 +371,23 @@ mod tests {
     async fn test_list_ok() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
+        let context1 = Context::new(1000, Role::User, Uuid::new_v4());
         let registration_created1 = RegistrationForCreate {
             event_id: 1,
-            user_id: 1000,
         };
+        let context2 = Context::new(1001, Role::User, Uuid::new_v4());
         let registration_created2 = RegistrationForCreate {
             event_id: 2,
-            user_id: 1001,
         };
 
         // -- Exec
         let id1 =
-            RegistrationModelController::create(&context, &model_manager, registration_created1)
+            RegistrationModelController::create(&context1, &model_manager, registration_created1)
                 .await?;
         let id2 =
-            RegistrationModelController::create(&context, &model_manager, registration_created2)
+            RegistrationModelController::create(&context2, &model_manager, registration_created2)
                 .await?;
-        let registrations = RegistrationModelController::list(&context, &model_manager).await?;
+        let registrations = RegistrationModelController::list(&context1, &model_manager).await?;
 
         assert_eq!(registrations.len(), 5, "number of seeded registrations.");
         assert_eq!(registrations[3].event_id, 1);
@@ -361,8 +397,8 @@ mod tests {
         println!("registration2 for test_update: {:?}", registrations[4]);
 
         // Clean
-        RegistrationModelController::delete(&context, &model_manager, id1).await?;
-        RegistrationModelController::delete(&context, &model_manager, id2).await?;
+        RegistrationModelController::delete(&context1, &model_manager, id1).await?;
+        RegistrationModelController::delete(&context2, &model_manager, id2).await?;
 
         Ok(())
     }
@@ -372,25 +408,24 @@ mod tests {
     async fn test_list_by_event_id() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
+        let context1 = Context::new(1000, Role::User, Uuid::new_v4());
         let registration_created1 = RegistrationForCreate {
             event_id: 1,
-            user_id: 1000,
         };
+        let context2 = Context::new(1001, Role::User, Uuid::new_v4());
         let registration_created2 = RegistrationForCreate {
             event_id: 1,
-            user_id: 1001,
         };
 
         // -- Exec
         let id1 =
-            RegistrationModelController::create(&context, &model_manager, registration_created1)
+            RegistrationModelController::create(&context1, &model_manager, registration_created1)
                 .await?;
         let id2 =
-            RegistrationModelController::create(&context, &model_manager, registration_created2)
+            RegistrationModelController::create(&context2, &model_manager, registration_created2)
                 .await?;
         let registrations =
-            RegistrationModelController::list_by_event_id(&context, &model_manager, 1).await?;
+            RegistrationModelController::list_by_event_id(&context1, &model_manager, 1).await?;
 
         assert_eq!(registrations.len(), 3, "number of seeded registrations.");
         assert_eq!(registrations[1].event_id, 1);
@@ -400,8 +435,8 @@ mod tests {
         println!("registration2 for test_update: {:?}", registrations[2]);
 
         // Clean
-        RegistrationModelController::delete(&context, &model_manager, id1).await?;
-        RegistrationModelController::delete(&context, &model_manager, id2).await?;
+        RegistrationModelController::delete(&context1, &model_manager, id1).await?;
+        RegistrationModelController::delete(&context1, &model_manager, id2).await?;
 
         Ok(())
     }
@@ -438,10 +473,9 @@ mod tests {
     async fn test_update_ok() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
+        let context = Context::new(1000, Role::User, Uuid::new_v4());
         let registration_created = RegistrationForCreate {
             event_id: 1,
-            user_id: 1000,
         };
 
         // -- Exec
@@ -474,7 +508,7 @@ mod tests {
     async fn test_delete_err_not_found() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
+        let context = Context::new(1000, Role::User, Uuid::new_v4());
         let id = 100;
 
         // -- Exec
@@ -501,33 +535,32 @@ mod tests {
     async fn test_get_num_of_registrations() -> Result<()> {
         // -- Setup & Fixtures
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
+        let context1 = Context::new(1000, Role::User, Uuid::new_v4());
         let registration_created1 = RegistrationForCreate {
             event_id: 1,
-            user_id: 1000,
         };
+        let context2 = Context::new(1001, Role::User, Uuid::new_v4());
         let registration_created2 = RegistrationForCreate {
             event_id: 1,
-            user_id: 1001,
         };
 
         // -- Exec
         let id1 =
-            RegistrationModelController::create(&context, &model_manager, registration_created1)
+            RegistrationModelController::create(&context1, &model_manager, registration_created1)
                 .await?;
         let id2 =
-            RegistrationModelController::create(&context, &model_manager, registration_created2)
+            RegistrationModelController::create(&context2, &model_manager, registration_created2)
                 .await?;
         let num_of_registrations =
-            RegistrationModelController::get_num_of_registrations(&context, &model_manager, 1)
+            RegistrationModelController::get_num_of_registrations(&context1, &model_manager, 1)
                 .await?;
 
         // -- Check
         assert_eq!(num_of_registrations, 3);
 
         // Clean
-        RegistrationModelController::delete(&context, &model_manager, id1).await?;
-        RegistrationModelController::delete(&context, &model_manager, id2).await?;
+        RegistrationModelController::delete(&context1, &model_manager, id1).await?;
+        RegistrationModelController::delete(&context1, &model_manager, id2).await?;
 
         Ok(())
     }

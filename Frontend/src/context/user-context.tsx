@@ -17,16 +17,12 @@ import { logout } from "@/api/logout";
 import showErrorToast from "@/components/error-toast";
 import { LogoutPayload } from "@/types/logout";
 
-type Role = "User" | "Facility" | "Organiser" | "Admin";
-
 type UserContextType = {
   user: Accessor<Users | null>;
-  role: Accessor<Role | null>;
   isAuthenticated: Accessor<boolean>;
   error: Accessor<AppError | null>;
   isLoading: Accessor<boolean>;
   setUser: Setter<Users | null>;
-  setRole: Setter<Role | null>;
   setIsAuthenticated: Setter<boolean>;
   setError: Setter<AppError | null>;
   refreshUser: () =>
@@ -45,7 +41,6 @@ type UserProviderProps = {
 
 export function UserProvider(props: UserProviderProps) {
   const [user, setUser] = createSignal<Users | null>(null);
-  const [role, setRole] = createSignal<Role | null>(null);
   const [isAuthenticated, setIsAuthenticated] = createSignal(
     !!localStorage.getItem("accessToken")
   );
@@ -55,8 +50,6 @@ export function UserProvider(props: UserProviderProps) {
   async function fetchUser(): Promise<
     Result<GetCredentialsResponse, AppError>
   > {
-    console.log("fetchUserData function called");
-
     try {
       const result = await fetchWithAuth<GetCredentialsResponse>({
         path: "/api/get-credentials",
@@ -77,13 +70,11 @@ export function UserProvider(props: UserProviderProps) {
 
   createEffect(() => {
     if (userData.loading) {
-      console.log("userData.loading");
       setIsLoading(true);
       return;
     }
 
     setIsLoading(false);
-    console.log("userData.loaded");
 
     if (userData.error) {
       setError({ message: "UNKNOWN_ERROR" });
@@ -97,9 +88,7 @@ export function UserProvider(props: UserProviderProps) {
     const data = userData();
     if (!data) {
       setIsAuthenticated(false);
-      setRole(null);
       setUser(null);
-      console.log("data is null");
       return;
     }
 
@@ -107,23 +96,31 @@ export function UserProvider(props: UserProviderProps) {
       (response) => {
         if ("userDetails" in response.data) {
           setIsAuthenticated(true);
-          setRole("User");
-          setUser(response.data.userDetails);
+          setUser({
+            ...response.data.userDetails,
+            role: "User",
+          });
           setError(null);
         } else if ("facilityDetails" in response.data) {
           setIsAuthenticated(true);
-          setRole("Facility");
-          setUser(response.data.facilityDetails);
+          setUser({
+            ...response.data.facilityDetails,
+            role: "Facility",
+          });
           setError(null);
         } else if ("organiserDetails" in response.data) {
           setIsAuthenticated(true);
-          setRole("Organiser");
-          setUser(response.data.organiserDetails);
+          setUser({
+            ...response.data.organiserDetails,
+            role: "Organiser",
+          });
           setError(null);
         } else if ("adminDetails" in response.data) {
           setIsAuthenticated(true);
-          setRole("Admin");
-          setUser(response.data.adminDetails);
+          setUser({
+            ...response.data.adminDetails,
+            role: "Admin",
+          });
           setError(null);
         } else {
           setError({ message: "UNKNOWN_ERROR" });
@@ -139,7 +136,6 @@ export function UserProvider(props: UserProviderProps) {
           error.message === "SESSION_EXPIRED"
         ) {
           setIsAuthenticated(false);
-          setRole(null);
           setUser(null);
         }
         setError(error);
@@ -155,7 +151,6 @@ export function UserProvider(props: UserProviderProps) {
       if (!refreshToken) {
         localStorage.removeItem("accessToken");
         setIsAuthenticated(false);
-        setRole(null);
         setUser(null);
         setError({ message: "NO_AUTH" });
         showErrorToast({
@@ -171,7 +166,6 @@ export function UserProvider(props: UserProviderProps) {
 
       if (result.isOk()) {
         setIsAuthenticated(false);
-        setRole(null);
         setUser(null);
         setError(null);
       } else {
@@ -182,7 +176,6 @@ export function UserProvider(props: UserProviderProps) {
           result.error.message === "SESSION_EXPIRED"
         ) {
           setIsAuthenticated(false);
-          setRole(null);
           setUser(null);
         }
         showErrorToast({
@@ -202,12 +195,10 @@ export function UserProvider(props: UserProviderProps) {
 
   const value = {
     user,
-    role,
     isAuthenticated,
     error,
     isLoading,
     setUser,
-    setRole,
     setIsAuthenticated,
     setError,
     refreshUser: refetch,

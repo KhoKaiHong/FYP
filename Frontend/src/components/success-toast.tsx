@@ -8,7 +8,7 @@ import {
   import { toaster } from "@kobalte/core";
   import { Show } from "solid-js";
   
-  type ErrorToastProps = {
+  type SuccessToastProps = {
     successTitle?: string;
     successDescription?: string;
   };
@@ -16,7 +16,7 @@ import {
   function showSuccessToast({
     successTitle = "",
     successDescription = "",
-  }: ErrorToastProps) {
+  }: SuccessToastProps) {
     toaster.show((props) => (
       <Toast toastId={props.toastId} variant="success">
         <ToastContent>

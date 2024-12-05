@@ -61,7 +61,7 @@ function Login() {
     }
   };
 
-  const { setUser, setRole, setIsAuthenticated, setError } = useUser();
+  const { setUser, setIsAuthenticated, setError } = useUser();
 
   const [id, setId] = createSignal("");
   const [password, setPassword] = createSignal("");
@@ -116,8 +116,10 @@ function Login() {
 
       if (response.isOk()) {
         setIsAuthenticated(true);
-        setRole("User");
-        setUser(response.value.data.userDetails);
+        setUser({
+          ...response.value.data.userDetails,
+          role: "User",
+        });
         setError(null);
         navigate("/");
       } else {
@@ -160,8 +162,10 @@ function Login() {
       } as OrganiserLoginPayload);
       if (response.isOk()) {
         setIsAuthenticated(true);
-        setRole("Organiser");
-        setUser(response.value.data.organiserDetails);
+        setUser({
+          ...response.value.data.organiserDetails,
+          role: "Organiser",
+        });
         setError(null);
         navigate("/");
       } else {

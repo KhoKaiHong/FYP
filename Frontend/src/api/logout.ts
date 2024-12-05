@@ -7,7 +7,6 @@ export async function logout(
   logoutPayload: LogoutPayload
 ): Promise<Result<LogoutResponse, AppError>> {
   try {
-    console.log(JSON.stringify(logoutPayload));
     const result = await fetchWithAuth<LogoutResponse>({
       path: "/api/logout",
       method: "POST",

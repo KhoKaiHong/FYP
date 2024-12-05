@@ -1,10 +1,15 @@
-import { User, Facility, Organiser, Admin } from "@/types/users";
+import {
+  UserResponse,
+  FacilityResponse,
+  OrganiserResponse,
+  AdminResponse,
+} from "@/types/users";
 
 export type UserLoginResponse = {
   data: {
     accessToken: string;
     refreshToken: string;
-    userDetails: User;
+    userDetails: UserResponse;
   };
 };
 
@@ -12,7 +17,7 @@ export type FacilityLoginResponse = {
   data: {
     accessToken: string;
     refreshToken: string;
-    facilityDetails: Facility;
+    facilityDetails: FacilityResponse;
   };
 };
 
@@ -20,7 +25,7 @@ export type OrganiserLoginResponse = {
   data: {
     accessToken: string;
     refreshToken: string;
-    organiserDetails: Organiser;
+    organiserDetails: OrganiserResponse;
   };
 };
 
@@ -28,7 +33,7 @@ export type AdminLoginResponse = {
   data: {
     accessToken: string;
     refreshToken: string;
-    adminDetails: Admin;
+    adminDetails: AdminResponse;
   };
 };
 

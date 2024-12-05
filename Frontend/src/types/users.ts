@@ -1,8 +1,8 @@
 // EligibilityStatus type
 type EligibilityStatus = "Eligible" | "Ineligible" | "Ineligible - Condition";
 
-// UserWithLocation type
-export type User = {
+// User type
+export type UserResponse = {
   id: number;
   icNumber: string;
   name: string;
@@ -16,8 +16,8 @@ export type User = {
   districtName: string;
 };
 
-// FacilityWithLocation type
-export type Facility = {
+// Facility type
+export type FacilityResponse = {
   id: number;
   email: string;
   name: string;
@@ -28,7 +28,7 @@ export type Facility = {
 };
 
 // Organiser type
-export type Organiser = {
+export type OrganiserResponse = {
   id: number;
   email: string;
   name: string;
@@ -36,10 +36,32 @@ export type Organiser = {
 };
 
 // Admin type
-export type Admin = {
+export type AdminResponse = {
   id: number;
   email: string;
   name: string;
 };
 
-export type Users = User | Facility | Organiser | Admin;
+export type User = {
+  role: "User"
+} &UserResponse;
+
+export type Facility = {
+  role: "Facility"
+} &FacilityResponse;
+
+export type Organiser = {
+  role: "Organiser"
+} &OrganiserResponse;
+
+export type Admin = {
+  role: "Admin"
+} &AdminResponse;
+
+export type Users =
+  | User
+  | Facility
+  | Organiser
+  | Admin;
+
+

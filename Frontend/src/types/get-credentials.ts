@@ -1,26 +1,31 @@
-import { User, Facility, Organiser, Admin } from "@/types/users";
+import {
+  UserResponse,
+  FacilityResponse,
+  OrganiserResponse,
+  AdminResponse,
+} from "@/types/users";
 
 type UserGetCredentialsResponse = {
   data: {
-    userDetails: User;
+    userDetails: UserResponse;
   };
 };
 
 type FacilityGetCredentialsResponse = {
   data: {
-    facilityDetails: Facility;
+    facilityDetails: FacilityResponse;
   };
 };
 
 type OrganiserGetCredentialsResponse = {
   data: {
-    organiserDetails: Organiser;
+    organiserDetails: OrganiserResponse;
   };
 };
 
 type AdminGetCredentialsResponse = {
   data: {
-    adminDetails: Admin;
+    adminDetails: AdminResponse;
   };
 };
 

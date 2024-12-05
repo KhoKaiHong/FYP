@@ -1,7 +1,7 @@
 import {
     AlertDialog,
     AlertDialogContent,
-    AlertDialogDescription,
+    AlertDialogTitle,
     AlertDialogFooter,
     AlertDialogHeader,
   } from "@/components/ui/alert-dialog";
@@ -18,10 +18,10 @@ import {
       <AlertDialog open={isAuthenticated()}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogDescription>
+            <AlertDialogTitle>
               You are already logged in. Do you wish to log out? <br />
               Pressing no will redirect you to the home page.
-            </AlertDialogDescription>
+            </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <Button variant="destructive" onClick={async () => await logout()}>

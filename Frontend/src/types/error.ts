@@ -8,7 +8,9 @@ type ClientError =
   | { message: "NO_AUTH" }
   | { message: "SERVICE_ERROR" }
   | { message: "DUPLICATE_RECORD"; detail: string }
-  | { message: "PERMISSION_DENIED" };
+  | { message: "PERMISSION_DENIED" }
+  | { message: "EVENT_AT_CAPACITY" }
+  | { message: "EXISTING_EVENT_REGISTRATION" };
 
 // Type for the error response from the backend
 export interface ClientErrorResponse {

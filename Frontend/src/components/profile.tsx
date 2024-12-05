@@ -26,7 +26,7 @@ import { Switch, Match } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 
 function ProfileDropDown() {
-  const { isAuthenticated, user, role, isLoading, logout } = useUser();
+  const { isAuthenticated, user, isLoading, logout } = useUser();
   const navigate = useNavigate();
 
   function DropDownContent() {
@@ -50,7 +50,7 @@ function ProfileDropDown() {
           </DropdownMenuGroup>
         }
       >
-        <Match when={role() === "User" && isAuthenticated() && user() != null}>
+        <Match when={isAuthenticated() && user() != null && user()?.role === "User"}>
           <DropdownMenuGroup>
             <div class="flex flex-col items-center gap-y-2 py-2">
               <UserRound size={42} />
@@ -75,7 +75,7 @@ function ProfileDropDown() {
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </Match>
-        <Match when={role() === "Facility"  && isAuthenticated() && user() != null}>
+        <Match when={isAuthenticated() && user() != null && user()?.role === "Facility"}>
           <DropdownMenuGroup>
             <div class="flex flex-col items-center gap-y-4 py-2">
               <Hospital size={42} />
@@ -100,7 +100,7 @@ function ProfileDropDown() {
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </Match>
-        <Match when={role() === "Organiser"  && isAuthenticated() && user() != null}>
+        <Match when={isAuthenticated() && user() != null && user()?.role === "Organiser"}>
           <DropdownMenuGroup>
             <div class="flex flex-col items-center gap-y-4 py-2">
               <UsersRound size={42} />
@@ -125,7 +125,7 @@ function ProfileDropDown() {
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </Match>
-        <Match when={role() === "Admin"  && isAuthenticated() && user() != null}>
+        <Match when={isAuthenticated() && user() != null && user()?.role === "Admin"}>
           <DropdownMenuGroup>
             <div class="flex flex-col items-center gap-y-4 py-2">
               <UserRoundCog size={42} />
@@ -161,13 +161,13 @@ function ProfileDropDown() {
           <Button variant="ghost" size="icon" disabled={isLoading()} {...props}>
             {isLoading() ? (
               <LoaderCircle size={18} class="animate-spin" />
-            ) : role() === "User" ? (
+            ) : user()?.role === "User" ? (
               <UserRound size={18} />
-            ) : role() === "Facility" ? (
+            ) : user()?.role === "Facility" ? (
               <Hospital size={18} />
-            ) : role() === "Organiser" ? (
+            ) : user()?.role === "Organiser" ? (
               <UsersRound size={18} />
-            ) : role() === "Admin" ? (
+            ) : user()?.role === "Admin" ? (
               <UserRoundCog size={18} />
             ) : (
               <UserRoundX size={18} />

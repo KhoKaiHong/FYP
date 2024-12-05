@@ -61,7 +61,7 @@ function SuperLogin() {
     }
   };
 
-  const { setUser, setRole, setIsAuthenticated, setError } = useUser();
+  const { setUser, setIsAuthenticated, setError } = useUser();
 
   const [email, setEmail] = createSignal("");
   const [password, setPassword] = createSignal("");
@@ -116,8 +116,10 @@ function SuperLogin() {
 
       if (response.isOk()) {
         setIsAuthenticated(true);
-        setRole("Facility");
-        setUser(response.value.data.facilityDetails);
+        setUser({
+          ...response.value.data.facilityDetails,
+          role: "Facility",
+        });
         setError(null);
         navigate("/");
       } else {
@@ -162,8 +164,10 @@ function SuperLogin() {
 
       if (response.isOk()) {
         setIsAuthenticated(true);
-        setRole("Admin");
-        setUser(response.value.data.adminDetails);
+        setUser({
+          ...response.value.data.adminDetails,
+          role: "Admin",
+        });
         setError(null);
         navigate("/");
       } else {

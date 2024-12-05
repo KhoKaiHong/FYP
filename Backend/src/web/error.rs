@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use crate::model::registration::RegistrationError;
 use crate::{auth, model, web};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
@@ -39,6 +40,7 @@ pub enum Error {
     // -- Logout Request Errors
     LogoutFailInvalidRefreshToken,
     LogoutFailNoSessionFound,
+
 
     // Invalid Data Errors
     InvalidData(String),
@@ -145,13 +147,24 @@ impl Error {
             LogoutFailInvalidRefreshToken => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
             LogoutFailNoSessionFound => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
 
-            // Invalid Data Errors
+            // -- Invalid Data Errors
             InvalidData(_) => (StatusCode::BAD_REQUEST, ClientError::INVALID_REQUEST),
 
-            // Duplicate Record Errors
+            // -- Duplicate Record Errors
             ModelError(model::Error::DuplicateKey { table: _, column }) => (
                 StatusCode::BAD_REQUEST,
                 ClientError::DUPLICATE_RECORD(column.to_string()),
+            ),
+            
+            // -- Event Registration Errors
+            ModelError(model::Error::EventRegistration(RegistrationError::EventAtCapacity)) => (
+                StatusCode::BAD_REQUEST,
+                ClientError::EVENT_AT_CAPACITY,
+            ),
+
+            ModelError(model::Error::EventRegistration(RegistrationError::ExistingEventRegistration)) => (
+                StatusCode::BAD_REQUEST,
+                ClientError::EXISTING_EVENT_REGISTRATION,
             ),
 
             // -- Fallback.
@@ -177,5 +190,7 @@ pub enum ClientError {
     SERVICE_ERROR,
     DUPLICATE_RECORD(String),
     PERMISSION_DENIED,
+    EVENT_AT_CAPACITY,
+    EXISTING_EVENT_REGISTRATION,
 }
 // endregion: --- Client Error

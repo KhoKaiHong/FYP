@@ -39,6 +39,8 @@ export function parseErrorResponse(errorResponse: unknown): AppError {
     case "NO_AUTH":
     case "SERVICE_ERROR":
     case "PERMISSION_DENIED":
+    case "EVENT_AT_CAPACITY":
+    case "EXISTING_EVENT_REGISTRATION":
       return { message };
 
     case "DUPLICATE_RECORD":
@@ -71,6 +73,10 @@ export function getErrorMessage(error: AppError): string {
       return `Duplicate record found: ${error.detail}`;
     case "PERMISSION_DENIED":
       return "You do not have permission to access this resource.";
+    case "EVENT_AT_CAPACITY":
+      return "Event is currently full. Sorry for any inconveniences caused.";
+    case "EXISTING_EVENT_REGISTRATION":
+      return "You already have an existing event registration.";
     case "UNKNOWN_ERROR":
       return "An unknown error occurred. Please try again later.";
     default:

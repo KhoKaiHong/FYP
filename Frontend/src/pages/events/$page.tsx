@@ -30,7 +30,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -71,9 +70,16 @@ import { DateValue } from "@ark-ui/solid";
 import { MapPin, Calendar, Clock, UsersRound } from "lucide-solid";
 import { DialogTriggerProps } from "@kobalte/core/dialog";
 import { useUser } from "@/context/user-context";
+import RequireUserDialog from "./require-user-dialog";
+import UserNotEligibleDialog from "./user-not-eligible-dialog";
+import { fetchWithAuth } from "@/utils/fetch-auth";
+import { EventRegistrationPayload } from "@/types/event-registration";
+import EventAtCapacityDialog from "./event-at-capacity-dialog";
+import ExistingEventRegistrationDialog from "./existing-event-registration-dialog.";
+import EventRegistrationSuccessfulDialog from "./event-registration-successful-dialog";
 
 function Events() {
-  const { isAuthenticated, user, role, isLoading, logout } = useUser();
+  const { user } = useUser();
 
   async function getEventsData() {
     try {
@@ -113,7 +119,7 @@ function Events() {
 
       if (!events || !statesAndDistricts) {
         showErrorToast({
-          errorTitle: "Error loading events data.",
+          errorTitle: "Error loading events.",
           error: { message: "SERVICE_ERROR" },
         });
         return null;
@@ -134,48 +140,55 @@ function Events() {
     }
   }
 
-  const [eventsData] = createResource(getEventsData);
+  const [eventsData, { refetch }] = createResource(getEventsData);
   const events = () => eventsData()?.events ?? null;
   const states = () => eventsData()?.states ?? null;
   const districts = () => eventsData()?.districts ?? null;
 
-  // let map: google.maps.Map | undefined;
-  // let infoWindow: google.maps.InfoWindow | undefined;
-  const markers: google.maps.marker.AdvancedMarkerElement[] = [];
-
-  const [map, setMap] = createSignal<google.maps.Map | null>(null);
-  const [infoWindow, setInfoWindow] =
-    createSignal<google.maps.InfoWindow | null>(null);
+  let map: google.maps.Map | undefined;
+  let infoWindow: google.maps.InfoWindow | undefined;
 
   onMount(async () => {
     const { Map, InfoWindow } = (await google.maps.importLibrary(
       "maps"
     )) as google.maps.MapsLibrary;
 
-    setMap(
-      new Map(document.getElementById("map") as HTMLElement, {
-        center: { lat: 3.1732962387784367, lng: 101.70668106095312 },
-        zoom: 10,
-        mapId: "f7a7a21c7ed4070e",
-      })
-    );
+    map = new Map(document.getElementById("map") as HTMLElement, {
+      center: { lat: 3.1732962387784367, lng: 101.70668106095312 },
+      zoom: 10,
+      mapId: "f7a7a21c7ed4070e",
+    });
 
-    setInfoWindow(new InfoWindow());
+    infoWindow = new InfoWindow();
   });
+
+  async function getMarkerLibrary() {
+    try {
+      const markerLibrary = (await google.maps.importLibrary(
+        "marker"
+      )) as google.maps.MarkerLibrary;
+
+      return markerLibrary;
+    } catch (error) {
+      console.error("Error loading Google Maps libraries:", error);
+      showErrorToast({
+        errorTitle: "Error loading Google Maps libraries.",
+        error: { message: "UNKNOWN_ERROR" },
+      });
+      return null;
+    }
+  }
+
+  const [markerLibrary] = createResource(getMarkerLibrary);
+  const markers: google.maps.marker.AdvancedMarkerElement[] = [];
 
   createEffect(() => {
     const eventsPin = events();
-    const mapConst = map();
-    const infoWindowConst = infoWindow();
+    const markerLibraryConst = markerLibrary() ?? null;
 
-    async function initialiseMarkers(
-      map: google.maps.Map,
-      infoWindow: google.maps.InfoWindow,
-      eventsPin: Event[]
-    ) {
-      const { AdvancedMarkerElement } = (await google.maps.importLibrary(
-        "marker"
-      )) as google.maps.MarkerLibrary;
+    if (eventsPin && map && infoWindow && markerLibraryConst) {
+      const { AdvancedMarkerElement } =
+        markerLibraryConst as google.maps.MarkerLibrary;
 
       eventsPin.forEach((event) => {
         const marker = new AdvancedMarkerElement({
@@ -186,20 +199,15 @@ function Events() {
         });
 
         marker.addListener("click", () => {
-          infoWindow.close();
-          infoWindow.setContent(
+          infoWindow?.close();
+          infoWindow?.setContent(
             `<p class="text-slate-600">${marker.title}</p>`
           );
-          infoWindow.open(marker.map, marker);
+          infoWindow?.open(marker.map, marker);
         });
 
         markers.push(marker);
       });
-    }
-
-    if (mapConst && infoWindowConst && eventsPin && eventsPin.length > 0) {
-      console.log("Initialising markers");
-      initialiseMarkers(mapConst, infoWindowConst, eventsPin);
     }
   });
 
@@ -244,7 +252,7 @@ function Events() {
     const selectedDistrict = districtChosen();
     const dateRange = selectedDateRange();
 
-    if (!allEvents) return []; // Return an empty array if no events data is available
+    if (!allEvents) return [];
 
     const filteredEvents = allEvents.filter((event) => {
       const eventStartTime = new Date(event.startTime);
@@ -275,28 +283,25 @@ function Events() {
     markers.forEach((marker) => (marker.map = null));
     markers.splice(0, markers.length);
 
-    const { AdvancedMarkerElement } = (await google.maps.importLibrary(
-      "marker"
-    )) as google.maps.MarkerLibrary;
+    const markerLibraryConst = markerLibrary() ?? null;
 
-    const mapConst = map();
+    if (markerLibraryConst && map && infoWindow && filteredEvents.length > 0) {
+      const { AdvancedMarkerElement } = markerLibraryConst;
 
-    // Add markers for the filtered events
-    if (mapConst && filteredEvents.length > 0) {
       filteredEvents.forEach((event) => {
         const marker = new AdvancedMarkerElement({
-          map: mapConst,
+          map,
           position: { lat: event.latitude, lng: event.longitude },
           title: event.location,
           gmpClickable: true,
         });
 
         marker.addListener("click", () => {
-          infoWindow()?.close();
-          infoWindow()?.setContent(
+          infoWindow?.close();
+          infoWindow?.setContent(
             `<p class="text-slate-600">${marker.title}</p>`
           );
-          infoWindow()?.open(marker.map, marker);
+          infoWindow?.open(marker.map, marker);
         });
 
         markers.push(marker);
@@ -305,17 +310,83 @@ function Events() {
   }
 
   function expandMarkerPin(event: Event) {
-    markers.forEach((marker) => {
-      if (marker.title === event.location) {
-        map()?.setCenter({ lat: event.latitude, lng: event.longitude });
-        map()?.setZoom(18);
-        infoWindow()?.setContent(
-          `<p class="text-slate-600">${marker.title}</p>`
+    if (map && infoWindow) {
+      markers.forEach((marker) => {
+        if (marker.title === event.location) {
+          map?.setCenter({ lat: event.latitude, lng: event.longitude });
+          map?.setZoom(18);
+          infoWindow?.setContent(
+            `<p class="text-slate-600">${marker.title}</p>`
+          );
+          infoWindow?.open(marker.map, marker);
+          return;
+        }
+      });
+    }
+  }
+
+  const [requireUserDialogOpen, setRequireUserDialogOpen] = createSignal(false);
+  const [userNotEligibleDialogOpen, setUserNotEligibleDialogOpen] =
+    createSignal(false);
+  const [eventAtCapacityDialogOpen, setEventAtCapacityDialogOpen] =
+    createSignal(false);
+  const [
+    existingEventRegistrationDialogOpen,
+    setExistingEventRegistrationDialogOpen,
+  ] = createSignal(false);
+  const [
+    eventRegistrationSuccessfulDialogOpen,
+    setEventRegistrationSuccessfulDialogOpen,
+  ] = createSignal(false);
+
+  function handleRegisterButtonClick(eventId: number) {
+    const loggedInUser = user();
+    if (!loggedInUser || loggedInUser.role !== "User") {
+      setRequireUserDialogOpen(true);
+      return;
+    } else if (loggedInUser.eligibility !== "Eligible") {
+      setUserNotEligibleDialogOpen(true);
+      return;
+    }
+
+    async function registerEvent(eventId: number) {
+      try {
+        const result = await fetchWithAuth<EventRegistrationPayload>({
+          path: "/api/registration/register",
+          method: "POST",
+          body: JSON.stringify({
+            eventId,
+          }),
+        });
+
+        result.match(
+          () => {
+            setEventRegistrationSuccessfulDialogOpen(true);
+            refetch();
+          },
+          (error) => {
+            if (error.message === "EVENT_AT_CAPACITY") {
+              setEventAtCapacityDialogOpen(true);
+            } else if (error.message === "EXISTING_EVENT_REGISTRATION") {
+              setExistingEventRegistrationDialogOpen(true);
+            } else {
+              showErrorToast({
+                errorTitle: "Error performing registration. Please try again.",
+                error,
+              });
+            }
+          }
         );
-        infoWindow()?.open(marker.map, marker);
-        return;
+      } catch (error) {
+        console.error("Error performing registration:", error);
+        showErrorToast({
+          errorTitle: "Error performing registration. ",
+          error: { message: "UNKNOWN_ERROR" },
+        });
       }
-    });
+    }
+
+    registerEvent(eventId);
   }
 
   return (
@@ -642,7 +713,7 @@ function Events() {
                             </Button>
                           )}
                         />
-                        <DialogContent>
+                        <DialogContent class="h-max max-h-72 overflow-y-auto overscroll-contain">
                           <DialogHeader>
                             <DialogTitle>Details</DialogTitle>
                             <div class="space-y-2">
@@ -716,6 +787,7 @@ function Events() {
                       </A>
                       <Button
                         disabled={event.currentAttendees >= event.maxAttendees}
+                        onClick={() => handleRegisterButtonClick(event.id)}
                       >
                         Register
                       </Button>
@@ -725,6 +797,27 @@ function Events() {
               </For>
             </CardContent>
           </Card>
+
+          <RequireUserDialog
+            open={requireUserDialogOpen()}
+            onClose={() => setRequireUserDialogOpen(false)}
+          />
+          <UserNotEligibleDialog
+            open={userNotEligibleDialogOpen()}
+            onClose={() => setUserNotEligibleDialogOpen(false)}
+          />
+          <EventAtCapacityDialog
+            open={eventAtCapacityDialogOpen()}
+            onClose={() => setEventAtCapacityDialogOpen(false)}
+          />
+          <ExistingEventRegistrationDialog
+            open={existingEventRegistrationDialogOpen()}
+            onClose={() => setExistingEventRegistrationDialogOpen(false)}
+          />
+          <EventRegistrationSuccessfulDialog
+            open={eventRegistrationSuccessfulDialogOpen()}
+            onClose={() => setEventRegistrationSuccessfulDialogOpen(false)}
+          />
         </div>
 
         <div class="lg:col-span-2">
