@@ -41,6 +41,8 @@ pub enum Error {
     LogoutFailInvalidRefreshToken,
     LogoutFailNoSessionFound,
 
+    // Update Password Errors
+    CurrentPasswordNotMatching,
 
     // Invalid Data Errors
     InvalidData(String),
@@ -147,6 +149,9 @@ impl Error {
             LogoutFailInvalidRefreshToken => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
             LogoutFailNoSessionFound => (StatusCode::FORBIDDEN, ClientError::NO_AUTH),
 
+            // -- Update Password Errors
+            CurrentPasswordNotMatching => (StatusCode::BAD_REQUEST, ClientError::CURRENT_PASSWORD_NOT_MATCHING),
+
             // -- Invalid Data Errors
             InvalidData(_) => (StatusCode::BAD_REQUEST, ClientError::INVALID_REQUEST),
 
@@ -192,5 +197,6 @@ pub enum ClientError {
     PERMISSION_DENIED,
     EVENT_AT_CAPACITY,
     EXISTING_EVENT_REGISTRATION,
+    CURRENT_PASSWORD_NOT_MATCHING,
 }
 // endregion: --- Client Error

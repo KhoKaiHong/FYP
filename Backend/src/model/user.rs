@@ -1,7 +1,7 @@
 use crate::context::Context;
+use crate::model::enums::{BloodType, EligibilityStatus};
 use crate::model::EntityErrorField::{I64Error, StringError};
 use crate::model::{Error, ModelManager, Result};
-use crate::model::enums::{BloodType, EligibilityStatus};
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgDatabaseError;
 use sqlx::FromRow;
@@ -58,6 +58,7 @@ pub struct UserForUpdate {
     pub password: Option<String>,
     pub email: Option<String>,
     pub phone_number: Option<String>,
+    pub eligibility: Option<EligibilityStatus>,
     pub state_id: Option<i32>,
     pub district_id: Option<i32>,
 }
@@ -178,6 +179,15 @@ impl UserModelController {
             first = false;
         }
 
+        if let Some(eligibility) = user_updated.eligibility {
+            if !first {
+                query_builder.push(", ");
+            }
+            query_builder.push("eligibility = ");
+            query_builder.push_bind(eligibility);
+            first = false;
+        }
+
         if let Some(state_id) = user_updated.state_id {
             if !first {
                 query_builder.push(", ");
@@ -229,10 +239,19 @@ fn check_duplicate(err: sqlx::Error) -> Error {
             if let Some(pg_err) = e.try_downcast_ref::<PgDatabaseError>() {
                 if pg_err.code() == "23505" {
                     match pg_err.constraint() {
-                        Some("users_ic_number_key") => Error::DuplicateKey { table: "users", column: "IC number" },
-                        Some("users_email_key") => Error::DuplicateKey { table: "users", column: "email" },
-                        Some("users_phone_number_key") => Error::DuplicateKey { table: "users", column: "phone number" },
-                        _ => Error::Sqlx(err)
+                        Some("users_ic_number_key") => Error::DuplicateKey {
+                            table: "users",
+                            column: "IC number",
+                        },
+                        Some("users_email_key") => Error::DuplicateKey {
+                            table: "users",
+                            column: "email",
+                        },
+                        Some("users_phone_number_key") => Error::DuplicateKey {
+                            table: "users",
+                            column: "phone number",
+                        },
+                        _ => Error::Sqlx(err),
                     }
                 } else {
                     Error::Sqlx(err)
@@ -241,7 +260,7 @@ fn check_duplicate(err: sqlx::Error) -> Error {
                 Error::Sqlx(err)
             }
         }
-        _ => Error::Sqlx(err)
+        _ => Error::Sqlx(err),
     }
 }
 
@@ -403,6 +422,7 @@ mod tests {
             password: Some("new_password".to_string()),
             email: None,
             phone_number: Some("9876543210".to_string()),
+            eligibility: Some(EligibilityStatus::Ineligible),
             state_id: Some(2),
             district_id: Some(2),
         };
@@ -417,7 +437,7 @@ mod tests {
         assert_eq!(user.email, "john@example.com");
         assert_eq!(user.phone_number, "9876543210");
         assert_eq!(user.blood_type, BloodType::APositive);
-        assert_eq!(user.eligibility, EligibilityStatus::Eligible);
+        assert_eq!(user.eligibility, EligibilityStatus::Ineligible);
         assert_eq!(user.state_id, 2);
         assert_eq!(user.district_id, 2);
 

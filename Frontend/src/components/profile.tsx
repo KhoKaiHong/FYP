@@ -57,7 +57,7 @@ function ProfileDropDown() {
               <p class="font-medium">{user()?.name || "Loading..."}</p>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="gap-x-2">
+            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/account-user")}>
               <CircleUserRound size={18} />
               <p>Account</p>
             </DropdownMenuItem>

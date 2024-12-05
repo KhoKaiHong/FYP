@@ -18,7 +18,7 @@ function RegisterRedirectDialog() {
     <AlertDialog open={isAuthenticated()}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>
+          <AlertDialogTitle class="text-base font-medium">
             You are already logged in. Do you wish to log out? <br />
             Pressing no will redirect you to the home page.
           </AlertDialogTitle>
@@ -27,9 +27,7 @@ function RegisterRedirectDialog() {
           <Button variant="destructive" onClick={async () => await logout()}>
             Yes
           </Button>
-          <Button onClick={() => navigate("/")}>
-            No
-          </Button>
+          <Button onClick={() => navigate("/")}>No</Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
