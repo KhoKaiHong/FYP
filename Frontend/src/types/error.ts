@@ -10,7 +10,8 @@ type ClientError =
   | { message: "DUPLICATE_RECORD"; detail: string }
   | { message: "PERMISSION_DENIED" }
   | { message: "EVENT_AT_CAPACITY" }
-  | { message: "EXISTING_EVENT_REGISTRATION" };
+  | { message: "EXISTING_EVENT_REGISTRATION" }
+  | { message: "CURRENT_PASSWORD_NOT_MATCHING" };
 
 // Type for the error response from the backend
 export interface ClientErrorResponse {

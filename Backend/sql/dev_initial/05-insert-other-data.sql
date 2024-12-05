@@ -1,8 +1,8 @@
 -- Insert data into users
 INSERT INTO users (ic_number, password, name, email, phone_number, blood_type, eligibility, state_id, district_id) VALUES
-('900101-01-1234', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'John Doe', 'john.doe@example.com', '60123456789', 'A+', 'Ineligible - Condition', 1, 1),
-('900102-02-2345', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'Jane Smith', 'jane.smith@example.com', '60123456790', 'B+', 'Eligible', 1, 1),
-('900103-03-3456', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'Ali Bin Ahmad', 'ali.ahmad@example.com', '60123456791', 'O-', 'Eligible', 1, 1);
+('900101-01-1234', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'John Doe', 'john.doe@example.com', '+6012-3456789', 'A+', 'Ineligible - Condition', 1, 1),
+('900102-02-2345', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'Jane Smith', 'jane.smith@example.com', '+6012-3456790', 'B+', 'Eligible', 1, 1),
+('900103-03-3456', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'Ali Bin Ahmad', 'ali.ahmad@example.com', '+6012-3456791', 'O-', 'Eligible', 1, 1);
 
 -- Insert data into event_organisers
 INSERT INTO event_organisers (email, password, name, phone_number) VALUES

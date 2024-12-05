@@ -57,12 +57,8 @@ function ProfileDropDown() {
               <p class="font-medium">{user()?.name || "Loading..."}</p>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/account-user")}>
+            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/user-dashboard")}>
               <CircleUserRound size={18} />
-              <p>Account</p>
-            </DropdownMenuItem>
-            <DropdownMenuItem class="gap-x-2">
-              <PanelTop size={18} />
               <p>Dashboard</p>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -84,10 +80,6 @@ function ProfileDropDown() {
             <DropdownMenuSeparator />
             <DropdownMenuItem class="gap-x-2">
               <CircleUserRound size={18} />
-              <p>Account</p>
-            </DropdownMenuItem>
-            <DropdownMenuItem class="gap-x-2">
-              <PanelTop size={18} />
               <p>Dashboard</p>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -107,12 +99,8 @@ function ProfileDropDown() {
               <p>{user()?.name || "Loading..."}</p>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="gap-x-2">
+            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/organiser-dashboard")}>
               <CircleUserRound size={18} />
-              <p>Account</p>
-            </DropdownMenuItem>
-            <DropdownMenuItem class="gap-x-2">
-              <PanelTop size={18} />
               <p>Dashboard</p>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -134,10 +122,6 @@ function ProfileDropDown() {
             <DropdownMenuSeparator />
             <DropdownMenuItem class="gap-x-2">
               <CircleUserRound size={18} />
-              <p>Account</p>
-            </DropdownMenuItem>
-            <DropdownMenuItem class="gap-x-2">
-              <PanelTop size={18} />
               <p>Dashboard</p>
             </DropdownMenuItem>
             <DropdownMenuSeparator />

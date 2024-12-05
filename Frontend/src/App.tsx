@@ -12,7 +12,8 @@ import NotFound from "@/pages/not-found/$page";
 import DonorPrivileges from "./pages/donor-privileges/$page";
 import BloodDonationStatistics from "@/pages/blood-donation-statistics/$page";
 import Events from "@/pages/events/$page";
-import UserAccount from "@/pages/account-user/$page";
+import UserDashboard from "@/pages/dashboard-user/$page";
+import OrganiserDashboard from "@/pages/dashboard-organiser/$page";
 
 const App: Component = () => {
   return (
@@ -36,7 +37,8 @@ const App: Component = () => {
       <Route path="/donor-privileges" component={DonorPrivileges} />
       <Route path="/blood-donation-statistics" component={BloodDonationStatistics} />
       <Route path="/events" component={Events} />
-      <Route path="/account-user" component={UserAccount} />
+      <Route path="/user-dashboard" component={UserDashboard} />
+      <Route path="/organiser-dashboard" component={OrganiserDashboard} />
       <Route path="*404" component={NotFound} />
     </Router>
   );
