@@ -1,10 +1,10 @@
 import { createForm } from "@tanstack/solid-form";
 import { zodValidator } from "@tanstack/zod-form-adapter";
 import { z } from "zod";
-import { createMemo } from "solid-js";
+import { createMemo, createSignal } from "solid-js";
 import showErrorToast from "@/components/error-toast";
-import { OrganiserUpdatePayload } from "@/types/organiser";
-import { updateOrganiser } from "@/api/organiser";
+import { FacilityUpdatePayload } from "@/types/facility";
+import { updateFacility } from "@/api/facility";
 import showSuccessToast from "@/components/success-toast";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/user-context";
@@ -25,38 +25,48 @@ import {
   TextFieldRoot,
 } from "@/components/ui/text-field";
 
-function ChangeNameDialog() {
+function ChangeEmailDialog() {
   const { refreshUser } = useUser();
+
+  const [duplicateEmail, setDuplicateEmail] = createSignal(false);
 
   const form = createForm(() => ({
     defaultValues: {
-      name: "",
+      email: "",
     },
     onSubmit: async ({ value }) => {
-      const organiserUpdatePayload: OrganiserUpdatePayload = {
-        name: value.name,
+      const facilityUpdatePayload: FacilityUpdatePayload = {
+        email: value.email,
       };
-      const response = await updateOrganiser(organiserUpdatePayload);
+      const response = await updateFacility(facilityUpdatePayload);
       response.match(
         () => {
-          showSuccessToast({ successTitle: "Name update successful." });
+          showSuccessToast({ successTitle: "Email update successful." });
           refreshUser();
         },
         (error) => {
-          showErrorToast({
-            errorTitle: "Error performing update. Please try again.",
-            error: error,
-          });
+          if (
+            error.message === "DUPLICATE_RECORD" &&
+            error.detail === "email"
+          ) {
+            setDuplicateEmail(true);
+          } else {
+            showErrorToast({
+              errorTitle: "Error performing update. Please try again.",
+              error: error,
+            });
+          }
         }
       );
     },
     validatorAdapter: zodValidator(),
   }));
 
-  const nameSchema = z
+  const emailSchema = z
     .string()
-    .min(1, "Name is required")
-    .max(64, "Name must be at most 64 characters");
+    .min(1, "Email is required")
+    .email("Please enter a valid email address")
+    .max(64, "Email must be at most 64 characters");
 
   return (
     <Dialog>
@@ -69,7 +79,7 @@ function ChangeNameDialog() {
       />
       <DialogContent class="md:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Change name</DialogTitle>
+          <DialogTitle>Change email</DialogTitle>
         </DialogHeader>
         <form
           onSubmit={(e) => {
@@ -80,13 +90,14 @@ function ChangeNameDialog() {
         >
           <div class="space-y-2 pb-4">
             <form.Field
-              name="name"
-              validators={{ onChange: nameSchema }}
+              name="email"
+              validators={{ onChange: emailSchema }}
               children={(field) => {
                 const hasError = createMemo(() => {
                   return (
-                    field().state.meta.errors.length > 0 &&
-                    field().state.meta.isTouched
+                    (field().state.meta.errors.length > 0 &&
+                      field().state.meta.isTouched) ||
+                    duplicateEmail()
                   );
                 });
 
@@ -97,12 +108,17 @@ function ChangeNameDialog() {
                     validationState={hasError() ? "invalid" : "valid"}
                     value={field().state.value}
                     onBlur={field().handleBlur}
-                    onChange={field().handleChange}
+                    onChange={(e) => {
+                      field().handleChange(e);
+                      setDuplicateEmail(false);
+                    }}
                   >
-                    <TextFieldLabel>Name</TextFieldLabel>
-                    <TextField />
+                    <TextFieldLabel>Email</TextFieldLabel>
+                    <TextField type="email" />
                     <TextFieldErrorMessage>
-                      {field().state.meta.errors.join(", ").split(", ")[0]}
+                      {duplicateEmail()
+                        ? "Email already registered"
+                        : field().state.meta.errors.join(", ").split(", ")[0]}
                     </TextFieldErrorMessage>
                   </TextFieldRoot>
                 );
@@ -118,4 +134,4 @@ function ChangeNameDialog() {
   );
 }
 
-export default ChangeNameDialog;
+export default ChangeEmailDialog;

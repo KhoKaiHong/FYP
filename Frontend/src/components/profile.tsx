@@ -78,7 +78,7 @@ function ProfileDropDown() {
               <p>{user()?.name || "Loading..."}</p>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="gap-x-2">
+            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/facility-dashboard")}>
               <CircleUserRound size={18} />
               <p>Dashboard</p>
             </DropdownMenuItem>

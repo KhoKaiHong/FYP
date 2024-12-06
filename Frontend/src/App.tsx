@@ -14,6 +14,7 @@ import BloodDonationStatistics from "@/pages/blood-donation-statistics/$page";
 import Events from "@/pages/events/$page";
 import UserDashboard from "@/pages/dashboard-user/$page";
 import OrganiserDashboard from "@/pages/dashboard-organiser/$page";
+import FacilityDashboard from "@/pages/dashboard-facility/$page";
 
 const App: Component = () => {
   return (
@@ -39,6 +40,7 @@ const App: Component = () => {
       <Route path="/events" component={Events} />
       <Route path="/user-dashboard" component={UserDashboard} />
       <Route path="/organiser-dashboard" component={OrganiserDashboard} />
+      <Route path="/facility-dashboard" component={FacilityDashboard} />
       <Route path="*404" component={NotFound} />
     </Router>
   );

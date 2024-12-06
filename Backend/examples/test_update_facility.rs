@@ -6,9 +6,9 @@ async fn main() -> Result<()> {
     let hc = httpc_test::new_client("http://localhost:8000")?;
 
     let req_login = hc.do_post(
-        "/api/organiser-login",
+        "/api/facility-login",
         json!({
-            "email": "organiser1@example.com",
+            "email": "sultanah.aminah@example.com",
             "password": "password123"
         }),
     );
@@ -19,14 +19,15 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .patch("http://localhost:8000/api/organiser")
+        .patch("http://localhost:8000/api/facility")
         .header("Accept", "text/html")
         .bearer_auth(access_token)
         .json(&json!({
             "currentPassword": "password123",
             "password": "password1234",
-            "name": "New org name",
-            "email": "neworg@yahoo.com",
+            "name": "New facility name",
+            "address": "New address",
+            "email": "newfac@yahoo.com",
             "phoneNumber": "+6018-9876524",
         }));
 
@@ -48,14 +49,15 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .patch("http://localhost:8000/api/organiser")
+        .patch("http://localhost:8000/api/facility")
         .header("Accept", "text/html")
         .bearer_auth(access_token)
         .json(&json!({
             "currentPassword": "password123",
             "password": "password1234",
-            "name": "New org name",
-            "email": "neworg@yahoo.com",
+            "name": "New facility name",
+            "address": "New address",
+            "email": "newfac@yahoo.com",
             "phoneNumber": "+6018-9876524",
         }));
 
@@ -64,11 +66,11 @@ async fn main() -> Result<()> {
     println!("{:?}", res);
     println!("{:?}\n\n", res.text().await?);
 
-    // Use facility to access endpoint
+    // Use user to access endpoint
     let req_login = hc.do_post(
-        "/api/facility-login",
+        "/api/user-login",
         json!({
-            "email": "sultanah.aminah@example.com",
+            "icNumber": "900101-01-1234",
             "password": "password123"
         }),
     );
@@ -79,14 +81,15 @@ async fn main() -> Result<()> {
 
     let req = hc
         .reqwest_client()
-        .patch("http://localhost:8000/api/organiser")
+        .patch("http://localhost:8000/api/facility")
         .header("Accept", "text/html")
         .bearer_auth(access_token)
         .json(&json!({
             "currentPassword": "password123",
             "password": "password1234",
-            "name": "New org name",
-            "email": "neworg@yahoo.com",
+            "name": "New facility name",
+            "address": "New address",
+            "email": "newfac@yahoo.com",
             "phoneNumber": "+6018-9876524",
         }));
 

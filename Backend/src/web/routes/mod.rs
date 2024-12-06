@@ -13,3 +13,4 @@ pub mod blood_type;
 pub mod event_registration;
 pub mod user;
 pub mod organiser;
+pub mod facility;

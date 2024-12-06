@@ -3,8 +3,8 @@ import { zodValidator } from "@tanstack/zod-form-adapter";
 import { z } from "zod";
 import { createMemo } from "solid-js";
 import showErrorToast from "@/components/error-toast";
-import { OrganiserUpdatePayload } from "@/types/organiser";
-import { updateOrganiser } from "@/api/organiser";
+import { FacilityUpdatePayload } from "@/types/facility";
+import { updateFacility } from "@/api/facility";
 import showSuccessToast from "@/components/success-toast";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/user-context";
@@ -25,18 +25,18 @@ import {
   TextFieldRoot,
 } from "@/components/ui/text-field";
 
-function ChangeNameDialog() {
+function ChangeAddressDialog() {
   const { refreshUser } = useUser();
 
   const form = createForm(() => ({
     defaultValues: {
-      name: "",
+      address: "",
     },
     onSubmit: async ({ value }) => {
-      const organiserUpdatePayload: OrganiserUpdatePayload = {
-        name: value.name,
+      const facilityUpdatePayload: FacilityUpdatePayload = {
+        address: value.address,
       };
-      const response = await updateOrganiser(organiserUpdatePayload);
+      const response = await updateFacility(facilityUpdatePayload);
       response.match(
         () => {
           showSuccessToast({ successTitle: "Name update successful." });
@@ -53,10 +53,10 @@ function ChangeNameDialog() {
     validatorAdapter: zodValidator(),
   }));
 
-  const nameSchema = z
+  const addressSchema = z
     .string()
-    .min(1, "Name is required")
-    .max(64, "Name must be at most 64 characters");
+    .min(1, "Address is required")
+    .max(128, "Address must be at most 128 characters");
 
   return (
     <Dialog>
@@ -69,7 +69,7 @@ function ChangeNameDialog() {
       />
       <DialogContent class="md:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Change name</DialogTitle>
+          <DialogTitle>Change address</DialogTitle>
         </DialogHeader>
         <form
           onSubmit={(e) => {
@@ -80,8 +80,8 @@ function ChangeNameDialog() {
         >
           <div class="space-y-2 pb-4">
             <form.Field
-              name="name"
-              validators={{ onChange: nameSchema }}
+              name="address"
+              validators={{ onChange: addressSchema }}
               children={(field) => {
                 const hasError = createMemo(() => {
                   return (
@@ -99,7 +99,7 @@ function ChangeNameDialog() {
                     onBlur={field().handleBlur}
                     onChange={field().handleChange}
                   >
-                    <TextFieldLabel>Name</TextFieldLabel>
+                    <TextFieldLabel>Address</TextFieldLabel>
                     <TextField />
                     <TextFieldErrorMessage>
                       {field().state.meta.errors.join(", ").split(", ")[0]}
@@ -118,4 +118,4 @@ function ChangeNameDialog() {
   );
 }
 
-export default ChangeNameDialog;
+export default ChangeAddressDialog;

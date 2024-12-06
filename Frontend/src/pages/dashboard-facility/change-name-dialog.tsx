@@ -3,8 +3,8 @@ import { zodValidator } from "@tanstack/zod-form-adapter";
 import { z } from "zod";
 import { createMemo } from "solid-js";
 import showErrorToast from "@/components/error-toast";
-import { OrganiserUpdatePayload } from "@/types/organiser";
-import { updateOrganiser } from "@/api/organiser";
+import { FacilityUpdatePayload } from "@/types/facility";
+import { updateFacility } from "@/api/facility";
 import showSuccessToast from "@/components/success-toast";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/user-context";
@@ -33,10 +33,10 @@ function ChangeNameDialog() {
       name: "",
     },
     onSubmit: async ({ value }) => {
-      const organiserUpdatePayload: OrganiserUpdatePayload = {
+      const facilityUpdatePayload: FacilityUpdatePayload = {
         name: value.name,
       };
-      const response = await updateOrganiser(organiserUpdatePayload);
+      const response = await updateFacility(facilityUpdatePayload);
       response.match(
         () => {
           showSuccessToast({ successTitle: "Name update successful." });
