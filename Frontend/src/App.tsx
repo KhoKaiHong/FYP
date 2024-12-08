@@ -9,12 +9,14 @@ import Login from "@/pages/login/$page";
 import SuperLogin from "./pages/superlogin/$page";
 import Register from "@/pages/register/$page";
 import NotFound from "@/pages/not-found/$page";
-import DonorPrivileges from "./pages/donor-privileges/$page";
+import DonorPrivileges from "@/pages/donor-privileges/$page";
 import BloodDonationStatistics from "@/pages/blood-donation-statistics/$page";
 import Events from "@/pages/events/$page";
 import UserDashboard from "@/pages/dashboard-user/$page";
 import OrganiserDashboard from "@/pages/dashboard-organiser/$page";
 import FacilityDashboard from "@/pages/dashboard-facility/$page";
+import AdminDashboard from "@/pages/dashboard-admin/$page";
+import Contact from "@/pages/contact/$page";
 
 const App: Component = () => {
   return (
@@ -41,6 +43,8 @@ const App: Component = () => {
       <Route path="/user-dashboard" component={UserDashboard} />
       <Route path="/organiser-dashboard" component={OrganiserDashboard} />
       <Route path="/facility-dashboard" component={FacilityDashboard} />
+      <Route path="/admin-dashboard" component={AdminDashboard} />
+      <Route path="/contact" component={Contact} />
       <Route path="*404" component={NotFound} />
     </Router>
   );

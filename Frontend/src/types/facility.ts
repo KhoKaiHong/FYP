@@ -1,3 +1,5 @@
+import { FacilityResponse } from "@/types/users";
+
 export type FacilityUpdatePayload = {
     currentPassword?: string,
     password?: string,
@@ -10,5 +12,11 @@ export type FacilityUpdatePayload = {
 export type FacilityUpdateResponse = {
   data: {
     success: boolean;
+  };
+}
+
+export type FacilityListResponse = {
+  data: {
+    facilities: FacilityResponse[];
   };
 }

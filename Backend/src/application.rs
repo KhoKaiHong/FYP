@@ -41,6 +41,7 @@ impl Application {
             .merge(web::routes::district::routes(app_state.clone()))
             .merge(web::routes::state::routes(app_state.clone()))
             .merge(web::routes::event::routes(app_state.clone()))
+            .merge(web::routes::facility::list_route(app_state.clone()))
             .merge(web::routes::blood_type::routes());
 
         let routes_require_user: Router = Router::new()
@@ -51,7 +52,7 @@ impl Application {
 
         let routes_require_facility: Router = Router::new()
             // Add facility-specific routes here
-            .merge(web::routes::facility::routes(app_state.clone()))
+            .merge(web::routes::facility::update_route(app_state.clone()))
             .layer(middleware::from_fn(web::middleware::auth::require_facility));
 
         let routes_require_organiser: Router = Router::new()
@@ -63,6 +64,7 @@ impl Application {
 
         let routes_require_admin: Router = Router::new()
             // Add admin-specific routes here
+            .merge(web::routes::admin::routes(app_state.clone()))
             .layer(middleware::from_fn(web::middleware::auth::require_admin));
 
         let routes_require_auth = Router::new()

@@ -70,7 +70,7 @@ function Navbar() {
     },
     {
       name: "Contact",
-      href: "#",
+      href: "/contact",
     },
   ] as const;
 

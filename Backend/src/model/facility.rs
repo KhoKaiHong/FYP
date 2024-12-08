@@ -123,7 +123,6 @@ impl FacilityModelController {
     }
 
     pub async fn list(
-        context: &Context,
         model_manager: &ModelManager,
     ) -> Result<Vec<FacilityWithLocation>> {
         let db = model_manager.db();
@@ -351,7 +350,7 @@ mod tests {
             FacilityModelController::create(&context, &model_manager, facility_created1).await?;
         let id2 =
             FacilityModelController::create(&context, &model_manager, facility_created2).await?;
-        let facilities = FacilityModelController::list(&context, &model_manager).await?;
+        let facilities = FacilityModelController::list(&model_manager).await?;
 
         // Check
         assert_eq!(facilities.len(), 24, "Number of facilities");
