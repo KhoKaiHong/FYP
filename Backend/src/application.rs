@@ -58,6 +58,7 @@ impl Application {
         let routes_require_organiser: Router = Router::new()
             // Add organiser-specific routes here
             .merge(web::routes::organiser::routes(app_state.clone()))
+            .merge(web::routes::new_event_request::post_route(app_state.clone()))
             .layer(middleware::from_fn(
                 web::middleware::auth::require_organiser,
             ));

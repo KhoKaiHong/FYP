@@ -31,6 +31,9 @@ pub enum Error {
     // -- Event Registration Errors
     EventRegistration(RegistrationError),
 
+    // -- Existing New Event Request Error
+    ExistingNewEventRequest,
+
     // -- Modules
     Store(store::Error),
 

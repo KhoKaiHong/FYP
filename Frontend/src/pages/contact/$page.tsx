@@ -32,10 +32,10 @@ function Contact() {
     <div>
       <Navbar />
       <div class="p-8 space-y-8">
-        <Show when={facilities()} keyed>
+        <Show when={facilities()}>
           {(facilities) => (
             <div class="space-y-8 lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0">
-              <For each={facilities}>
+              <For each={facilities()}>
                 {(facility) => (
                   <Card>
                     <CardHeader class="bg-brand rounded-t-xl">

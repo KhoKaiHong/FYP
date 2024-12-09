@@ -17,6 +17,7 @@ import OrganiserDashboard from "@/pages/dashboard-organiser/$page";
 import FacilityDashboard from "@/pages/dashboard-facility/$page";
 import AdminDashboard from "@/pages/dashboard-admin/$page";
 import Contact from "@/pages/contact/$page";
+import NewEventProposalPage from "@/pages/new-event-proposal/$page";
 
 const App: Component = () => {
   return (
@@ -45,6 +46,7 @@ const App: Component = () => {
       <Route path="/facility-dashboard" component={FacilityDashboard} />
       <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route path="/contact" component={Contact} />
+      <Route path="/new-event-proposal" component={NewEventProposalPage} />
       <Route path="*404" component={NotFound} />
     </Router>
   );

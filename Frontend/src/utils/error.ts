@@ -42,6 +42,7 @@ export function parseErrorResponse(errorResponse: unknown): AppError {
     case "EVENT_AT_CAPACITY":
     case "EXISTING_EVENT_REGISTRATION":
     case "CURRENT_PASSWORD_NOT_MATCHING":
+    case "EXISTING_NEW_EVENT_REQUEST":
       return { message };
 
     case "DUPLICATE_RECORD":
@@ -80,6 +81,8 @@ export function getErrorMessage(error: AppError): string {
       return "You already have an existing event registration.";
     case "CURRENT_PASSWORD_NOT_MATCHING":
       return "Current password does not match.";
+    case "EXISTING_NEW_EVENT_REQUEST":
+      return "You already have an existing new event request.";
     case "UNKNOWN_ERROR":
       return "An unknown error occurred. Please try again later.";
     default:

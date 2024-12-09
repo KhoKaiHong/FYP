@@ -3,7 +3,7 @@ use crate::model::enums::EventRequestStatus;
 use crate::model::EntityErrorField::I64Error;
 use crate::model::{Error, ModelManager, Result};
 use chrono::prelude::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 
@@ -117,6 +117,18 @@ impl NewEventRequestModelController {
     ) -> Result<i64> {
         let db = model_manager.db();
 
+        let mut transaction = db.begin().await?;
+
+        let event_exists = sqlx::query_as::<_, (i32,)>("SELECT 1 FROM new_blood_donation_events_requests WHERE organiser_id = $1 AND status = 'Pending'")
+            .bind(event_created.organiser_id)
+            .fetch_optional(&mut *transaction)
+            .await?;
+
+        if event_exists.is_some() {
+            transaction.rollback().await?;
+            return Err(Error::ExistingNewEventRequest);
+        }
+
         let (id,) = sqlx::query_as(
             "INSERT INTO new_blood_donation_events_requests (location, address, start_time, end_time, max_attendees, latitude, longitude, facility_id, organiser_id, state_id, district_id) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) returning id",
         )
@@ -131,8 +143,10 @@ impl NewEventRequestModelController {
         .bind(event_created.organiser_id)
         .bind(event_created.state_id)
         .bind(event_created.district_id)
-        .fetch_one(db)
+        .fetch_one(&mut *transaction)
         .await?;
+
+        transaction.commit().await?;
 
         Ok(id)
     }

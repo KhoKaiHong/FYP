@@ -172,6 +172,12 @@ impl Error {
                 ClientError::EXISTING_EVENT_REGISTRATION,
             ),
 
+            // -- New Event Request Error
+            ModelError(model::Error::ExistingNewEventRequest) => (
+                StatusCode::BAD_REQUEST,
+                ClientError::EXISTING_NEW_EVENT_REQUEST,
+            ),
+
             // -- Fallback.
             _ => (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -198,5 +204,6 @@ pub enum ClientError {
     EVENT_AT_CAPACITY,
     EXISTING_EVENT_REGISTRATION,
     CURRENT_PASSWORD_NOT_MATCHING,
+    EXISTING_NEW_EVENT_REQUEST,
 }
 // endregion: --- Client Error

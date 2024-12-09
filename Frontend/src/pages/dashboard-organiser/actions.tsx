@@ -7,7 +7,7 @@ function OrganiserActions() {
 
   return (
     <div class="grid grid-cols-1 md:grid-cols-2 justify-center items-center gap-6">
-      <Button variant="outline" class="w-full h-16 border-2 border-brand">
+      <Button variant="outline" class="w-full h-16 border-2 border-brand" onClick={() => navigate("/new-event-proposal")}>
         <div class="flex items-center justify-center gap-x-2">
           <ClipboardPlus size={24} />
           <p class="text-base">New Event Proposal</p>
