@@ -3,7 +3,7 @@ import showErrorToast from "@/components/error-toast";
 import Navbar from "@/components/navigation-bar";
 import { useUser } from "@/context/user-context";
 import { useNavigate } from "@solidjs/router";
-import { createEffect, createResource, Show } from "solid-js";
+import { createEffect, createMemo, createResource, Show } from "solid-js";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 
@@ -37,12 +37,41 @@ function ManageEventProposalPage() {
 
   const [eventProposals] = createResource(fetchEventProposals);
 
+  const pendingEventProposals = createMemo(() => {
+    const eventProposalsConst = eventProposals();
+
+    if (!eventProposalsConst) {
+      return [];
+    } else {
+      return eventProposalsConst.filter(
+        (proposal) => proposal.status === "Pending"
+      );
+    }
+  });
+
+  const nonPendingEventProposals = createMemo(() => {
+    const eventProposalsConst = eventProposals();
+
+    if (!eventProposalsConst) {
+      return [];
+    } else {
+      return eventProposalsConst.filter(
+        (proposal) => proposal.status !== "Pending"
+      );
+    }
+  });
+
   return (
     <div>
       <Navbar />
       <div class="p-8">
         <Show when={eventProposals()} keyed>
-          {(eventProposals) => <DataTable columns={columns} data={eventProposals} />}
+          {(eventProposals) => (
+            <div>
+              <DataTable columns={columns} data={pendingEventProposals()} />
+              <DataTable columns={columns} data={nonPendingEventProposals()} />
+            </div>
+          )}
         </Show>
       </div>
     </div>
