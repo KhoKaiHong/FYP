@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
             "maxAttendees": 250,
             "latitude": 3.1100465061202556,
             "longitude": 101.68386687698307,
-            "facilityId": 2,
+            "facilityId": 1,
             "stateId": 1,
             "districtId": 4
         }));
@@ -53,10 +53,21 @@ async fn main() -> Result<()> {
             "maxAttendees": 250,
             "latitude": 3.1100465061202556,
             "longitude": 101.68386687698307,
-            "facilityId": 2,
+            "facilityId": 1,
             "stateId": 1,
             "districtId": 4
         }));
+
+    let res = req.send().await?;
+
+    println!("{:?}", res);
+    println!("{:?}\n\n", res.text().await?);
+
+    let req = hc
+        .reqwest_client()
+        .get("http://localhost:8000/api/new-event-request/organiser")
+        .header("Accept", "text/html")
+        .bearer_auth(access_token);
 
     let res = req.send().await?;
 
@@ -89,12 +100,23 @@ async fn main() -> Result<()> {
             "maxAttendees": 250,
             "latitude": 3.1100465061202556,
             "longitude": 101.68386687698307,
-            "facilityId": 2,
+            "facilityId": 1,
             "stateId": 1,
             "districtId": 4
         }));
 
     let res = req.send().await?;
+    println!("{:?}", res);
+    println!("{:?}\n\n", res.text().await?);
+
+    let req = hc
+        .reqwest_client()
+        .get("http://localhost:8000/api/new-event-request/facility")
+        .header("Accept", "text/html")
+        .bearer_auth(access_token);
+
+    let res = req.send().await?;
+
     println!("{:?}", res);
     println!("{:?}\n\n", res.text().await?);
 

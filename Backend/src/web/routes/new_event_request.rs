@@ -3,7 +3,7 @@ use crate::model::new_event_request::{NewEventRequestForCreate, NewEventRequestM
 use crate::state::AppState;
 use crate::web::{Error, Result};
 use axum::extract::State;
-use axum::routing::post;
+use axum::routing::{get, post};
 use axum::{Json, Router};
 use chrono::{prelude::*, DurationRound, TimeDelta};
 use serde::Deserialize;
@@ -13,6 +13,18 @@ use tracing::debug;
 pub fn post_route(app_state: AppState) -> Router {
     Router::new()
         .route("/new-event-request", post(post_new_event_request_handler))
+        .with_state(app_state)
+}
+
+pub fn list_by_facility_route(app_state: AppState) -> Router {
+    Router::new()
+        .route("/new-event-request/facility", get(list_new_event_requests_facility_handler))
+        .with_state(app_state)
+}
+
+pub fn list_by_organiser_route(app_state: AppState) -> Router {
+    Router::new()
+        .route("/new-event-request/organiser", get(list_new_event_requests_organiser_handler))
         .with_state(app_state)
 }
 
@@ -77,4 +89,40 @@ pub struct NewEventRequestCreatePayload {
     pub facility_id: i64,
     pub state_id: i32,
     pub district_id: i32,
+}
+
+async fn list_new_event_requests_facility_handler(
+    context: Context,
+    State(app_state): State<AppState>,
+) -> Result<Json<Value>> {
+    let model_manager = &app_state.model_manager;
+
+    let events =
+        NewEventRequestModelController::list_by_facility(model_manager, context.user_id()).await?;
+
+    let body = Json(json!({
+        "data": {
+            "eventRequests": events,
+        }
+    }));
+
+    Ok(body)
+}
+
+async fn list_new_event_requests_organiser_handler(
+    context: Context,
+    State(app_state): State<AppState>,
+) -> Result<Json<Value>> {
+    let model_manager = &app_state.model_manager;
+
+    let events =
+        NewEventRequestModelController::list_by_organiser(model_manager, context.user_id()).await?;
+
+    let body = Json(json!({
+        "data": {
+            "eventRequests": events,
+        }
+    }));
+
+    Ok(body)
 }

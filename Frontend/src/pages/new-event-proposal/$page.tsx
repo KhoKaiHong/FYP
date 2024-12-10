@@ -1,6 +1,6 @@
 import Navbar from "@/components/navigation-bar";
 import { useUser } from "@/context/user-context";
-import { createEffect, Index, onMount, Show } from "solid-js";
+import { createEffect, Index, Show } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import {
   Card,
@@ -204,8 +204,6 @@ function NewEventProposalPage() {
         districtId: value.districtId,
       };
 
-      console.log(newEventProposalPayload);
-
       const response = await postNewEventProposal(newEventProposalPayload);
       response.match(
         () => {
@@ -339,6 +337,7 @@ function NewEventProposalPage() {
       center: { lat: 3.1732962387784367, lng: 101.70668106095312 },
       zoom: 10,
       mapId: "f7a7a21c7ed4070e",
+      draggableCursor: "pointer",
     });
 
     infoWindow = new InfoWindow();
@@ -1144,7 +1143,7 @@ function NewEventProposalPage() {
                               ></div>
                               <Show when={hasError()} keyed>
                                 <div class="font-medium text-destructive text-xs">
-                                  Please add a marker.
+                                  Please add a marker
                                 </div>
                               </Show>
                             </div>

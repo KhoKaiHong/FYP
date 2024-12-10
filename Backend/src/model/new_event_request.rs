@@ -26,7 +26,8 @@ pub struct NewEventRequest {
     pub organiser_id: i64,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NewEventRequestWithInformation {
     pub id: i64,
     pub location: String,
@@ -186,12 +187,10 @@ impl NewEventRequestModelController {
     }
 
     pub async fn list_by_organiser(
-        context: &Context,
         model_manager: &ModelManager,
+        organiser_id: i64, 
     ) -> Result<Vec<NewEventRequestWithInformation>> {
         let db = model_manager.db();
-
-        let organiser_id = context.user_id();
 
         let events = sqlx::query_as("SELECT new_blood_donation_events_requests.*, blood_collection_facilities.email AS facility_email, blood_collection_facilities.name AS facility_name, blood_collection_facilities.address AS facility_address, blood_collection_facilities.phone_number AS facility_phone_number, event_organisers.email AS organiser_email, event_organisers.name AS organiser_name, event_organisers.phone_number AS organiser_phone_number, states.name AS state_name, districts.name AS district_name FROM new_blood_donation_events_requests JOIN blood_collection_facilities ON new_blood_donation_events_requests.facility_id = blood_collection_facilities.id JOIN event_organisers ON new_blood_donation_events_requests.organiser_id = event_organisers.id JOIN states ON new_blood_donation_events_requests.state_id = states.id JOIN districts ON new_blood_donation_events_requests.district_id = districts.id WHERE organiser_id = $1 ORDER BY id")
             .bind(organiser_id)
@@ -202,12 +201,10 @@ impl NewEventRequestModelController {
     }
 
     pub async fn list_by_facility(
-        context: &Context,
         model_manager: &ModelManager,
+        facility_id: i64,
     ) -> Result<Vec<NewEventRequestWithInformation>> {
         let db = model_manager.db();
-
-        let facility_id = context.user_id();
 
         let events = sqlx::query_as("SELECT new_blood_donation_events_requests.*, blood_collection_facilities.email AS facility_email, blood_collection_facilities.name AS facility_name, blood_collection_facilities.address AS facility_address, blood_collection_facilities.phone_number AS facility_phone_number, event_organisers.email AS organiser_email, event_organisers.name AS organiser_name, event_organisers.phone_number AS organiser_phone_number, states.name AS state_name, districts.name AS district_name FROM new_blood_donation_events_requests JOIN blood_collection_facilities ON new_blood_donation_events_requests.facility_id = blood_collection_facilities.id JOIN event_organisers ON new_blood_donation_events_requests.organiser_id = event_organisers.id JOIN states ON new_blood_donation_events_requests.state_id = states.id JOIN districts ON new_blood_donation_events_requests.district_id = districts.id WHERE facility_id = $1 ORDER BY id")
             .bind(facility_id)
@@ -457,7 +454,7 @@ mod tests {
         let id3 = NewEventRequestModelController::create(&context, &model_manager, event_created3)
             .await?;
         let events =
-            NewEventRequestModelController::list_by_organiser(&context, &model_manager).await?;
+            NewEventRequestModelController::list_by_organiser(&model_manager, context.user_id()).await?;
 
         assert_eq!(events.len(), 2, "number of seeded requests.");
         assert_eq!(events[0].address, "test_list_ok-event 01");
@@ -539,7 +536,7 @@ mod tests {
         let id3 = NewEventRequestModelController::create(&context, &model_manager, event_created3)
             .await?;
         let events =
-            NewEventRequestModelController::list_by_facility(&context, &model_manager).await?;
+            NewEventRequestModelController::list_by_facility(&model_manager, context.user_id()).await?;
 
         assert_eq!(events.len(), 2, "number of seeded requests.");
         assert_eq!(events[0].address, "test_list_ok-event 01");

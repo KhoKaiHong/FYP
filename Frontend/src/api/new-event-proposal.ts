@@ -1,10 +1,14 @@
 import { err, ok, Result } from "neverthrow";
 import { AppError } from "@/types/error";
-import { PostNewEventProposalPayload, PostNewEventProposalResponse } from "@/types/new-event-proposal";
+import {
+  PostNewEventProposalPayload,
+  PostNewEventProposalResponse,
+  ListNewEventProposalResponse,
+} from "@/types/new-event-proposal";
 import { fetchWithAuth } from "@/utils/fetch-auth";
 
 export async function postNewEventProposal(
-    postNewEventProposalPayload: PostNewEventProposalPayload
+  postNewEventProposalPayload: PostNewEventProposalPayload
 ): Promise<Result<PostNewEventProposalResponse, AppError>> {
   try {
     const result = await fetchWithAuth<PostNewEventProposalResponse>({
@@ -20,6 +24,46 @@ export async function postNewEventProposal(
     }
   } catch (error) {
     console.error("Error when posting new event proposal:", error);
+    return err({ message: "UNKNOWN_ERROR" });
+  }
+}
+
+export async function organiserListNewEventProposal(): Promise<
+  Result<ListNewEventProposalResponse, AppError>
+> {
+  try {
+    const result = await fetchWithAuth<ListNewEventProposalResponse>({
+      path: "/api/new-event-request/organiser",
+      method: "GET",
+    });
+
+    if (result.isOk()) {
+      return ok(result.value as ListNewEventProposalResponse);
+    } else {
+      return err(result.error);
+    }
+  } catch (error) {
+    console.error("Error when listing new event proposals:", error);
+    return err({ message: "UNKNOWN_ERROR" });
+  }
+}
+
+export async function facilityListNewEventProposal(): Promise<
+  Result<ListNewEventProposalResponse, AppError>
+> {
+  try {
+    const result = await fetchWithAuth<ListNewEventProposalResponse>({
+      path: "/api/new-event-request/facility",
+      method: "GET",
+    });
+
+    if (result.isOk()) {
+      return ok(result.value as ListNewEventProposalResponse);
+    } else {
+      return err(result.error);
+    }
+  } catch (error) {
+    console.error("Error when listing new event proposals:", error);
     return err({ message: "UNKNOWN_ERROR" });
   }
 }
