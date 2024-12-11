@@ -5,7 +5,22 @@ import { useUser } from "@/context/user-context";
 import { useNavigate } from "@solidjs/router";
 import { createEffect, createMemo, createResource, Show } from "solid-js";
 import { DataTable } from "./data-table";
-import { columns } from "./columns";
+import { pendingColumns } from "./pendingColumns";
+import { completedColumns } from "./completedColumns";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsIndicator,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 function ManageEventProposalPage() {
   const { user, isLoading } = useUser();
@@ -28,7 +43,7 @@ function ManageEventProposalPage() {
         console.error("Error fetching event proposals.", error);
         showErrorToast({
           errorTitle: "Error fetching event proposals.",
-          error: { message: "SERVICE_ERROR" },
+          error,
         });
         return null;
       }
@@ -49,7 +64,7 @@ function ManageEventProposalPage() {
     }
   });
 
-  const nonPendingEventProposals = createMemo(() => {
+  const completedEventProposals = createMemo(() => {
     const eventProposalsConst = eventProposals();
 
     if (!eventProposalsConst) {
@@ -66,12 +81,45 @@ function ManageEventProposalPage() {
       <Navbar />
       <div class="p-8">
         <Show when={eventProposals()} keyed>
-          {(eventProposals) => (
-            <div>
-              <DataTable columns={columns} data={pendingEventProposals()} />
-              <DataTable columns={columns} data={nonPendingEventProposals()} />
-            </div>
-          )}
+            <Tabs defaultValue="pending">
+              <TabsList>
+                <TabsTrigger value="pending">Pending</TabsTrigger>
+                <TabsTrigger value="completed">Completed</TabsTrigger>
+                <TabsIndicator />
+              </TabsList>
+              <TabsContent value="pending">
+                <Card class="min-h-[37rem]">
+                  <CardHeader>
+                    <CardTitle>Pending New Event Proposals</CardTitle>
+                    <CardDescription>
+                      View, approve and reject pending new event proposals.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent class="space-y-2">
+                    <DataTable
+                      columns={pendingColumns}
+                      data={pendingEventProposals()}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="completed">
+                <Card class="min-h-[37rem]">
+                  <CardHeader>
+                    <CardTitle>Completed New Event Proposals</CardTitle>
+                    <CardDescription>
+                      View completed new event proposals.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent class="space-y-2">
+                    <DataTable
+                      columns={completedColumns}
+                      data={completedEventProposals()}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
         </Show>
       </div>
     </div>

@@ -33,3 +33,40 @@ INSERT INTO donation_history (user_id, event_id) VALUES
 (1000, 1),
 (1001, 2),
 (1002, 3);
+
+-- Insert new blood donation events requests
+INSERT INTO new_blood_donation_events_requests (
+    location, address, start_time, end_time, max_attendees,
+    latitude, longitude, status, rejection_reason, facility_id,
+    organiser_id, state_id, district_id
+) VALUES
+('Location 1', 'Address for Location 1, Malaysia', '2025-01-01 01:00:00', '2025-01-01 06:00:00', 50, 3.0925, 101.6495, 'Approved', NULL, 1, 1, 1, 1),
+('Location 2', 'Address for Location 2, Malaysia', '2025-01-02 02:00:00', '2025-01-02 07:00:00', 100, 3.0927, 101.6496, 'Pending', NULL, 1, 2, 2, 2),
+('Location 3', 'Address for Location 3, Malaysia', '2025-01-03 03:00:00', '2025-01-03 08:00:00', 150, 3.0923, 101.6497, 'Rejected', 'Insufficient resources at the facility', 1, 3, 3, 3),
+('Location 4', 'Address for Location 4, Malaysia', '2025-01-04 01:00:00', '2025-01-04 06:00:00', 200, 3.0926, 101.6498, 'Approved', NULL, 1, 1, 4, 4),
+('Location 5', 'Address for Location 5, Malaysia', '2025-01-05 02:00:00', '2025-01-05 07:00:00', 250, 3.0924, 101.6499, 'Pending', NULL, 1, 2, 5, 5),
+('Location 6', 'Address for Location 6, Malaysia', '2025-01-06 03:00:00', '2025-01-06 08:00:00', 300, 3.0922, 101.6493, 'Rejected', 'Insufficient resources at the facility', 1, 3, 1, 6),
+('Location 7', 'Address for Location 7, Malaysia', '2025-01-07 01:00:00', '2025-01-07 06:00:00', 50, 3.0928, 101.6494, 'Approved', NULL, 1, 1, 2, 7),
+('Location 8', 'Address for Location 8, Malaysia', '2025-01-08 02:00:00', '2025-01-08 07:00:00', 100, 3.0921, 101.6495, 'Pending', NULL, 1, 2, 3, 8),
+('Location 9', 'Address for Location 9, Malaysia', '2025-01-09 03:00:00', '2025-01-09 08:00:00', 150, 3.0929, 101.6496, 'Rejected', 'Insufficient resources at the facility', 1, 3, 4, 9),
+('Location 10', 'Address for Location 10, Malaysia', '2025-01-10 01:00:00', '2025-01-10 06:00:00', 200, 3.0923, 101.6497, 'Approved', NULL, 1, 1, 5, 10),
+('Location 11', 'Address for Location 11, Malaysia', '2025-01-11 02:00:00', '2025-01-11 07:00:00', 250, 3.0924, 101.6498, 'Pending', NULL, 1, 2, 1, 11),
+('Location 12', 'Address for Location 12, Malaysia', '2025-01-12 03:00:00', '2025-01-12 08:00:00', 300, 3.0922, 101.6499, 'Rejected', 'Insufficient resources at the facility', 1, 3, 2, 12),
+('Location 13', 'Address for Location 13, Malaysia', '2025-01-13 01:00:00', '2025-01-13 06:00:00', 50, 3.0925, 101.6493, 'Approved', NULL, 1, 1, 3, 13),
+('Location 14', 'Address for Location 14, Malaysia', '2025-01-14 02:00:00', '2025-01-14 07:00:00', 100, 3.0927, 101.6494, 'Pending', NULL, 1, 2, 4, 14),
+('Location 15', 'Address for Location 15, Malaysia', '2025-01-15 03:00:00', '2025-01-15 08:00:00', 150, 3.0923, 101.6495, 'Rejected', 'Insufficient resources at the facility', 1, 3, 5, 15),
+('Location 16', 'Address for Location 16, Malaysia', '2025-01-16 01:00:00', '2025-01-16 06:00:00', 200, 3.0926, 101.6496, 'Approved', NULL, 1, 1, 1, 16),
+('Location 17', 'Address for Location 17, Malaysia', '2025-01-17 02:00:00', '2025-01-17 07:00:00', 250, 3.0924, 101.6497, 'Pending', NULL, 1, 2, 2, 17),
+('Location 18', 'Address for Location 18, Malaysia', '2025-01-18 03:00:00', '2025-01-18 08:00:00', 300, 3.0922, 101.6498, 'Rejected', 'Insufficient resources at the facility', 1, 3, 3, 18),
+('Location 19', 'Address for Location 19, Malaysia', '2025-01-19 01:00:00', '2025-01-19 06:00:00', 50, 3.0925, 101.6499, 'Approved', NULL, 1, 1, 4, 19),
+('Location 20', 'Address for Location 20, Malaysia', '2025-01-20 02:00:00', '2025-01-20 07:00:00', 100, 3.0927, 101.6493, 'Pending', NULL, 1, 2, 5, 20),
+('Location 21', 'Address for Location 21, Malaysia', '2025-01-21 03:00:00', '2025-01-21 08:00:00', 150, 3.0923, 101.6494, 'Rejected', 'Insufficient resources at the facility', 1, 3, 1, 21),
+('Location 22', 'Address for Location 22, Malaysia', '2025-01-22 01:00:00', '2025-01-22 06:00:00', 200, 3.0926, 101.6495, 'Approved', NULL, 1, 1, 2, 22),
+('Location 23', 'Address for Location 23, Malaysia', '2025-01-23 02:00:00', '2025-01-23 07:00:00', 250, 3.0924, 101.6496, 'Pending', NULL, 1, 2, 3, 23),
+('Location 24', 'Address for Location 24, Malaysia', '2025-01-24 03:00:00', '2025-01-24 08:00:00', 300, 3.0922, 101.6497, 'Rejected', 'Insufficient resources at the facility', 1, 3, 4, 24),
+('Location 25', 'Address for Location 25, Malaysia', '2025-01-25 01:00:00', '2025-01-25 06:00:00', 50, 3.0925, 101.6498, 'Approved', NULL, 1, 1, 5, 25),
+('Location 26', 'Address for Location 26, Malaysia', '2025-01-26 02:00:00', '2025-01-26 07:00:00', 100, 3.0927, 101.6499, 'Pending', NULL, 1, 2, 1, 26),
+('Location 27', 'Address for Location 27, Malaysia', '2025-01-27 03:00:00', '2025-01-27 08:00:00', 150, 3.0923, 101.6493, 'Rejected', 'Insufficient resources at the facility', 1, 3, 2, 27),
+('Location 28', 'Address for Location 28, Malaysia', '2025-01-28 01:00:00', '2025-01-28 06:00:00', 200, 3.0926, 101.6494, 'Approved', NULL, 1, 1, 3, 28),
+('Location 29', 'Address for Location 29, Malaysia', '2025-01-29 02:00:00', '2025-01-29 07:00:00', 250, 3.0924, 101.6495, 'Pending', NULL, 1, 2, 4, 29),
+('Location 30', 'Address for Location 30, Malaysia', '2025-01-30 03:00:00', '2025-01-30 08:00:00', 300, 3.0922, 101.6496, 'Rejected', 'Insufficient resources at the facility', 1, 3, 5, 30);
