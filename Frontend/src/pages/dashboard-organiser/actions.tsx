@@ -13,7 +13,7 @@ function OrganiserActions() {
           <p class="text-base">New Event Proposal</p>
         </div>
       </Button>
-      <Button variant="outline" class="w-full h-16 border-2 border-brand">
+      <Button variant="outline" class="w-full h-16 border-2 border-brand" onClick={() => navigate("/organiser-event-proposals")}>
         <div class="flex items-center justify-center gap-x-2">
           <ClipboardList size={24} />
           <p class="text-base">My Event Proposals</p>

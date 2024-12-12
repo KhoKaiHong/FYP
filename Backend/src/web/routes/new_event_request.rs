@@ -157,7 +157,7 @@ async fn update_new_event_request_facility_handler(
     State(app_state): State<AppState>,
     Json(payload): Json<NewEventRequestUpdatePayload>,
 ) -> Result<Json<Value>> {
-    debug!("{:<12} - faciliot_update_new_event_request_api", "HANDLER");
+    debug!("{:<12} - facility_update_new_event_request_api", "HANDLER");
 
     let model_manager = &app_state.model_manager;
 

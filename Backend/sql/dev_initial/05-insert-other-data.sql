@@ -7,14 +7,14 @@ INSERT INTO users (ic_number, password, name, email, phone_number, blood_type, e
 -- Insert data into event_organisers
 INSERT INTO event_organisers (email, password, name, phone_number) VALUES
 ('organiser1@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Blood Organiser 1', '60123456795'),
-('organiser2@example.com', 'password123', 'Blood Organiser 2', '60123456796'),
-('organiser3@example.com', 'password123', 'Blood Organiser 3', '60123456797');
+('organiser2@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Blood Organiser 2', '60123456796'),
+('organiser3@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Blood Organiser 3', '60123456797');
 
 -- Insert data into admins
 INSERT INTO admins (email, password, name) VALUES
 ('admin1@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Admin 1'),
-('admin2@example.com', 'password123', 'Admin 2'),
-('admin3@example.com', 'password123', 'Admin 3');
+('admin2@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Admin 2'),
+('admin3@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Admin 3');
 
 -- Insert data into blood_donation_events
 INSERT INTO blood_donation_events (location, address, start_time, end_time, max_attendees, latitude, longitude, facility_id, state_id, district_id, organiser_id) VALUES

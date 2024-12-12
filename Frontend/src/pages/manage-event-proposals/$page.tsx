@@ -88,7 +88,7 @@ function ManageEventProposalPage() {
               <TabsIndicator />
             </TabsList>
             <TabsContent value="pending">
-              <Card class="min-h-[37rem]">
+              <Card class="min-h-[37rem] border-2 border-brand">
                 <CardHeader>
                   <CardTitle>Pending New Event Proposals</CardTitle>
                   <CardDescription>
@@ -105,7 +105,7 @@ function ManageEventProposalPage() {
               </Card>
             </TabsContent>
             <TabsContent value="completed">
-              <Card class="min-h-[37rem]">
+              <Card class="min-h-[37rem] border-2 border-brand">
                 <CardHeader>
                   <CardTitle>Completed New Event Proposals</CardTitle>
                   <CardDescription>

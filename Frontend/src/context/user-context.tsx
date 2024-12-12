@@ -15,7 +15,6 @@ import { GetCredentialsResponse } from "@/types/get-credentials";
 import { Result, err } from "neverthrow";
 import { logout } from "@/api/logout";
 import showErrorToast from "@/components/error-toast";
-import { LogoutPayload } from "@/types/logout";
 
 type UserContextType = {
   user: Accessor<Users | null>;
