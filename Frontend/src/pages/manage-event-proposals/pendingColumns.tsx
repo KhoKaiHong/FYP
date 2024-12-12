@@ -42,11 +42,19 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  TextField,
-  TextFieldLabel,
+  TextFieldErrorMessage,
   TextFieldRoot,
 } from "@/components/ui/text-field";
 import { TextArea } from "@/components/ui/textarea";
+import { createForm } from "@tanstack/solid-form";
+import { zodValidator } from "@tanstack/zod-form-adapter";
+import { z } from "zod";
+import {
+  UpdateNewEventProposalPayload,
+} from "@/types/new-event-proposal";
+import { facilityUpdateNewEventProposal } from "@/api/new-event-proposal";
+import showSuccessToast from "@/components/success-toast";
+import showErrorToast from "@/components/error-toast";
 
 export const pendingColumns: ColumnDef<NewEventProposal>[] = [
   {
@@ -260,7 +268,68 @@ export const pendingColumns: ColumnDef<NewEventProposal>[] = [
   {
     accessorKey: "actions",
     header: "Actions",
-    cell: () => {
+    cell: (props) => {
+      const [rejectDialogOpen, setRejectDialogOpen] = createSignal(false);
+
+      const form = createForm(() => ({
+        defaultValues: {
+          rejectionReason: "",
+        },
+        onSubmit: async ({ value }) => {
+          setRejectDialogOpen(false);
+          const updateNewEventProposalPayload: UpdateNewEventProposalPayload = {
+            id: props.row.original.id,
+            status: "Rejected",
+            rejectionReason: value.rejectionReason,
+          };
+          const response = await facilityUpdateNewEventProposal(
+            updateNewEventProposalPayload
+          );
+          response.match(
+            () => {
+              showSuccessToast({ successTitle: "New event proposal rejected" });
+            },
+            (error) => {
+              showErrorToast({
+                errorTitle:
+                  "Error performing new event proposal rejection. Please try again.",
+                error: error,
+              });
+            }
+          );
+          props.table.options.meta?.performRefetch();
+        },
+        validatorAdapter: zodValidator(),
+      }));
+
+      const rejectionReasonSchema = z
+        .string()
+        .min(1, "Rejection reason is required")
+        .max(256, "Rejection reason must be at most 256 characters");
+
+      async function approveUpdateNewEventProposal() {
+        const updateNewEventProposalPayload: UpdateNewEventProposalPayload = {
+          id: props.row.original.id,
+          status: "Approved",
+        };
+        const response = await facilityUpdateNewEventProposal(
+          updateNewEventProposalPayload
+        );
+        response.match(
+          () => {
+            showSuccessToast({ successTitle: "New event proposal approved" });
+          },
+          (error) => {
+            showErrorToast({
+              errorTitle:
+                "Error performing new event proposal approval. Please try again.",
+              error: error,
+            });
+          }
+        );
+        props.table.options.meta?.performRefetch();
+      }
+
       return (
         <div class="flex items-center gap-1">
           <AlertDialog>
@@ -282,11 +351,17 @@ export const pendingColumns: ColumnDef<NewEventProposal>[] = [
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogClose>Cancel</AlertDialogClose>
-                <AlertDialogAction>Continue</AlertDialogAction>
+                <AlertDialogAction
+                  onClick={async () => {
+                    await approveUpdateNewEventProposal();
+                  }}
+                >
+                  Continue
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-          <Dialog>
+          <Dialog open={rejectDialogOpen()} onOpenChange={setRejectDialogOpen}>
             <DialogTrigger
               as={(props: DialogTriggerProps) => (
                 <Button variant="ghost" size={"icon"} {...props}>
@@ -298,14 +373,51 @@ export const pendingColumns: ColumnDef<NewEventProposal>[] = [
               <DialogHeader>
                 <DialogTitle>Reject Proposal</DialogTitle>
               </DialogHeader>
-              <div class="py-2">
-                <TextFieldRoot class="w-full">
-                  <TextArea placeholder="Enter rejection reason here." />
-                </TextFieldRoot>
-              </div>
-              <DialogFooter>
-                <Button type="submit">Reject</Button>
-              </DialogFooter>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  form.handleSubmit();
+                }}
+              >
+                <div class="py-2">
+                  <form.Field
+                    name="rejectionReason"
+                    validators={{ onChange: rejectionReasonSchema }}
+                    children={(field) => {
+                      const hasError = createMemo(() => {
+                        return (
+                          field().state.meta.errors.length > 0 &&
+                          field().state.meta.isTouched
+                        );
+                      });
+
+                      return (
+                        <TextFieldRoot
+                          class="w-full"
+                          name={field().name}
+                          validationState={hasError() ? "invalid" : "valid"}
+                          value={field().state.value}
+                          onBlur={field().handleBlur}
+                          onChange={field().handleChange}
+                        >
+                          <TextArea placeholder="Enter rejection reason here." />
+                          <TextFieldErrorMessage>
+                            {
+                              field()
+                                .state.meta.errors.join(", ")
+                                .split(", ")[0]
+                            }
+                          </TextFieldErrorMessage>
+                        </TextFieldRoot>
+                      );
+                    }}
+                  />
+                </div>
+                <DialogFooter>
+                  <Button type="submit">Reject</Button>
+                </DialogFooter>
+              </form>
             </DialogContent>
           </Dialog>
         </div>
@@ -313,29 +425,3 @@ export const pendingColumns: ColumnDef<NewEventProposal>[] = [
     },
   },
 ];
-
-// export type NewEventProposal = {
-//     id: number;
-//     location: string;
-//     address: string;
-//     startTime: string;
-//     endTime: string;
-//     maxAttendees: number;
-//     latitude: number;
-//     longitude: number;
-//     status: string;
-//     rejectionReason: string | null;
-//     facilityId: number;
-//     facilityEmail: string;
-//     facilityName: string;
-//     facilityAddress: string;
-//     facilityPhoneNumber: string;
-//     organiserId: number;
-//     organiserEmail: string;
-//     organiserName: string;
-//     organiserPhoneNumber: string;
-//     stateId: number;
-//     stateName: string;
-//     districtId: number;
-//     districtName: string;
-//   };

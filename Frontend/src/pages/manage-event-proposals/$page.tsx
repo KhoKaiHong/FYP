@@ -50,7 +50,7 @@ function ManageEventProposalPage() {
     );
   }
 
-  const [eventProposals] = createResource(fetchEventProposals);
+  const [eventProposals, { refetch }] = createResource(fetchEventProposals);
 
   const pendingEventProposals = createMemo(() => {
     const eventProposalsConst = eventProposals();
@@ -81,45 +81,47 @@ function ManageEventProposalPage() {
       <Navbar />
       <div class="p-8">
         <Show when={eventProposals()} keyed>
-            <Tabs defaultValue="pending">
-              <TabsList>
-                <TabsTrigger value="pending">Pending</TabsTrigger>
-                <TabsTrigger value="completed">Completed</TabsTrigger>
-                <TabsIndicator />
-              </TabsList>
-              <TabsContent value="pending">
-                <Card class="min-h-[37rem]">
-                  <CardHeader>
-                    <CardTitle>Pending New Event Proposals</CardTitle>
-                    <CardDescription>
-                      View, approve and reject pending new event proposals.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent class="space-y-2">
-                    <DataTable
-                      columns={pendingColumns}
-                      data={pendingEventProposals()}
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              <TabsContent value="completed">
-                <Card class="min-h-[37rem]">
-                  <CardHeader>
-                    <CardTitle>Completed New Event Proposals</CardTitle>
-                    <CardDescription>
-                      View completed new event proposals.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent class="space-y-2">
-                    <DataTable
-                      columns={completedColumns}
-                      data={completedEventProposals()}
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+          <Tabs defaultValue="pending">
+            <TabsList>
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+              <TabsIndicator />
+            </TabsList>
+            <TabsContent value="pending">
+              <Card class="min-h-[37rem]">
+                <CardHeader>
+                  <CardTitle>Pending New Event Proposals</CardTitle>
+                  <CardDescription>
+                    View, approve and reject pending new event proposals.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent class="space-y-2">
+                  <DataTable
+                    columns={pendingColumns}
+                    data={pendingEventProposals()}
+                    refetch={refetch}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            <TabsContent value="completed">
+              <Card class="min-h-[37rem]">
+                <CardHeader>
+                  <CardTitle>Completed New Event Proposals</CardTitle>
+                  <CardDescription>
+                    View completed new event proposals.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent class="space-y-2">
+                  <DataTable
+                    columns={completedColumns}
+                    data={completedEventProposals()}
+                    refetch={refetch}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </Show>
       </div>
     </div>

@@ -9,8 +9,8 @@ import {
   getSortedRowModel,
   ColumnFiltersState,
   getFilteredRowModel,
+  RowData,
 } from "@tanstack/solid-table";
-
 import {
   Table,
   TableBody,
@@ -21,10 +21,19 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { TextField, TextFieldRoot } from "@/components/ui/text-field";
+import { NewEventProposal } from "@/types/new-event-proposal";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  refetch: (info?: unknown) => NewEventProposal[] | Promise<NewEventProposal[] | null | undefined> | null | undefined
+}
+
+declare module '@tanstack/solid-table' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface TableMeta<TData extends RowData> {
+    performRefetch: (info?: unknown) => NewEventProposal[] | Promise<NewEventProposal[] | null | undefined> | null | undefined;
+  }
 }
 
 export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
@@ -54,11 +63,14 @@ export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
         return columnFilters();
       },
     },
+    meta: {
+      performRefetch: props.refetch,
+    },
   });
 
   return (
     <div>
-      <div class="flex items-center pb-4">
+      <div class="flex items-center pb-4 gap-2">
         <TextFieldRoot
           class="w-full max-w-xs"
           value={
@@ -69,6 +81,17 @@ export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
           }
         >
           <TextField placeholder="Filter organisers..." />
+        </TextFieldRoot>
+        <TextFieldRoot
+          class="w-full max-w-xs"
+          value={
+            (table.getColumn("location")?.getFilterValue() as string) ?? ""
+          }
+          onChange={(value) =>
+            table.getColumn("location")?.setFilterValue(value)
+          }
+        >
+          <TextField placeholder="Filter location..." />
         </TextFieldRoot>
       </div>
       <div class="rounded-md border">

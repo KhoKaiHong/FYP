@@ -48,3 +48,15 @@ export type ListNewEventProposalResponse = {
     eventRequests: NewEventProposal[];
   };
 };
+
+export type UpdateNewEventProposalPayload = {
+  id: number;
+  status: string;
+  rejectionReason?: string;
+};
+
+export type UpdateNewEventProposalResponse = {
+  data: {
+    success: boolean;
+  };
+}

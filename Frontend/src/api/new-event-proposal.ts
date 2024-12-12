@@ -4,6 +4,8 @@ import {
   PostNewEventProposalPayload,
   PostNewEventProposalResponse,
   ListNewEventProposalResponse,
+  UpdateNewEventProposalPayload,
+  UpdateNewEventProposalResponse,
 } from "@/types/new-event-proposal";
 import { fetchWithAuth } from "@/utils/fetch-auth";
 
@@ -64,6 +66,27 @@ export async function facilityListNewEventProposal(): Promise<
     }
   } catch (error) {
     console.error("Error when listing new event proposals:", error);
+    return err({ message: "UNKNOWN_ERROR" });
+  }
+}
+
+export async function facilityUpdateNewEventProposal(
+  updateNewEventProposalPayload: UpdateNewEventProposalPayload
+): Promise<Result<UpdateNewEventProposalResponse, AppError>> {
+  try {
+    const result = await fetchWithAuth<UpdateNewEventProposalResponse>({
+      path: "/api/new-event-request",
+      method: "PATCH",
+      body: JSON.stringify(updateNewEventProposalPayload),
+    });
+
+    if (result.isOk()) {
+      return ok(result.value as UpdateNewEventProposalResponse);
+    } else {
+      return err(result.error);
+    }
+  } catch (error) {
+    console.error("Error when updating new event proposal:", error);
     return err({ message: "UNKNOWN_ERROR" });
   }
 }

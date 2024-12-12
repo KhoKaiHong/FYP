@@ -160,9 +160,7 @@ export function UserProvider(props: UserProviderProps) {
         return;
       }
 
-      const result = await logout({
-        refreshToken: refreshToken,
-      } as LogoutPayload);
+      const result = await logout();
 
       if (result.isOk()) {
         setIsAuthenticated(false);

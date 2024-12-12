@@ -3,7 +3,6 @@ import { NewEventProposal } from "@/types/new-event-proposal";
 import { createEffect, createMemo, createSignal, Show } from "solid-js";
 import {
   ContactRound,
-  MapPin,
   Mail,
   Phone,
   MapPinned,
@@ -274,28 +273,3 @@ export const completedColumns: ColumnDef<NewEventProposal>[] = [
   },
 ];
 
-// export type NewEventProposal = {
-//     id: number;
-//     location: string;
-//     address: string;
-//     startTime: string;
-//     endTime: string;
-//     maxAttendees: number;
-//     latitude: number;
-//     longitude: number;
-//     status: string;
-//     rejectionReason: string | null;
-//     facilityId: number;
-//     facilityEmail: string;
-//     facilityName: string;
-//     facilityAddress: string;
-//     facilityPhoneNumber: string;
-//     organiserId: number;
-//     organiserEmail: string;
-//     organiserName: string;
-//     organiserPhoneNumber: string;
-//     stateId: number;
-//     stateName: string;
-//     districtId: number;
-//     districtName: string;
-//   };

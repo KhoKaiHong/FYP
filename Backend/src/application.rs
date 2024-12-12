@@ -54,6 +54,7 @@ impl Application {
             // Add facility-specific routes here
             .merge(web::routes::facility::update_route(app_state.clone()))
             .merge(web::routes::new_event_request::list_by_facility_route(app_state.clone()))
+            .merge(web::routes::new_event_request::update_by_facility_route(app_state.clone()))
             .layer(middleware::from_fn(web::middleware::auth::require_facility));
 
         let routes_require_organiser: Router = Router::new()
