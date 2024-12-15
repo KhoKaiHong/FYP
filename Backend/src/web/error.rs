@@ -178,6 +178,12 @@ impl Error {
                 ClientError::EXISTING_NEW_EVENT_REQUEST,
             ),
 
+            // -- Change Event Request Error
+            ModelError(model::Error::ExistingChangeEventRequest) => (
+                StatusCode::BAD_REQUEST,
+                ClientError::EXISTING_CHANGE_EVENT_REQUEST,
+            ),
+
             // -- Fallback.
             _ => (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -205,5 +211,6 @@ pub enum ClientError {
     EXISTING_EVENT_REGISTRATION,
     CURRENT_PASSWORD_NOT_MATCHING,
     EXISTING_NEW_EVENT_REQUEST,
+    EXISTING_CHANGE_EVENT_REQUEST,
 }
 // endregion: --- Client Error

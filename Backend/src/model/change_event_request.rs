@@ -3,7 +3,7 @@ use crate::model::enums::EventRequestStatus;
 use crate::model::EntityErrorField::I64Error;
 use crate::model::{Error, ModelManager, Result};
 use chrono::prelude::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 
@@ -28,7 +28,8 @@ pub struct ChangeEventRequest {
     pub organiser_id: i64,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ChangeEventRequestWithInformation {
     pub id: i64,
     pub location: String,
@@ -125,6 +126,19 @@ impl ChangeEventRequestModelController {
     ) -> Result<i64> {
         let db = model_manager.db();
 
+        let mut transaction = db.begin().await?;
+
+        let change_request_exists = sqlx::query_as::<_, (i32,)>("SELECT 1 FROM change_blood_donation_events_requests WHERE organiser_id = $1 AND event_id = $2 AND status = 'Pending'")
+            .bind(request_created.organiser_id)
+            .bind(request_created.event_id)
+            .fetch_optional(&mut *transaction)
+            .await?;
+
+        if change_request_exists.is_some() {
+            transaction.rollback().await?;
+            return Err(Error::ExistingChangeEventRequest);
+        }
+
         let (id,) = sqlx::query_as(
             "INSERT INTO change_blood_donation_events_requests (location, address, start_time, end_time, max_attendees, latitude, longitude, change_reason, event_id, facility_id, organiser_id, state_id, district_id) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) returning id",
         )
@@ -141,8 +155,10 @@ impl ChangeEventRequestModelController {
         .bind(request_created.organiser_id)
         .bind(request_created.state_id)
         .bind(request_created.district_id)
-        .fetch_one(db)
+        .fetch_one(&mut *transaction)
         .await?;
+
+        transaction.commit().await?;
 
         Ok(id)
     }
@@ -182,12 +198,10 @@ impl ChangeEventRequestModelController {
     }
 
     pub async fn list_by_organiser(
-        context: &Context,
         model_manager: &ModelManager,
+        organiser_id: i64, 
     ) -> Result<Vec<ChangeEventRequestWithInformation>> {
         let db = model_manager.db();
-
-        let organiser_id = context.user_id();
 
         let events = sqlx::query_as("SELECT change_blood_donation_events_requests.*, blood_collection_facilities.email AS facility_email, blood_collection_facilities.name AS facility_name, blood_collection_facilities.address AS facility_address, blood_collection_facilities.phone_number AS facility_phone_number, event_organisers.email AS organiser_email, event_organisers.name AS organiser_name, event_organisers.phone_number AS organiser_phone_number, states.name AS state_name, districts.name AS district_name FROM change_blood_donation_events_requests JOIN blood_collection_facilities ON change_blood_donation_events_requests.facility_id = blood_collection_facilities.id JOIN event_organisers ON change_blood_donation_events_requests.organiser_id = event_organisers.id JOIN states ON change_blood_donation_events_requests.state_id = states.id JOIN districts ON change_blood_donation_events_requests.district_id = districts.id WHERE organiser_id = $1 ORDER BY id")
             .bind(organiser_id)
@@ -198,12 +212,10 @@ impl ChangeEventRequestModelController {
     }
 
     pub async fn list_by_facility(
-        context: &Context,
         model_manager: &ModelManager,
+        facility_id: i64, 
     ) -> Result<Vec<ChangeEventRequestWithInformation>> {
         let db = model_manager.db();
-
-        let facility_id = context.user_id();
 
         let events = sqlx::query_as("SELECT change_blood_donation_events_requests.*, blood_collection_facilities.email AS facility_email, blood_collection_facilities.name AS facility_name, blood_collection_facilities.address AS facility_address, blood_collection_facilities.phone_number AS facility_phone_number, event_organisers.email AS organiser_email, event_organisers.name AS organiser_name, event_organisers.phone_number AS organiser_phone_number, states.name AS state_name, districts.name AS district_name FROM change_blood_donation_events_requests JOIN blood_collection_facilities ON change_blood_donation_events_requests.facility_id = blood_collection_facilities.id JOIN event_organisers ON change_blood_donation_events_requests.organiser_id = event_organisers.id JOIN states ON change_blood_donation_events_requests.state_id = states.id JOIN districts ON change_blood_donation_events_requests.district_id = districts.id WHERE facility_id = $1 ORDER BY id")
             .bind(facility_id)
@@ -472,7 +484,7 @@ mod tests {
             ChangeEventRequestModelController::create(&context, &model_manager, change_request_3)
                 .await?;
         let events =
-            ChangeEventRequestModelController::list_by_organiser(&context, &model_manager).await?;
+            ChangeEventRequestModelController::list_by_organiser(&model_manager, context.user_id()).await?;
 
         assert_eq!(events.len(), 2, "number of seeded requests.");
         assert_eq!(events[0].address, "test_list_ok-event 01");
@@ -563,7 +575,7 @@ mod tests {
             ChangeEventRequestModelController::create(&context, &model_manager, change_request_3)
                 .await?;
         let events =
-            ChangeEventRequestModelController::list_by_facility(&context, &model_manager).await?;
+            ChangeEventRequestModelController::list_by_facility(&model_manager, context.user_id()).await?;
 
         assert_eq!(events.len(), 2, "number of seeded requests.");
         assert_eq!(events[0].address, "test_list_ok-event 01");

@@ -34,6 +34,9 @@ pub enum Error {
     // -- Existing New Event Request Error
     ExistingNewEventRequest,
 
+    // -- Existing Change Event Request Error
+    ExistingChangeEventRequest,
+
     // -- Modules
     Store(store::Error),
 

@@ -40,7 +40,7 @@ impl Application {
             .merge(web::routes::refresh::routes(app_state.clone()))
             .merge(web::routes::district::routes(app_state.clone()))
             .merge(web::routes::state::routes(app_state.clone()))
-            .merge(web::routes::event::routes(app_state.clone()))
+            .merge(web::routes::event::list_routes(app_state.clone()))
             .merge(web::routes::facility::list_route(app_state.clone()))
             .merge(web::routes::blood_type::routes());
 
@@ -55,6 +55,9 @@ impl Application {
             .merge(web::routes::facility::update_route(app_state.clone()))
             .merge(web::routes::new_event_request::list_by_facility_route(app_state.clone()))
             .merge(web::routes::new_event_request::update_by_facility_route(app_state.clone()))
+            .merge(web::routes::event::list_routes_facility(app_state.clone()))
+            .merge(web::routes::change_event_request::list_by_facility_route(app_state.clone()))
+            .merge(web::routes::change_event_request::update_by_facility_route(app_state.clone()))
             .layer(middleware::from_fn(web::middleware::auth::require_facility));
 
         let routes_require_organiser: Router = Router::new()
@@ -62,6 +65,9 @@ impl Application {
             .merge(web::routes::organiser::routes(app_state.clone()))
             .merge(web::routes::new_event_request::list_by_organiser_route(app_state.clone()))
             .merge(web::routes::new_event_request::post_route(app_state.clone()))
+            .merge(web::routes::event::list_routes_organiser(app_state.clone()))
+            .merge(web::routes::change_event_request::list_by_organiser_route(app_state.clone()))
+            .merge(web::routes::change_event_request::post_route(app_state.clone()))
             .layer(middleware::from_fn(
                 web::middleware::auth::require_organiser,
             ));

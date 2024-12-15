@@ -18,9 +18,12 @@ INSERT INTO admins (email, password, name) VALUES
 
 -- Insert data into blood_donation_events
 INSERT INTO blood_donation_events (location, address, start_time, end_time, max_attendees, latitude, longitude, facility_id, state_id, district_id, organiser_id) VALUES
-('Mid Valley Megamall', 'Jalan Hospital, Johor Bahru', '2024-12-30 3:00:00', '2024-12-30 10:00:00', 50, 3.1732962387784367, 101.70668106095312, 1, 1, 1, 1),
-('Pavilion Bukit Jalil', 'Jalan Langgar, Alor Setar', '2024-12-31 4:00:00', '2024-12-31 11:00:00', 100, 3.1742962387784367, 101.70768106095312, 2, 1, 1, 2),
-('Pavilion KL', 'Jalan Tun Razak, Kuala Lumpur', '2024-12-31 5:00:00', '2024-12-31 12:00:00', 70, 3.1752962387784367, 101.70868106095312, 3, 1, 1, 3);
+('Mid Valley Megamall 1', 'Jalan Hospital, Johor Bahru', '2024-12-01 3:00:00', '2024-12-30 9:00:00', 50, 3.1712962387784367, 101.70368106095312, 1, 1, 1, 1),
+('Mid Valley Megamall 2', 'Jalan Hospital, Johor Bahru', '2024-12-10 3:00:00', '2024-12-30 9:00:00', 50, 3.1722962387784367, 101.70468106095312, 1, 1, 1, 1),
+('Mid Valley Megamall 3', 'Jalan Hospital, Johor Bahru', '2024-12-20 3:00:00', '2024-12-30 9:00:00', 50, 3.1732962387784367, 101.70568106095312, 1, 1, 1, 1),
+('Mid Valley Megamall 4', 'Jalan Hospital, Johor Bahru', '2024-12-30 3:00:00', '2024-12-30 9:00:00', 50, 3.1742962387784367, 101.70668106095312, 1, 1, 1, 1),
+('Pavilion Bukit Jalil', 'Jalan Langgar, Alor Setar', '2024-12-31 4:00:00', '2024-12-31 9:00:00', 100, 3.1742962387784367, 101.70768106095312, 2, 1, 1, 2),
+('Pavilion KL', 'Jalan Tun Razak, Kuala Lumpur', '2024-12-31 5:00:00', '2024-12-31 9:00:00', 70, 3.1752962387784367, 101.70868106095312, 3, 1, 1, 3);
 
 -- Insert data into registrations
 INSERT INTO registrations (status, event_id, user_id) VALUES

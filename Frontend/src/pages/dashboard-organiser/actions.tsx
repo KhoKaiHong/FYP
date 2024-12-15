@@ -19,13 +19,13 @@ function OrganiserActions() {
           <p class="text-base">My Event Proposals</p>
         </div>
       </Button>
-      <Button variant="outline" class="w-full h-16 border-2 border-brand">
+      <Button variant="outline" class="w-full h-16 border-2 border-brand" onClick={() => navigate("/organiser-events")}>
         <div class="flex items-center justify-center gap-x-2">
           <ClipboardCheck size={24} />
           <p class="text-base">My Events</p>
         </div>
       </Button>
-      <Button variant="outline" class="w-full h-16 border-2 border-brand">
+      <Button variant="outline" class="w-full h-16 border-2 border-brand" onClick={() => navigate("/organiser-change-requests")}>
         <div class="flex items-center justify-center gap-x-2">
           <ClipboardPen size={24} />
           <p class="text-base">My Change Requests</p>

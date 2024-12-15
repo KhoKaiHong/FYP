@@ -16,3 +16,4 @@ pub mod organiser;
 pub mod facility;
 pub mod admin;
 pub mod new_event_request;
+pub mod change_event_request;

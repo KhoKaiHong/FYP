@@ -12,7 +12,8 @@ type ClientError =
   | { message: "EVENT_AT_CAPACITY" }
   | { message: "EXISTING_EVENT_REGISTRATION" }
   | { message: "CURRENT_PASSWORD_NOT_MATCHING" }
-  | { message: "EXISTING_NEW_EVENT_REQUEST" };
+  | { message: "EXISTING_NEW_EVENT_REQUEST" }
+  | { message: "EXISTING_CHANGE_EVENT_REQUEST" };
 
 // Type for the error response from the backend
 export interface ClientErrorResponse {

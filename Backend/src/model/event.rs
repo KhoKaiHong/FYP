@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 
+use super::organiser;
+
 // region:    --- Event Types
 #[derive(Debug, FromRow)]
 pub struct Event {
@@ -284,6 +286,104 @@ impl EventModelController {
         Ok(events)
     }
 
+    pub async fn list_by_organiser(
+        model_manager: &ModelManager,
+        organiser_id: i64,
+    ) -> Result<Vec<EventWithInformation>> {
+        let db = model_manager.db();
+
+        let events = sqlx::query_as(
+            "SELECT 
+                blood_donation_events.*, 
+                blood_collection_facilities.email AS facility_email, 
+                blood_collection_facilities.name AS facility_name, 
+                blood_collection_facilities.address AS facility_address, 
+                blood_collection_facilities.phone_number AS facility_phone_number, 
+                event_organisers.email AS organiser_email, 
+                event_organisers.name AS organiser_name, 
+                event_organisers.phone_number AS organiser_phone_number, 
+                states.name AS state_name, 
+                districts.name AS district_name, 
+                COALESCE(registration_counts.current_attendees, 0) AS current_attendees 
+            FROM 
+                blood_donation_events 
+            JOIN 
+                blood_collection_facilities ON blood_donation_events.facility_id = blood_collection_facilities.id 
+            JOIN 
+                event_organisers ON blood_donation_events.organiser_id = event_organisers.id 
+            JOIN 
+                states ON blood_donation_events.state_id = states.id 
+            JOIN 
+                districts ON blood_donation_events.district_id = districts.id
+            LEFT JOIN (
+                SELECT 
+                    event_id, 
+                    COUNT(*)::INTEGER AS current_attendees
+                FROM 
+                    registrations
+                GROUP BY 
+                    event_id
+            ) AS registration_counts ON blood_donation_events.id = registration_counts.event_id 
+            WHERE 
+                organiser_id = $1
+            ORDER BY 
+                id")
+            .bind(organiser_id)
+            .fetch_all(db)
+            .await?;
+
+        Ok(events)
+    }
+
+    pub async fn list_by_facility(
+        model_manager: &ModelManager,
+        facility_id: i64,
+    ) -> Result<Vec<EventWithInformation>> {
+        let db = model_manager.db();
+
+        let events = sqlx::query_as(
+            "SELECT 
+                blood_donation_events.*, 
+                blood_collection_facilities.email AS facility_email, 
+                blood_collection_facilities.name AS facility_name, 
+                blood_collection_facilities.address AS facility_address, 
+                blood_collection_facilities.phone_number AS facility_phone_number, 
+                event_organisers.email AS organiser_email, 
+                event_organisers.name AS organiser_name, 
+                event_organisers.phone_number AS organiser_phone_number, 
+                states.name AS state_name, 
+                districts.name AS district_name, 
+                COALESCE(registration_counts.current_attendees, 0) AS current_attendees 
+            FROM 
+                blood_donation_events 
+            JOIN 
+                blood_collection_facilities ON blood_donation_events.facility_id = blood_collection_facilities.id 
+            JOIN 
+                event_organisers ON blood_donation_events.organiser_id = event_organisers.id 
+            JOIN 
+                states ON blood_donation_events.state_id = states.id 
+            JOIN 
+                districts ON blood_donation_events.district_id = districts.id
+            LEFT JOIN (
+                SELECT 
+                    event_id, 
+                    COUNT(*)::INTEGER AS current_attendees
+                FROM 
+                    registrations
+                GROUP BY 
+                    event_id
+            ) AS registration_counts ON blood_donation_events.id = registration_counts.event_id 
+            WHERE 
+                facility_id = $1
+            ORDER BY 
+                id")
+            .bind(facility_id)
+            .fetch_all(db)
+            .await?;
+
+        Ok(events)
+    }
+
     pub async fn update(
         context: &Context,
         model_manager: &ModelManager,
@@ -295,6 +395,15 @@ impl EventModelController {
         let mut query_builder = sqlx::QueryBuilder::new("UPDATE blood_donation_events SET ");
 
         let mut first = true;
+
+        if let Some(location) = event_updated.location {
+            if !first {
+                query_builder.push(", ");
+            }
+            query_builder.push("location = ");
+            query_builder.push_bind(location);
+            first = false;
+        }
 
         if let Some(address) = event_updated.address {
             if !first {

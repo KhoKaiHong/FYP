@@ -394,8 +394,8 @@ function NewEventProposalPage() {
               `<p class="text-slate-600">${marker?.title}</p>`
             );
             form.setFieldValue("latlng", {
-              lat: mapClickEvent?.latLng?.lat() ?? null,
-              lng: mapClickEvent?.latLng?.lng() ?? null,
+              lat: markerDragEvent?.latLng?.lat() ?? null,
+              lng: markerDragEvent?.latLng?.lng() ?? null,
             });
             form.validateField("latlng", "change");
           }
