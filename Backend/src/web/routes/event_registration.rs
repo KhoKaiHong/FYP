@@ -1,17 +1,35 @@
+use std::str::FromStr;
+
 use crate::context::Context;
-use crate::model::registration::{RegistrationModelController, RegistrationForCreate};
+use crate::model::donation_history::{DonationHistoryForCreate, DonationHistoryModelController};
+use crate::model::enums::RegistrationStatus;
+use crate::model::registration::{
+    RegistrationForCreate, RegistrationForUpdate, RegistrationModelController,
+};
 use crate::state::AppState;
-use crate::web::Result;
+use crate::web::{Error, Result};
 use axum::extract::State;
-use axum::routing::post;
+use axum::routing::{patch, post};
 use axum::{Json, Router};
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tracing::debug;
 
-pub fn routes(app_state: AppState) -> Router {
+pub fn register_route(app_state: AppState) -> Router {
     Router::new()
         .route("/registration/register", post(event_registration_handler))
+        .with_state(app_state)
+}
+
+pub fn update_route(app_state: AppState) -> Router {
+    Router::new()
+        .route("/registration", patch(update_registration_status_handler))
+        .with_state(app_state)
+}
+
+pub fn list_by_event_id_route(app_state: AppState) -> Router {
+    Router::new()
+        .route("/registration/event-id", post(list_registrations_by_event_id))
         .with_state(app_state)
 }
 
@@ -28,7 +46,8 @@ async fn event_registration_handler(
         event_id: payload.event_id,
     };
 
-    let registration_id = RegistrationModelController::create(&context, model_manager, registration).await?;
+    let registration_id =
+        RegistrationModelController::create(&context, model_manager, registration).await?;
 
     let body = Json(json!({
         "data": {
@@ -43,4 +62,101 @@ async fn event_registration_handler(
 #[serde(rename_all(deserialize = "camelCase"))]
 struct EventRegisterPayload {
     event_id: i64,
+}
+
+async fn list_registrations_by_event_id(
+    context: Context,
+    State(app_state): State<AppState>,
+    Json(payload): Json<ListRegistrationsByEventIdPayload>,
+) -> Result<Json<Value>> {
+    debug!("{:<12} - list_registrations_by_event_id_api", "HANDLER");
+
+    let model_manager = &app_state.model_manager;
+
+    let registrations =
+        RegistrationModelController::list_by_event_id(&context, model_manager, payload.event_id)
+            .await?;
+
+    let body = Json(json!({
+        "data": {
+            "registrations": registrations,
+        }
+    }));
+
+    Ok(body)
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
+struct ListRegistrationsByEventIdPayload {
+    event_id: i64,
+}
+
+async fn update_registration_status_handler(
+    context: Context,
+    State(app_state): State<AppState>,
+    Json(payload): Json<UpdateRegistrationStatusPayload>,
+) -> Result<Json<Value>> {
+    debug!("{:<12} - update_registration_status_api", "HANDLER");
+
+    let model_manager = &app_state.model_manager;
+
+    let status = RegistrationStatus::from_str(&payload.status)
+        .map_err(|_| Error::InvalidData("registration status".to_string()))?;
+
+    let registration_updated = RegistrationForUpdate {
+        status: Some(status.clone()),
+    };
+
+    match status {
+        RegistrationStatus::Absent => {
+            RegistrationModelController::update(
+                &context,
+                model_manager,
+                payload.registration_id,
+                registration_updated,
+            )
+            .await?;
+        }
+        RegistrationStatus::Attended => {
+            RegistrationModelController::update(
+                &context,
+                model_manager,
+                payload.registration_id,
+                registration_updated,
+            )
+            .await?;
+
+            let registration = RegistrationModelController::get(
+                &context,
+                model_manager,
+                payload.registration_id,
+            ).await?;
+
+            let donation_history = DonationHistoryForCreate{
+                user_id: registration.user_id,
+                event_id: Some(registration.event_id),
+            };
+
+            DonationHistoryModelController::create(&context, model_manager, donation_history).await?;
+        }
+        RegistrationStatus::Registered => {
+            return Err(Error::InvalidData("registration status".to_string()));
+        }
+    }
+
+    let body = Json(json!({
+        "data": {
+            "success": true,
+        }
+    }));
+
+    Ok(body)
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all(deserialize = "camelCase"))]
+struct UpdateRegistrationStatusPayload {
+    registration_id: i64,
+    status: String,
 }

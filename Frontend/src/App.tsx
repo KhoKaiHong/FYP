@@ -19,6 +19,8 @@ import AdminDashboard from "@/pages/dashboard-admin/$page";
 import Contact from "@/pages/contact/$page";
 import NewEventProposalPage from "@/pages/new-event-proposal/$page";
 import ManageEventProposalPage from "@/pages/manage-event-proposals/$page";
+import ManageChangeRequestsPage from "@/pages/manage-change-requests/$page";
+import ManageEventsPage from "./pages/manage-events/$page";
 import OrganiserEventProposalPage from "@/pages/organiser-event-proposals/$page";
 import OrganiserEventPage from "@/pages/organiser-events/$page";
 import OrganiserChangeRequestsPage from "@/pages/organiser-change-requests/$page";
@@ -52,6 +54,8 @@ const App: Component = () => {
       <Route path="/contact" component={Contact} />
       <Route path="/new-event-proposal" component={NewEventProposalPage} />
       <Route path="/manage-event-proposals" component={ManageEventProposalPage} />
+      <Route path="/manage-change-requests" component={ManageChangeRequestsPage} />
+      <Route path="/manage-events" component={ManageEventsPage} />
       <Route path="/organiser-event-proposals" component={OrganiserEventProposalPage} />
       <Route path="/organiser-events" component={OrganiserEventPage} />
       <Route path="/organiser-change-requests" component={OrganiserChangeRequestsPage} />

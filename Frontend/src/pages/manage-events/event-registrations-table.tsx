@@ -35,7 +35,7 @@ declare module '@tanstack/solid-table' {
   }
 }
 
-export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
+export function EventRegistrationsTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = createSignal<SortingState>([]);
   const [columnFilters, setColumnFilters] = createSignal<ColumnFiltersState>(
     []
@@ -73,24 +73,24 @@ export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
         <TextFieldRoot
           class="w-full max-w-xs"
           value={
-            (table.getColumn("organiserName")?.getFilterValue() as string) ?? ""
+            (table.getColumn("userName")?.getFilterValue() as string) ?? ""
           }
           onChange={(value) =>
-            table.getColumn("organiserName")?.setFilterValue(value)
+            table.getColumn("userName")?.setFilterValue(value)
           }
         >
-          <TextField placeholder="Filter organisers..." />
+          <TextField placeholder="Filter attendee name..." />
         </TextFieldRoot>
         <TextFieldRoot
           class="w-full max-w-xs"
           value={
-            (table.getColumn("location")?.getFilterValue() as string) ?? ""
+            (table.getColumn("userIcNumber")?.getFilterValue() as string) ?? ""
           }
           onChange={(value) =>
-            table.getColumn("location")?.setFilterValue(value)
+            table.getColumn("userIcNumber")?.setFilterValue(value)
           }
         >
-          <TextField placeholder="Filter location..." />
+          <TextField placeholder="Filter attendee IC number..." />
         </TextFieldRoot>
       </div>
       <div class="rounded-md border">
@@ -124,7 +124,7 @@ export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
                     colSpan={props.columns.length}
                     class="h-24 text-center"
                   >
-                    No results.
+                    There is currently no past / ongoing events organised.
                   </TableCell>
                 </TableRow>
               }

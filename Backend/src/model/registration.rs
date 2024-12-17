@@ -1,7 +1,7 @@
 use crate::context::Context;
 use crate::model::EntityErrorField::I64Error;
 use crate::model::{Error, ModelManager, Result};
-use crate::model::enums::BloodType;
+use crate::model::enums::{BloodType, RegistrationStatus};
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
@@ -17,7 +17,8 @@ pub struct Registration {
     pub registered_at: DateTime<Utc>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct RegistrationWithInformation {
     pub id: i64,
     pub status: RegistrationStatus,
@@ -27,6 +28,8 @@ pub struct RegistrationWithInformation {
     pub event_start_time: DateTime<Utc>,
     pub event_end_time: DateTime<Utc>,
     pub event_max_attendees: i32,
+    pub event_latitude: f64,
+    pub event_longitude: f64,
     pub user_id: i64,
     pub user_ic_number: String,
     pub user_name: String,
@@ -49,6 +52,8 @@ impl<'r> FromRow<'r, PgRow> for RegistrationWithInformation {
                 .and_utc(),
             event_end_time: row.try_get::<NaiveDateTime, _>("event_end_time")?.and_utc(),
             event_max_attendees: row.try_get("event_max_attendees")?,
+            event_latitude: row.try_get("event_latitude")?,
+            event_longitude: row.try_get("event_longitude")?,
             user_id: row.try_get("user_id")?,
             user_ic_number: row.try_get("user_ic_number")?,
             user_name: row.try_get("user_name")?,
@@ -70,13 +75,6 @@ pub struct RegistrationForUpdate {
     pub status: Option<RegistrationStatus>,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone, Type)]
-#[sqlx(type_name = "registration_status")]
-pub enum RegistrationStatus {
-    Registered,
-    Absent,
-    Attended,
-}
 // endregion:    --- Registration Types
 
 // region:    --- Registration Errors to propagate to client
@@ -166,7 +164,7 @@ impl RegistrationModelController {
         let db = model_manager.db();
 
         let registration = sqlx::query_as(
-            "SELECT registrations.*, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id WHERE registrations.id = $1",
+            "SELECT registrations.*, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, blood_donation_events.latitude AS event_latitude, blood_donation_events.longitude AS event_longitude, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id WHERE registrations.id = $1",
         )
         .bind(id)
         .fetch_optional(db)
@@ -186,7 +184,7 @@ impl RegistrationModelController {
         let db = model_manager.db();
 
         let registrations = sqlx::query_as(
-            "SELECT registrations.*, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id ORDER BY id",
+            "SELECT registrations.*, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, blood_donation_events.latitude AS event_latitude, blood_donation_events.longitude AS event_longitude, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id ORDER BY id",
         )
         .fetch_all(db)
         .await?;
@@ -211,7 +209,7 @@ impl RegistrationModelController {
             })?;
 
         let registrations = sqlx::query_as(
-            "SELECT registrations.*, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id WHERE blood_donation_events.id = $1 ORDER BY id",
+            "SELECT registrations.*, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, blood_donation_events.latitude AS event_latitude, blood_donation_events.longitude AS event_longitude, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id WHERE blood_donation_events.id = $1 ORDER BY id",
         )
         .bind(event_id)
         .fetch_all(db)

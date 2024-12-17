@@ -13,13 +13,13 @@ function FacilityActions() {
           <p class="text-base">Manage Event Proposals</p>
         </div>
       </Button>
-      <Button variant="outline" class="w-full h-16 border-2 border-brand">
+      <Button variant="outline" class="w-full h-16 border-2 border-brand" onClick={() => navigate("/manage-events")}>
         <div class="flex items-center justify-center gap-x-2">
           <ClipboardList size={24} />
           <p class="text-base">Manage Events</p>
         </div>
       </Button>
-      <Button variant="outline" class="w-full h-16 border-2 border-brand">
+      <Button variant="outline" class="w-full h-16 border-2 border-brand" onClick={() => navigate("/manage-change-requests")}>
         <div class="flex items-center justify-center gap-x-2">
           <ClipboardPen size={24} />
           <p class="text-base">Manage Change Requests</p>

@@ -9,7 +9,6 @@ import {
   getSortedRowModel,
   ColumnFiltersState,
   getFilteredRowModel,
-  RowData,
 } from "@tanstack/solid-table";
 import {
   Table,
@@ -25,17 +24,9 @@ import { TextField, TextFieldRoot } from "@/components/ui/text-field";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  refetch: () => void
 }
 
-declare module '@tanstack/solid-table' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface TableMeta<TData extends RowData> {
-    performRefetch: () => void;
-  }
-}
-
-export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
+export function UpcomingEventsTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = createSignal<SortingState>([]);
   const [columnFilters, setColumnFilters] = createSignal<ColumnFiltersState>(
     []
@@ -62,9 +53,6 @@ export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
         return columnFilters();
       },
     },
-    meta: {
-      performRefetch: props.refetch,
-    },
   });
 
   return (
@@ -79,7 +67,7 @@ export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
             table.getColumn("organiserName")?.setFilterValue(value)
           }
         >
-          <TextField placeholder="Filter organisers..." />
+          <TextField placeholder="Filter organiser..." />
         </TextFieldRoot>
         <TextFieldRoot
           class="w-full max-w-xs"
@@ -124,7 +112,7 @@ export function DataTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
                     colSpan={props.columns.length}
                     class="h-24 text-center"
                   >
-                    No results.
+                    There is currently no upcoming events organised.
                   </TableCell>
                 </TableRow>
               }
