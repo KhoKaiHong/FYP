@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AlertDialogTriggerProps } from "@kobalte/core/alert-dialog";
 
-export const eventRegistrationsColumns: ColumnDef<EventRegistration>[] = [
+export const pastEventRegistrationsColumns: ColumnDef<EventRegistration>[] = [
   {
     accessorKey: "id",
     header: "ID",

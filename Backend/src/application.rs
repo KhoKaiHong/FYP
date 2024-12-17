@@ -48,6 +48,7 @@ impl Application {
             // Add user-specific routes here
             .merge(web::routes::event_registration::register_route(app_state.clone()))
             .merge(web::routes::user::user_routes(app_state.clone()))
+            .merge(web::routes::event_registration::list_by_user_id_route(app_state.clone()))
             .layer(middleware::from_fn(web::middleware::auth::require_user));
 
         let routes_require_facility: Router = Router::new()

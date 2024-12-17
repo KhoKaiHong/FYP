@@ -209,9 +209,25 @@ impl RegistrationModelController {
             })?;
 
         let registrations = sqlx::query_as(
-            "SELECT registrations.*, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, blood_donation_events.latitude AS event_latitude, blood_donation_events.longitude AS event_longitude, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id WHERE blood_donation_events.id = $1 ORDER BY id",
+            "SELECT registrations.*, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, blood_donation_events.latitude AS event_latitude, blood_donation_events.longitude AS event_longitude, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id WHERE event_id = $1 ORDER BY id",
         )
         .bind(event_id)
+        .fetch_all(db)
+        .await?;
+
+        Ok(registrations)
+    }
+
+    pub async fn list_by_user_id(
+        model_manager: &ModelManager,
+        user_id: i64,
+    ) -> Result<Vec<RegistrationWithInformation>> {
+        let db = model_manager.db();
+
+        let registrations = sqlx::query_as(
+            "SELECT registrations.*, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, blood_donation_events.latitude AS event_latitude, blood_donation_events.longitude AS event_longitude, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id WHERE user_id = $1 ORDER BY id",
+        )
+        .bind(user_id)
         .fetch_all(db)
         .await?;
 

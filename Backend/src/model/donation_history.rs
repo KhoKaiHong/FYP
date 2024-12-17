@@ -1,14 +1,15 @@
 use crate::context::Context;
+use crate::model::enums::BloodType;
 use crate::model::EntityErrorField::I64Error;
 use crate::model::{Error, ModelManager, Result};
-use crate::model::enums::BloodType;
 use chrono::prelude::*;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 
 // region:    --- Donation History Types
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct DonationHistoryWithInformation {
     pub id: i64,
     pub user_id: i64,
@@ -22,6 +23,8 @@ pub struct DonationHistoryWithInformation {
     pub event_address: Option<String>,
     pub event_start_time: Option<DateTime<Utc>>,
     pub event_end_time: Option<DateTime<Utc>>,
+    pub event_latitude: Option<f64>,
+    pub event_longitude: Option<f64>,
     pub created_at: DateTime<Utc>,
 }
 
@@ -44,6 +47,8 @@ impl<'r> FromRow<'r, PgRow> for DonationHistoryWithInformation {
             event_end_time: row
                 .try_get::<Option<NaiveDateTime>, _>("event_end_time")?
                 .map(|dt| dt.and_utc()),
+            event_latitude: row.try_get("event_latitude")?,
+            event_longitude: row.try_get("event_longitude")?,
             created_at: row.try_get::<NaiveDateTime, _>("created_at")?.and_utc(),
         })
     }
@@ -87,7 +92,7 @@ impl DonationHistoryModelController {
         let db = model_manager.db();
 
         let donation_history: DonationHistoryWithInformation = sqlx::query_as(
-            "SELECT donation_history.*, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time FROM donation_history JOIN users ON donation_history.user_id = users.id LEFT JOIN blood_donation_events ON donation_history.event_id = blood_donation_events.id WHERE donation_history.id = $1",
+            "SELECT donation_history.*, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.latitude as event_latitude, blood_donation_events.longitude as event_longitude FROM donation_history JOIN users ON donation_history.user_id = users.id LEFT JOIN blood_donation_events ON donation_history.event_id = blood_donation_events.id WHERE donation_history.id = $1",
         )
         .bind(id)
         .fetch_optional(db)
@@ -107,7 +112,7 @@ impl DonationHistoryModelController {
         let db = model_manager.db();
 
         let donation_histories = sqlx::query_as(
-            "SELECT donation_history.*, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time FROM donation_history JOIN users ON donation_history.user_id = users.id LEFT JOIN blood_donation_events ON donation_history.event_id = blood_donation_events.id ORDER BY id",
+            "SELECT donation_history.*, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.latitude as event_latitude, blood_donation_events.longitude as event_longitude FROM donation_history JOIN users ON donation_history.user_id = users.id LEFT JOIN blood_donation_events ON donation_history.event_id = blood_donation_events.id ORDER BY id",
         )
         .fetch_all(db)
         .await?;
@@ -132,7 +137,7 @@ impl DonationHistoryModelController {
             })?;
 
         let donation_histories = sqlx::query_as(
-            "SELECT donation_history.*, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time FROM donation_history JOIN users ON donation_history.user_id = users.id LEFT JOIN blood_donation_events ON donation_history.event_id = blood_donation_events.id WHERE users.id = $1 ORDER BY id",
+            "SELECT donation_history.*, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.latitude as event_latitude, blood_donation_events.longitude as event_longitude FROM donation_history JOIN users ON donation_history.user_id = users.id LEFT JOIN blood_donation_events ON donation_history.event_id = blood_donation_events.id WHERE users.id = $1 ORDER BY id",
         )
         .bind(user_id)
         .fetch_all(db)

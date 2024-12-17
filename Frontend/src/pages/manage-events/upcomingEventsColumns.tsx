@@ -1,11 +1,12 @@
 import { ColumnDef } from "@tanstack/solid-table";
-import { createEffect, createMemo, createSignal } from "solid-js";
+import { createEffect, createMemo, createResource, createSignal, Show } from "solid-js";
 import {
   ContactRound,
   Mail,
   Phone,
   MapPinned,
   ArrowUpDown,
+  Eye,
 } from "lucide-solid";
 import type { PopoverTriggerProps } from "@kobalte/core/popover";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Event } from "@/types/events";
+import { EventRegistrationsTable } from "./event-registrations-table";
+import showErrorToast from "@/components/error-toast";
+import { listRegistrationsByEventId } from "@/api/event-registration";
+import { upcomingEventRegistrationsColumns } from "./upcomingEventRegistrationsColumns";
 
 export const upcomingEventsColumns: ColumnDef<Event>[] = [
   {
@@ -188,10 +193,84 @@ export const upcomingEventsColumns: ColumnDef<Event>[] = [
     accessorKey: "attendees",
     header: "Attendees",
     cell: (props) => {
+      const [registrationsDialogOpen, setRegistrationsDialogOpen] =
+        createSignal(false);
+
+      async function fetchRegistrations() {
+        try {
+          const registrationsResponse = await listRegistrationsByEventId({
+            eventId: props.row.original.id,
+          });
+
+          return registrationsResponse.match(
+            (data) => {
+              return data.data.registrations;
+            },
+            (error) => {
+              showErrorToast({
+                errorTitle: "Error fetching event registrations.",
+                error,
+              });
+              console.error("Error fetching event registrations.", error);
+              return null;
+            }
+          );
+        } catch (err) {
+          showErrorToast({
+            errorTitle: "Error fetching event registrations.",
+            error: { message: "UNKNOWN_ERROR" },
+          });
+          console.error("Error fetching event registrations.", err);
+        }
+      }
+
+      const [registrations, { refetch }] = createResource(
+        () => registrationsDialogOpen(),
+        fetchRegistrations
+      );
+
       return (
-        <div>
-          {props.row.original.currentAttendees} /{" "}
-          {props.row.original.maxAttendees}
+        <div class="flex items-center justify-between pr-1">
+          <div>
+            {props.row.original.currentAttendees} /{" "}
+            {props.row.original.maxAttendees}
+          </div>
+          <Dialog
+            open={registrationsDialogOpen()}
+            onOpenChange={setRegistrationsDialogOpen}
+          >
+            <DialogTrigger
+              as={(props: DialogTriggerProps) => (
+                <Button variant="ghost" size={"icon"} {...props}>
+                  <Eye size={18} />
+                </Button>
+              )}
+            />
+            <DialogContent
+              class="max-w-5xl max-h-[40rem] overflow-y-auto"
+              onPointerDownOutside={(event) => event.preventDefault()}
+              onFocusOutside={(event) => event.preventDefault()}
+              onInteractOutside={(event) => event.preventDefault()}
+            >
+              <DialogHeader>
+                <DialogTitle>View Registrations</DialogTitle>
+                <DialogDescription>
+                  View attendees registered to the event.
+                </DialogDescription>
+              </DialogHeader>
+              <div>
+                <Show when={registrations()}>
+                  <EventRegistrationsTable
+                    columns={upcomingEventRegistrationsColumns}
+                    data={registrations() ?? []}
+                    refetch={() => {
+                      refetch();
+                    }}
+                  />
+                </Show>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       );
     },

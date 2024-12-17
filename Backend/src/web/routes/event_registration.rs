@@ -9,7 +9,7 @@ use crate::model::registration::{
 use crate::state::AppState;
 use crate::web::{Error, Result};
 use axum::extract::State;
-use axum::routing::{patch, post};
+use axum::routing::{get, patch, post};
 use axum::{Json, Router};
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -30,6 +30,12 @@ pub fn update_route(app_state: AppState) -> Router {
 pub fn list_by_event_id_route(app_state: AppState) -> Router {
     Router::new()
         .route("/registration/event-id", post(list_registrations_by_event_id))
+        .with_state(app_state)
+}
+
+pub fn list_by_user_id_route(app_state: AppState) -> Router {
+    Router::new()
+        .route("/registration/user-id", get(list_registrations_by_user_id))
         .with_state(app_state)
 }
 
@@ -159,4 +165,25 @@ async fn update_registration_status_handler(
 struct UpdateRegistrationStatusPayload {
     registration_id: i64,
     status: String,
+}
+
+async fn list_registrations_by_user_id(
+    context: Context,
+    State(app_state): State<AppState>,
+) -> Result<Json<Value>> {
+    debug!("{:<12} - list_registrations_by_event_id_api", "HANDLER");
+
+    let model_manager = &app_state.model_manager;
+
+    let registrations =
+        RegistrationModelController::list_by_user_id(model_manager, context.user_id())
+            .await?;
+
+    let body = Json(json!({
+        "data": {
+            "registrations": registrations,
+        }
+    }));
+
+    Ok(body)
 }

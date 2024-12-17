@@ -14,7 +14,7 @@ function UserActions() {
         </div>
       </Button>
       <Button variant="outline" class="w-full h-16 border-2 border-brand">
-        <div class="flex items-center justify-center gap-x-2">
+        <div class="flex items-center justify-center gap-x-2" onClick={() => navigate("/event-registrations")}>
           <ClipboardList size={24} />
           <p class="text-base">My Event Registrations</p>
         </div>

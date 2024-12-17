@@ -31,9 +31,7 @@ export async function listRegistrationsByEventId(
 
 export async function updateRegistration(
   updateRegistrationPayload: UpdateRegistrationPayload
-): Promise<
-  Result<UpdateRegistrationResponse, AppError>
-> {
+): Promise<Result<UpdateRegistrationResponse, AppError>> {
   try {
     const result = await fetchWithAuth<UpdateRegistrationResponse>({
       path: "/api/registration",
@@ -48,6 +46,26 @@ export async function updateRegistration(
     }
   } catch (error) {
     console.error("Error when updating event registration:", error);
+    return err({ message: "UNKNOWN_ERROR" });
+  }
+}
+
+export async function listRegistrationsByUserId(): Promise<
+  Result<ListRegistrationsResponse, AppError>
+> {
+  try {
+    const result = await fetchWithAuth<ListRegistrationsResponse>({
+      path: "/api/registration/user-id",
+      method: "GET",
+    });
+
+    if (result.isOk()) {
+      return ok(result.value as ListRegistrationsResponse);
+    } else {
+      return err(result.error);
+    }
+  } catch (error) {
+    console.error("Error when listing event registrations:", error);
     return err({ message: "UNKNOWN_ERROR" });
   }
 }

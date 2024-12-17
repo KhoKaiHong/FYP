@@ -9,7 +9,6 @@ import {
   getSortedRowModel,
   ColumnFiltersState,
   getFilteredRowModel,
-  RowData,
 } from "@tanstack/solid-table";
 import {
   Table,
@@ -25,17 +24,9 @@ import { TextField, TextFieldRoot } from "@/components/ui/text-field";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  refetch: () => void
 }
 
-declare module '@tanstack/solid-table' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface TableMeta<TData extends RowData> {
-    performRefetch: () => void;
-  }
-}
-
-export function EventRegistrationsTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
+export function PastRegistrationsTable<TData, TValue>(props: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = createSignal<SortingState>([]);
   const [columnFilters, setColumnFilters] = createSignal<ColumnFiltersState>(
     []
@@ -62,35 +53,21 @@ export function EventRegistrationsTable<TData, TValue>(props: DataTableProps<TDa
         return columnFilters();
       },
     },
-    meta: {
-      performRefetch: props.refetch,
-    },
   });
 
   return (
     <div>
-      <div class="flex items-center pb-4 gap-2">
+      <div class="flex items-center pb-4">
         <TextFieldRoot
           class="w-full max-w-xs"
           value={
-            (table.getColumn("userName")?.getFilterValue() as string) ?? ""
+            (table.getColumn("location")?.getFilterValue() as string) ?? ""
           }
           onChange={(value) =>
-            table.getColumn("userName")?.setFilterValue(value)
+            table.getColumn("location")?.setFilterValue(value)
           }
         >
-          <TextField placeholder="Filter attendee name..." />
-        </TextFieldRoot>
-        <TextFieldRoot
-          class="w-full max-w-xs"
-          value={
-            (table.getColumn("userIcNumber")?.getFilterValue() as string) ?? ""
-          }
-          onChange={(value) =>
-            table.getColumn("userIcNumber")?.setFilterValue(value)
-          }
-        >
-          <TextField placeholder="Filter attendee IC number..." />
+          <TextField placeholder="Filter location..." />
         </TextFieldRoot>
       </div>
       <div class="rounded-md border">
@@ -124,7 +101,7 @@ export function EventRegistrationsTable<TData, TValue>(props: DataTableProps<TDa
                     colSpan={props.columns.length}
                     class="h-24 text-center"
                   >
-                    There is currently no attendees for this event.
+                    There is currently no past / ongoing events registered.
                   </TableCell>
                 </TableRow>
               }

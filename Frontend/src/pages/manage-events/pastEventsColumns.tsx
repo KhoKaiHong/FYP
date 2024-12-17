@@ -36,7 +36,7 @@ import { Event } from "@/types/events";
 import { listRegistrationsByEventId } from "@/api/event-registration";
 import showErrorToast from "@/components/error-toast";
 import { EventRegistrationsTable } from "./event-registrations-table";
-import { eventRegistrationsColumns } from "./eventRegistrationsColumns";
+import { pastEventRegistrationsColumns } from "./pastEventRegistrationsColumns";
 
 export const pastEventsColumns: ColumnDef<Event>[] = [
   {
@@ -199,10 +199,84 @@ export const pastEventsColumns: ColumnDef<Event>[] = [
     accessorKey: "attendees",
     header: "Attendees",
     cell: (props) => {
+      const [registrationsDialogOpen, setRegistrationsDialogOpen] =
+        createSignal(false);
+
+      async function fetchRegistrations() {
+        try {
+          const registrationsResponse = await listRegistrationsByEventId({
+            eventId: props.row.original.id,
+          });
+
+          return registrationsResponse.match(
+            (data) => {
+              return data.data.registrations;
+            },
+            (error) => {
+              showErrorToast({
+                errorTitle: "Error fetching event registrations.",
+                error,
+              });
+              console.error("Error fetching event registrations.", error);
+              return null;
+            }
+          );
+        } catch (err) {
+          showErrorToast({
+            errorTitle: "Error fetching event registrations.",
+            error: { message: "UNKNOWN_ERROR" },
+          });
+          console.error("Error fetching event registrations.", err);
+        }
+      }
+
+      const [registrations, { refetch }] = createResource(
+        () => registrationsDialogOpen(),
+        fetchRegistrations
+      );
+
       return (
-        <div>
-          {props.row.original.currentAttendees} /{" "}
-          {props.row.original.maxAttendees}
+        <div class="flex items-center justify-between pr-1">
+          <div>
+            {props.row.original.currentAttendees} /{" "}
+            {props.row.original.maxAttendees}
+          </div>
+          <Dialog
+            open={registrationsDialogOpen()}
+            onOpenChange={setRegistrationsDialogOpen}
+          >
+            <DialogTrigger
+              as={(props: DialogTriggerProps) => (
+                <Button variant="ghost" size={"icon"} {...props}>
+                  <Pencil size={18} />
+                </Button>
+              )}
+            />
+            <DialogContent
+              class="max-w-5xl max-h-[40rem] overflow-y-auto"
+              onPointerDownOutside={(event) => event.preventDefault()}
+              onFocusOutside={(event) => event.preventDefault()}
+              onInteractOutside={(event) => event.preventDefault()}
+            >
+              <DialogHeader>
+                <DialogTitle>Mark Attendance</DialogTitle>
+                <DialogDescription>
+                  Mark attendance of event attendees here.
+                </DialogDescription>
+              </DialogHeader>
+              <div>
+                <Show when={registrations()}>
+                  <EventRegistrationsTable
+                    columns={pastEventRegistrationsColumns}
+                    data={registrations() ?? []}
+                    refetch={() => {
+                      refetch();
+                    }}
+                  />
+                </Show>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       );
     },
@@ -252,83 +326,6 @@ export const pastEventsColumns: ColumnDef<Event>[] = [
             </PopoverContent>
           </Popover>
         </div>
-      );
-    },
-  },
-  {
-    accessorKey: "attendance",
-    header: "Attendance",
-    cell: (props) => {
-      const [registrationsDialogOpen, setRegistrationsDialogOpen] =
-        createSignal(false);
-
-      async function fetchRegistrations() {
-        try {
-          const registrationsResponse = await listRegistrationsByEventId({
-            eventId: props.row.original.id,
-          });
-
-          return registrationsResponse.match(
-            (data) => {
-              return data.data.registrations;
-            },
-            (error) => {
-              showErrorToast({
-                errorTitle: "Error fetching event registrations.",
-                error,
-              });
-              console.error("Error fetching event registrations.", error);
-              return null;
-            }
-          );
-        } catch (err) {
-          showErrorToast({
-            errorTitle: "Error fetching event registrations.",
-            error: { message: "UNKNOWN_ERROR" },
-          });
-          console.error("Error fetching event registrations.", err);
-        }
-      }
-
-      const [registrations, { refetch }] = createResource(
-        () => registrationsDialogOpen(),
-        fetchRegistrations
-      );
-
-      return (
-        <Dialog open={registrationsDialogOpen()} onOpenChange={setRegistrationsDialogOpen}>
-          <DialogTrigger
-            as={(props: DialogTriggerProps) => (
-              <Button variant="ghost" size={"icon"} {...props}>
-                <Pencil size={18} />
-              </Button>
-            )}
-          />
-          <DialogContent
-            class="max-w-5xl max-h-[40rem] overflow-y-auto"
-            onPointerDownOutside={(event) => event.preventDefault()}
-            onFocusOutside={(event) => event.preventDefault()}
-            onInteractOutside={(event) => event.preventDefault()}
-          >
-            <DialogHeader>
-              <DialogTitle>Mark Attendance</DialogTitle>
-              <DialogDescription>
-                Mark attendance of event attendees here.
-              </DialogDescription>
-            </DialogHeader>
-            <div>
-              <Show when={registrations()}>
-                <EventRegistrationsTable
-                  columns={eventRegistrationsColumns}
-                  data={registrations() ?? []}
-                  refetch={() => {
-                    refetch();
-                  }}
-                />
-              </Show>
-            </div>
-          </DialogContent>
-        </Dialog>
       );
     },
   },
