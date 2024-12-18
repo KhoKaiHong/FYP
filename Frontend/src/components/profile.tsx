@@ -19,7 +19,6 @@ import {
   CircleUserRound,
   LogOut,
   LogIn,
-  PanelTop,
   UserRoundPlus,
 } from "lucide-solid";
 import { Switch, Match } from "solid-js";

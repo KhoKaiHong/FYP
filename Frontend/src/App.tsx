@@ -18,6 +18,7 @@ import FacilityDashboard from "@/pages/dashboard-facility/$page";
 import AdminDashboard from "@/pages/dashboard-admin/$page";
 import Contact from "@/pages/contact/$page";
 import EventRegistrationsPage from "@/pages/event-registrations/$page";
+import DonationHistoryPage from "@/pages/donation-history/$page";
 import NewEventProposalPage from "@/pages/new-event-proposal/$page";
 import ManageEventProposalPage from "@/pages/manage-event-proposals/$page";
 import ManageChangeRequestsPage from "@/pages/manage-change-requests/$page";
@@ -54,6 +55,7 @@ const App: Component = () => {
       <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route path="/contact" component={Contact} />
       <Route path="/event-registrations" component={EventRegistrationsPage} />
+      <Route path="/donation-history" component={DonationHistoryPage} />
       <Route path="/new-event-proposal" component={NewEventProposalPage} />
       <Route path="/manage-event-proposals" component={ManageEventProposalPage} />
       <Route path="/manage-change-requests" component={ManageChangeRequestsPage} />

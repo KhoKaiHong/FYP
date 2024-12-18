@@ -34,6 +34,12 @@ INSERT INTO registrations (status, event_id, user_id) VALUES
 -- Insert data into donation_history
 INSERT INTO donation_history (user_id, event_id) VALUES
 (1000, 1),
+(1000, 2),
+(1000, 3),
+(1000, 4),
+(1000, 5),
+(1000, 6),
+(1000, NULL),
 (1001, 2),
 (1002, 3);
 

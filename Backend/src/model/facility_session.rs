@@ -184,7 +184,7 @@ impl FacilitySessionModelController {
     ) -> Result<()> {
         let db = model_manager.db();
 
-        sqlx::query_as::<_, (i32,)>("SELECT 1 FROM facility_sessions WHERE refresh_token_id = $1 AND access_token_id = $2 AND user_id = $3 ")
+        sqlx::query_as::<_, (i32,)>("SELECT 1 FROM facility_sessions WHERE refresh_token_id = $1 AND access_token_id = $2 AND facility_id = $3 ")
             .bind(refresh_token_id)
             .bind(context.token_id())
             .bind(context.user_id())

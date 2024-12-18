@@ -8,6 +8,7 @@ use sqlx::{FromRow, Row};
 
 // region:    --- Facility Notification Types
 
+#[serde_with::skip_serializing_none]
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct FacilityNotification {

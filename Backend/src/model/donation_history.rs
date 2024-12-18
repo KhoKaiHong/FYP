@@ -8,6 +8,7 @@ use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 
 // region:    --- Donation History Types
+#[serde_with::skip_serializing_none]
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DonationHistoryWithInformation {

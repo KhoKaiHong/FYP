@@ -182,7 +182,7 @@ impl AdminSessionModelController {
     ) -> Result<()> {
         let db = model_manager.db();
 
-        sqlx::query_as::<_, (i32,)>("SELECT 1 FROM admin_sessions WHERE refresh_token_id = $1 AND access_token_id = $2 AND user_id = $3 ")
+        sqlx::query_as::<_, (i32,)>("SELECT 1 FROM admin_sessions WHERE refresh_token_id = $1 AND access_token_id = $2 AND admin_id = $3 ")
             .bind(refresh_token_id)
             .bind(context.token_id())
             .bind(context.user_id())

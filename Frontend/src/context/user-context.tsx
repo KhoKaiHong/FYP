@@ -15,6 +15,7 @@ import { GetCredentialsResponse } from "@/types/get-credentials";
 import { Result, err } from "neverthrow";
 import { logout } from "@/api/logout";
 import showErrorToast from "@/components/error-toast";
+import { logoutAll } from "@/api/logoutAll";
 
 type UserContextType = {
   user: Accessor<Users | null>;
@@ -30,6 +31,7 @@ type UserContextType = {
     | undefined
     | null;
   logout: () => Promise<void>;
+  logoutAll: () => Promise<void>;
 };
 
 const UserContext = createContext<UserContextType>();
@@ -190,6 +192,52 @@ export function UserProvider(props: UserProviderProps) {
     }
   }
 
+  async function performLogoutAll() {
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+      if (!refreshToken) {
+        localStorage.removeItem("accessToken");
+        setIsAuthenticated(false);
+        setUser(null);
+        setError({ message: "NO_AUTH" });
+        showErrorToast({
+          errorTitle: "Error during log out.",
+          error: { message: "NO_AUTH" },
+        });
+        return;
+      }
+
+      const result = await logoutAll();
+
+      if (result.isOk()) {
+        setIsAuthenticated(false);
+        setUser(null);
+        setError(null);
+      } else {
+        setError(result.error);
+
+        if (
+          result.error.message === "NO_AUTH" ||
+          result.error.message === "SESSION_EXPIRED"
+        ) {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
+        showErrorToast({
+          errorTitle: "Error during log out.",
+          error: result.error,
+        });
+      }
+    } catch (err) {
+      setError({ message: "UNKNOWN_ERROR" });
+      showErrorToast({
+        errorTitle: "Error during log out.",
+        error: { message: "UNKNOWN_ERROR" },
+      });
+      console.error("Error during user logout:", err);
+    }
+  }
+
   const value = {
     user,
     isAuthenticated,
@@ -200,6 +248,7 @@ export function UserProvider(props: UserProviderProps) {
     setError,
     refreshUser: refetch,
     logout: performLogout,
+    logoutAll: performLogoutAll,
   };
 
   return (

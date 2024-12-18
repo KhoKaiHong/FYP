@@ -1,5 +1,4 @@
 pub mod fallback;
-pub mod hello;
 pub mod login;
 pub mod logout;
 pub mod logout_all;
@@ -17,3 +16,4 @@ pub mod facility;
 pub mod admin;
 pub mod new_event_request;
 pub mod change_event_request;
+pub mod donation_history;
