@@ -15,11 +15,16 @@ use serde_json::{json, Value};
 use std::str::FromStr;
 use tracing::debug;
 
-pub fn routes(app_state: AppState) -> Router {
+pub fn routes_public(app_state: AppState) -> Router {
     Router::new()
         .route("/user-register", post(user_register_handler))
-        .route("/facility-register", post(facility_register_handler))
         .route("/organiser-register", post(organiser_register_handler))
+        .with_state(app_state)
+}
+
+pub fn routes_admin(app_state: AppState) -> Router {
+    Router::new()
+        .route("/facility-register", post(facility_register_handler))
         .route("/admin-register", post(admin_register_handler))
         .with_state(app_state)
 }

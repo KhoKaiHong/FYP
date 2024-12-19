@@ -149,17 +149,26 @@ function Events() {
   let infoWindow: google.maps.InfoWindow | undefined;
 
   onMount(async () => {
-    const { Map, InfoWindow } = (await google.maps.importLibrary(
-      "maps"
-    )) as google.maps.MapsLibrary;
+    try {
+      const { Map, InfoWindow } = (await google.maps.importLibrary(
+        "maps"
+      )) as google.maps.MapsLibrary;
 
-    map = new Map(document.getElementById("map") as HTMLElement, {
-      center: { lat: 3.1732962387784367, lng: 101.70668106095312 },
-      zoom: 10,
-      mapId: "f7a7a21c7ed4070e",
-    });
+      map = new Map(document.getElementById("map") as HTMLElement, {
+        center: { lat: 3.1732962387784367, lng: 101.70668106095312 },
+        zoom: 10,
+        mapId: "f7a7a21c7ed4070e",
+      });
 
-    infoWindow = new InfoWindow();
+      infoWindow = new InfoWindow();
+    } catch (error) {
+      console.error("Error loading Google Maps libraries:", error);
+      showErrorToast({
+        errorTitle: "Error loading Google Maps libraries.",
+        error: { message: "UNKNOWN_ERROR" },
+      });
+      return null;
+    }
   });
 
   async function getMarkerLibrary() {
@@ -170,9 +179,9 @@ function Events() {
 
       return markerLibrary;
     } catch (error) {
-      console.error("Error loading Google Maps libraries:", error);
+      console.error("Error loading Google Marker libraries:", error);
       showErrorToast({
-        errorTitle: "Error loading Google Maps libraries.",
+        errorTitle: "Error loading Google Marker libraries.",
         error: { message: "UNKNOWN_ERROR" },
       });
       return null;

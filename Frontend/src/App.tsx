@@ -26,6 +26,8 @@ import ManageEventsPage from "./pages/manage-events/$page";
 import OrganiserEventProposalPage from "@/pages/organiser-event-proposals/$page";
 import OrganiserEventPage from "@/pages/organiser-events/$page";
 import OrganiserChangeRequestsPage from "@/pages/organiser-change-requests/$page";
+import AddAdminPage from "@/pages/add-admin/$page";
+import AddFacilityPage from "@/pages/add-facility/$page";
 
 const App: Component = () => {
   return (
@@ -63,6 +65,8 @@ const App: Component = () => {
       <Route path="/organiser-event-proposals" component={OrganiserEventProposalPage} />
       <Route path="/organiser-events" component={OrganiserEventPage} />
       <Route path="/organiser-change-requests" component={OrganiserChangeRequestsPage} />
+      <Route path="/add-facility" component={AddFacilityPage} />
+      <Route path="/add-admin" component={AddAdminPage} />
       <Route path="*404" component={NotFound} />
     </Router>
   );

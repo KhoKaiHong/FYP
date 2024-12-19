@@ -36,7 +36,7 @@ impl Application {
 
         let routes_public = Router::new()
             .merge(web::routes::login::routes(app_state.clone()))
-            .merge(web::routes::register::routes(app_state.clone()))
+            .merge(web::routes::register::routes_public(app_state.clone()))
             .merge(web::routes::refresh::routes(app_state.clone()))
             .merge(web::routes::district::routes(app_state.clone()))
             .merge(web::routes::state::routes(app_state.clone()))
@@ -79,6 +79,7 @@ impl Application {
         let routes_require_admin: Router = Router::new()
             // Add admin-specific routes here
             .merge(web::routes::admin::routes(app_state.clone()))
+            .merge(web::routes::register::routes_admin(app_state.clone()))
             .layer(middleware::from_fn(web::middleware::auth::require_admin));
 
         let routes_require_auth = Router::new()
