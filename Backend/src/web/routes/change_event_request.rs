@@ -7,6 +7,16 @@ use crate::model::change_event_request::{
 };
 use crate::model::enums::EventRequestStatus;
 use crate::model::event::{EventForUpdate, EventModelController};
+use crate::model::facility_notification::{
+    FacilityNotificationForCreate, FacilityNotificationModelController,
+};
+use crate::model::organiser_notification::{
+    OrganiserNotificationForCreate, OrganiserNotificationModelController,
+};
+use crate::model::registration::RegistrationModelController;
+use crate::model::user_notification::{
+    UserNotificationForCreateBulk, UserNotificationModelController,
+};
 use crate::state::AppState;
 use crate::web::{Error, Result};
 use axum::extract::State;
@@ -105,6 +115,14 @@ async fn post_change_event_request_handler(
     ChangeEventRequestModelController::create(&context, model_manager, change_event_request)
         .await?;
 
+    let notification = FacilityNotificationForCreate {
+        description: "You have a pending event change request.".to_string(),
+        redirect: Some("manage-change-requests".to_string()),
+        facility_id: event.facility_id,
+    };
+
+    FacilityNotificationModelController::create(&context, model_manager, notification).await?;
+
     let body = Json(json!({
         "data": {
             "success": true,
@@ -199,27 +217,81 @@ async fn update_change_event_request_facility_handler(
     ChangeEventRequestModelController::update(&context, model_manager, payload.id, updated_request)
         .await?;
 
-    if let EventRequestStatus::Approved = status {
-        let updated_event_details =
-            ChangeEventRequestModelController::get(&context, model_manager, payload.id).await?;
+    let updated_event_details =
+        ChangeEventRequestModelController::get(&context, model_manager, payload.id).await?;
 
-        let event_updated = EventForUpdate {
-            location: Some(updated_event_details.location),
-            address: Some(updated_event_details.address),
-            start_time: Some(updated_event_details.start_time),
-            end_time: Some(updated_event_details.end_time),
-            max_attendees: Some(updated_event_details.max_attendees),
-            latitude: Some(updated_event_details.latitude),
-            longitude: Some(updated_event_details.longitude),
-        };
+    match status {
+        EventRequestStatus::Approved => {
+            let event_updated = EventForUpdate {
+                location: Some(updated_event_details.location),
+                address: Some(updated_event_details.address),
+                start_time: Some(updated_event_details.start_time),
+                end_time: Some(updated_event_details.end_time),
+                max_attendees: Some(updated_event_details.max_attendees),
+                latitude: Some(updated_event_details.latitude),
+                longitude: Some(updated_event_details.longitude),
+            };
 
-        EventModelController::update(
-            &context,
-            model_manager,
-            updated_event_details.event_id,
-            event_updated,
-        )
-        .await?;
+            EventModelController::update(
+                &context,
+                model_manager,
+                updated_event_details.event_id,
+                event_updated,
+            )
+            .await?;
+
+            let organiser_notification = OrganiserNotificationForCreate {
+                description: "Your change event request has been accepted.".to_string(),
+                redirect: Some("organiser-change-requests".to_string()),
+                organiser_id: updated_event_details.organiser_id,
+            };
+
+            OrganiserNotificationModelController::create(
+                &context,
+                model_manager,
+                organiser_notification,
+            )
+            .await?;
+
+            let attendees_ids: Vec<i64> = RegistrationModelController::list_by_event_id(
+                &context,
+                model_manager,
+                updated_event_details.event_id,
+            )
+            .await?
+            .into_iter()
+            .map(|attendee| attendee.user_id)
+            .collect();
+
+            let user_notifications = UserNotificationForCreateBulk {
+                description: "There is a change in a blood donation event you are registered in."
+                    .to_string(),
+                redirect: Some("event-registrations".to_string()),
+                user_ids: attendees_ids,
+            };
+
+            UserNotificationModelController::create_bulk(
+                &context,
+                model_manager,
+                user_notifications,
+            )
+            .await?;
+        }
+        EventRequestStatus::Rejected => {
+            let organiser_notification = OrganiserNotificationForCreate {
+                description: "Your change event request has been rejected.".to_string(),
+                redirect: Some("organiser-change-requests".to_string()),
+                organiser_id: updated_event_details.organiser_id,
+            };
+
+            OrganiserNotificationModelController::create(
+                &context,
+                model_manager,
+                organiser_notification,
+            )
+            .await?;
+        }
+        _ => {}
     }
 
     let body = Json(json!({

@@ -79,3 +79,23 @@ INSERT INTO new_blood_donation_events_requests (
 ('Location 28', 'Address for Location 28, Malaysia', '2025-01-28 01:00:00', '2025-01-28 06:00:00', 200, 3.0926, 101.6494, 'Approved', NULL, 1, 1, 3, 28),
 ('Location 29', 'Address for Location 29, Malaysia', '2025-01-29 02:00:00', '2025-01-29 07:00:00', 250, 3.0924, 101.6495, 'Pending', NULL, 1, 2, 4, 29),
 ('Location 30', 'Address for Location 30, Malaysia', '2025-01-30 03:00:00', '2025-01-30 08:00:00', 300, 3.0922, 101.6496, 'Rejected', 'Insufficient resources at the facility', 1, 3, 5, 30);
+
+INSERT INTO user_notifications (description, redirect, is_read, created_at, user_id) VALUES
+('Reminder: upcoming meeting', NULL, TRUE, '2024-12-22 14:22:00', 1000),
+('Dont miss this offer', NULL, FALSE, '2024-12-15 05:38:00', 1000),
+('Security alert', 'events', FALSE, '2024-12-11 18:50:00', 1000),
+('Special offer for you', 'events', TRUE, '2024-12-30 18:02:00', 1000),
+('Event canceled', NULL, FALSE, '2024-12-16 05:42:00', 1000),
+('New alert for you', 'events', FALSE, '2024-12-31 09:08:00', 1000),
+('Dont miss this offer', NULL, TRUE, '2024-12-31 13:03:00', 1000),
+('Important system notification', NULL, FALSE, '2024-12-15 07:20:00', 1000),
+('Reminder: upcoming meeting', NULL, TRUE, '2024-12-26 07:50:00', 1000),
+('Check your new achievements', NULL, TRUE, '2024-12-26 20:40:00', 1000),
+('Security alert', NULL, FALSE, '2024-12-17 23:38:00', 1000),
+('New message in your inbox', NULL, TRUE, '2024-12-01 12:05:00', 1000),
+('Survey for feedback', NULL, FALSE, '2024-12-18 06:54:00', 1000),
+('Survey for feedback', 'events', TRUE, '2024-12-15 21:24:00', 1000),
+('Event is happening soon', NULL, FALSE, '2024-12-02 18:17:00', 1000),
+('System update scheduled', 'events', TRUE, '2024-12-30 18:17:00', 1000),
+('New alert for you', 'events', TRUE, '2024-12-03 23:37:00', 1000),
+('Notification about event 1', 'events', TRUE, '2024-12-07 20:37:00', 1000);

@@ -143,6 +143,20 @@ impl UserModelController {
         Ok(users)
     }
 
+    pub async fn list_eligible_by_district(
+        model_manager: &ModelManager,
+        district_id: i32,
+    ) -> Result<Vec<UserWithLocation>> {
+        let db = model_manager.db();
+
+        let users = sqlx::query_as("SELECT users.*, states.name AS state_name, districts.name AS district_name FROM users JOIN states ON users.state_id = states.id JOIN districts ON users.district_id = districts.id WHERE district_id = $1 AND eligibility = 'Eligible'")
+            .bind(district_id)
+            .fetch_all(db)
+            .await?;
+
+        Ok(users)
+    }
+
     pub async fn update(
         context: &Context,
         model_manager: &ModelManager,

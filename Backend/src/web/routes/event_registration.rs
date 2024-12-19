@@ -6,6 +6,7 @@ use crate::model::enums::RegistrationStatus;
 use crate::model::registration::{
     RegistrationForCreate, RegistrationForUpdate, RegistrationModelController,
 };
+use crate::model::user_notification::{UserNotificationForCreate, UserNotificationModelController};
 use crate::state::AppState;
 use crate::web::{Error, Result};
 use axum::extract::State;
@@ -29,7 +30,10 @@ pub fn update_route(app_state: AppState) -> Router {
 
 pub fn list_by_event_id_route(app_state: AppState) -> Router {
     Router::new()
-        .route("/registration/event-id", post(list_registrations_by_event_id))
+        .route(
+            "/registration/event-id",
+            post(list_registrations_by_event_id),
+        )
         .with_state(app_state)
 }
 
@@ -123,6 +127,20 @@ async fn update_registration_status_handler(
                 registration_updated,
             )
             .await?;
+
+            let registration =
+                RegistrationModelController::get(&context, model_manager, payload.registration_id)
+                    .await?;
+
+            let user_notification = UserNotificationForCreate {
+                description: "You have been marked as absent from a blood donation event you are registered in."
+                    .to_string(),
+                redirect: Some("event-registrations".to_string()),
+                user_id: registration.user_id,
+            };
+
+            UserNotificationModelController::create(&context, model_manager, user_notification)
+                .await?;
         }
         RegistrationStatus::Attended => {
             RegistrationModelController::update(
@@ -133,18 +151,27 @@ async fn update_registration_status_handler(
             )
             .await?;
 
-            let registration = RegistrationModelController::get(
-                &context,
-                model_manager,
-                payload.registration_id,
-            ).await?;
+            let registration =
+                RegistrationModelController::get(&context, model_manager, payload.registration_id)
+                    .await?;
 
-            let donation_history = DonationHistoryForCreate{
+            let donation_history = DonationHistoryForCreate {
                 user_id: registration.user_id,
                 event_id: Some(registration.event_id),
             };
 
-            DonationHistoryModelController::create(&context, model_manager, donation_history).await?;
+            DonationHistoryModelController::create(&context, model_manager, donation_history)
+                .await?;
+
+            let user_notification = UserNotificationForCreate {
+                description: "You have been marked as present from a blood donation event you are registered in."
+                    .to_string(),
+                redirect: Some("event-registrations".to_string()),
+                user_id: registration.user_id,
+            };
+
+            UserNotificationModelController::create(&context, model_manager, user_notification)
+                .await?;
         }
         RegistrationStatus::Registered => {
             return Err(Error::InvalidData("registration status".to_string()));
@@ -176,8 +203,7 @@ async fn list_registrations_by_user_id(
     let model_manager = &app_state.model_manager;
 
     let registrations =
-        RegistrationModelController::list_by_user_id(model_manager, context.user_id())
-            .await?;
+        RegistrationModelController::list_by_user_id(model_manager, context.user_id()).await?;
 
     let body = Json(json!({
         "data": {

@@ -4,7 +4,7 @@ use crate::model::{Error, ModelManager, Result};
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row};
+use sqlx::{FromRow, QueryBuilder, Row};
 
 // region:    --- User Notification Types
 
@@ -40,6 +40,13 @@ pub struct UserNotificationForCreate {
     pub user_id: i64,
 }
 
+#[derive(Deserialize)]
+pub struct UserNotificationForCreateBulk {
+    pub description: String,
+    pub redirect: Option<String>,
+    pub user_ids: Vec<i64>,
+}
+
 // endregion:    --- User Notification Types
 
 // region:    --- User Notification Model Controller
@@ -63,6 +70,30 @@ impl UserNotificationModelController {
         .await?;
 
         Ok(id)
+    }
+
+    pub async fn create_bulk(
+        context: &Context,
+        model_manager: &ModelManager,
+        notification_created: UserNotificationForCreateBulk,
+    ) -> Result<()> {
+        let db = model_manager.db();
+
+        if !notification_created.user_ids.is_empty() {
+            let mut query_builder = QueryBuilder::new(
+                "INSERT INTO user_notifications (description, redirect, user_id) ",
+            );
+
+            query_builder.push_values(notification_created.user_ids, |mut b, user_id| {
+                b.push_bind(&notification_created.description)
+                    .push_bind(&notification_created.redirect)
+                    .push_bind(user_id);
+            });
+
+            query_builder.build().execute(db).await?;
+        }
+
+        Ok(())
     }
 
     pub async fn get(
@@ -98,14 +129,14 @@ impl UserNotificationModelController {
     }
 
     pub async fn list_by_user_id(
-        context: &Context,
         model_manager: &ModelManager,
+        user_id: i64,
     ) -> Result<Vec<UserNotification>> {
         let db = model_manager.db();
 
         let notifications =
             sqlx::query_as("SELECT * FROM user_notifications WHERE user_id = $1 ORDER BY id")
-                .bind(context.user_id())
+                .bind(user_id)
                 .fetch_all(db)
                 .await?;
 
@@ -315,7 +346,7 @@ mod tests {
         )
         .await?;
         let notifications: Vec<UserNotification> =
-            UserNotificationModelController::list_by_user_id(&context, &model_manager).await?;
+            UserNotificationModelController::list_by_user_id(&model_manager, 1000).await?;
 
         // Check
         assert_eq!(notifications.len(), 2);
@@ -372,7 +403,8 @@ mod tests {
         UserNotificationModelController::read_notification(&context, &model_manager, id).await?;
 
         // -- Check
-        let notification = UserNotificationModelController::get(&context, &model_manager, id).await?;
+        let notification =
+            UserNotificationModelController::get(&context, &model_manager, id).await?;
         assert_eq!(notification.id, id);
         assert_eq!(notification.description, "test_description");
         assert_eq!(notification.redirect, Some(String::from("event")));

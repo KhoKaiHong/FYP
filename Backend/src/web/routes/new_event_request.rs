@@ -3,9 +3,15 @@ use std::str::FromStr;
 use crate::context::Context;
 use crate::model::enums::EventRequestStatus;
 use crate::model::event::{EventForCreate, EventModelController};
+use crate::model::facility_notification::{
+    FacilityNotificationForCreate, FacilityNotificationModelController,
+};
 use crate::model::new_event_request::{
     NewEventRequestForCreate, NewEventRequestForUpdate, NewEventRequestModelController,
 };
+use crate::model::organiser_notification::{OrganiserNotificationForCreate, OrganiserNotificationModelController};
+use crate::model::user::UserModelController;
+use crate::model::user_notification::{UserNotificationForCreateBulk, UserNotificationModelController};
 use crate::state::AppState;
 use crate::web::{Error, Result};
 use axum::extract::State;
@@ -88,6 +94,14 @@ async fn post_new_event_request_handler(
 
     NewEventRequestModelController::create(&context, model_manager, new_event_request).await?;
 
+    let notification = FacilityNotificationForCreate {
+        description: "You have a pending new event proposal.".to_string(),
+        redirect: Some("manage-event-proposals".to_string()),
+        facility_id: payload.facility_id,
+    };
+
+    FacilityNotificationModelController::create(&context, model_manager, notification).await?;
+
     let body = Json(json!({
         "data": {
             "success": true,
@@ -169,37 +183,81 @@ async fn update_new_event_request_facility_handler(
         rejection_reason: payload.rejection_reason,
     };
 
-    NewEventRequestModelController::update(
-        &context,
-        model_manager,
-        payload.id,
-        updated_request,
-    )
-    .await?;
-
-    if let EventRequestStatus::Approved = status {
-        let new_event_details = NewEventRequestModelController::get(
-            &context,
-            model_manager,
-            payload.id,
-        )
+    NewEventRequestModelController::update(&context, model_manager, payload.id, updated_request)
         .await?;
 
-        let event_created = EventForCreate {
-            location: new_event_details.location,
-            address: new_event_details.address,
-            start_time: new_event_details.start_time,
-            end_time: new_event_details.end_time,
-            max_attendees: new_event_details.max_attendees,
-            latitude: new_event_details.latitude,
-            longitude: new_event_details.longitude,
-            facility_id: new_event_details.facility_id,
-            organiser_id: new_event_details.organiser_id,
-            state_id: new_event_details.state_id,
-            district_id: new_event_details.district_id,
-        };
+    let new_event_details =
+        NewEventRequestModelController::get(&context, model_manager, payload.id).await?;
 
-        EventModelController::create(&context, model_manager, event_created).await?;
+    match status {
+        EventRequestStatus::Approved => {
+            let event_created = EventForCreate {
+                location: new_event_details.location,
+                address: new_event_details.address,
+                start_time: new_event_details.start_time,
+                end_time: new_event_details.end_time,
+                max_attendees: new_event_details.max_attendees,
+                latitude: new_event_details.latitude,
+                longitude: new_event_details.longitude,
+                facility_id: new_event_details.facility_id,
+                organiser_id: new_event_details.organiser_id,
+                state_id: new_event_details.state_id,
+                district_id: new_event_details.district_id,
+            };
+
+            EventModelController::create(&context, model_manager, event_created).await?;
+
+            let organiser_notification = OrganiserNotificationForCreate {
+                description: "Your new event proposal has been accepted.".to_string(),
+                redirect: Some("organiser-event-proposals".to_string()),
+                organiser_id: new_event_details.organiser_id,
+            };
+
+            OrganiserNotificationModelController::create(
+                &context,
+                model_manager,
+                organiser_notification,
+            )
+            .await?;
+
+            let users_ids: Vec<i64> = UserModelController::list_eligible_by_district(
+                model_manager,
+                new_event_details.district_id,
+            )
+            .await?
+            .into_iter()
+            .map(|user| user.id)
+            .collect();
+
+            let user_notifications = UserNotificationForCreateBulk {
+                description: "There is a new blood donation event near you."
+                    .to_string(),
+                redirect: Some("events".to_string()),
+                user_ids: users_ids,
+            };
+
+            UserNotificationModelController::create_bulk(
+                &context,
+                model_manager,
+                user_notifications,
+            )
+            .await?;
+        }
+        EventRequestStatus::Rejected => {
+            let organiser_notification = OrganiserNotificationForCreate {
+                description: "Your new event proposal has been rejected.".to_string(),
+                redirect: Some("organiser-event-proposals".to_string()),
+                organiser_id: new_event_details.organiser_id,
+            };
+
+            OrganiserNotificationModelController::create(
+                &context,
+                model_manager,
+                organiser_notification,
+            )
+            .await?;
+        }
+        _ => {}
     }
 
     let body = Json(json!({

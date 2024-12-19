@@ -50,6 +50,7 @@ impl Application {
             .merge(web::routes::user::user_routes(app_state.clone()))
             .merge(web::routes::event_registration::list_by_user_id_route(app_state.clone()))
             .merge(web::routes::donation_history::list_by_user_id(app_state.clone()))
+            .merge(web::routes::user_notifications::routes(app_state.clone()))
             .layer(middleware::from_fn(web::middleware::auth::require_user));
 
         let routes_require_facility: Router = Router::new()
@@ -62,6 +63,7 @@ impl Application {
             .merge(web::routes::change_event_request::update_by_facility_route(app_state.clone()))
             .merge(web::routes::event_registration::update_route(app_state.clone()))
             .merge(web::routes::event_registration::list_by_event_id_route(app_state.clone()))
+            .merge(web::routes::facility_notifications::routes(app_state.clone()))
             .layer(middleware::from_fn(web::middleware::auth::require_facility));
 
         let routes_require_organiser: Router = Router::new()
@@ -72,6 +74,7 @@ impl Application {
             .merge(web::routes::event::list_routes_organiser(app_state.clone()))
             .merge(web::routes::change_event_request::list_by_organiser_route(app_state.clone()))
             .merge(web::routes::change_event_request::post_route(app_state.clone()))
+            .merge(web::routes::organiser_notifications::routes(app_state.clone()))
             .layer(middleware::from_fn(
                 web::middleware::auth::require_organiser,
             ));
@@ -80,6 +83,7 @@ impl Application {
             // Add admin-specific routes here
             .merge(web::routes::admin::routes(app_state.clone()))
             .merge(web::routes::register::routes_admin(app_state.clone()))
+            .merge(web::routes::admin_notifications::routes(app_state.clone()))
             .layer(middleware::from_fn(web::middleware::auth::require_admin));
 
         let routes_require_auth = Router::new()

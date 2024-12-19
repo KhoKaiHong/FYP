@@ -17,3 +17,7 @@ pub mod admin;
 pub mod new_event_request;
 pub mod change_event_request;
 pub mod donation_history;
+pub mod admin_notifications;
+pub mod facility_notifications;
+pub mod organiser_notifications;
+pub mod user_notifications;

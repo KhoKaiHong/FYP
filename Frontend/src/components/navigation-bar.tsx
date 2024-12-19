@@ -1,5 +1,5 @@
 import { Menu } from "lucide-solid";
-import { createSignal, For, createEffect } from "solid-js";
+import { createSignal, For, createEffect, Show, Switch, Match } from "solid-js";
 import { Button } from "@/components/ui/button";
 import ColourModeToggle from "@/components/colour-mode-toggle";
 import Logo from "@/components/logo";
@@ -19,10 +19,17 @@ import {
 } from "@/components/ui/collapsible";
 import ProfileDropDown from "@/components/profile";
 import { useNavigate } from "@solidjs/router";
+import { useUser } from "@/context/user-context";
+import UserNotificationDialog from "@/components/user-notification-dialog";
+import OrganiserNotificationDialog from "@/components/organiser-notification-dialog";
+import FacilityNotificationDialog from "@/components/facility-notification-dialog";
+import AdminNotificationDialog from "@/components/admin-notification-dialog";
 
 function Navbar() {
   const [isOpen, setIsOpen] = createSignal(false);
   const navigate = useNavigate();
+
+  const { user } = useUser();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen());
@@ -65,7 +72,10 @@ function Navbar() {
         { name: "Myths & Facts", href: "#" },
         { name: "Donor Privileges", href: "/donor-privileges" },
         { name: "Event Organisation", href: "#" },
-        { name: "Blood Donation Statistics", href: "/blood-donation-statistics" },
+        {
+          name: "Blood Donation Statistics",
+          href: "/blood-donation-statistics",
+        },
       ],
     },
     {
@@ -131,6 +141,24 @@ function Navbar() {
         </div>
 
         <div class="flex items-center">
+          <Show when={user()} keyed>
+            {(user) => (
+              <Switch>
+                <Match when={user.role === "User"}>
+                  <UserNotificationDialog />
+                </Match>
+                <Match when={user.role === "Organiser"}>
+                  <OrganiserNotificationDialog />
+                </Match>
+                <Match when={user.role === "Facility"}>
+                  <FacilityNotificationDialog />
+                </Match>
+                <Match when={user.role === "Admin"}>
+                  <AdminNotificationDialog />
+                </Match>
+              </Switch>
+            )}
+          </Show>
           <ProfileDropDown />
           <ColourModeToggle />
           <Button

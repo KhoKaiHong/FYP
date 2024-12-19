@@ -98,14 +98,14 @@ impl FacilityNotificationModelController {
     }
 
     pub async fn list_by_facility_id(
-        context: &Context,
         model_manager: &ModelManager,
+        facility_id: i64,
     ) -> Result<Vec<FacilityNotification>> {
         let db = model_manager.db();
 
         let notifications =
             sqlx::query_as("SELECT * FROM facility_notifications WHERE facility_id = $1 ORDER BY id")
-                .bind(context.user_id())
+                .bind(facility_id)
                 .fetch_all(db)
                 .await?;
 
@@ -315,7 +315,7 @@ mod tests {
         )
         .await?;
         let notifications: Vec<FacilityNotification> =
-            FacilityNotificationModelController::list_by_facility_id(&context, &model_manager).await?;
+            FacilityNotificationModelController::list_by_facility_id(&model_manager, 1).await?;
 
         // Check
         assert_eq!(notifications.len(), 2);
