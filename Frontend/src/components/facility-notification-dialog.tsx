@@ -14,7 +14,7 @@ import {
 import showErrorToast from "@/components/error-toast";
 import { createMemo, createResource, createSignal, For, Show } from "solid-js";
 import { Bell } from "lucide-solid";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useLocation } from "@solidjs/router";
 import {
   Pagination,
   PaginationEllipsis,
@@ -26,6 +26,7 @@ import {
 
 function FacilityNotificationDialog() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   async function fetchFacilityNotifications() {
     const result = await listFacilityNotifications();
@@ -53,7 +54,11 @@ function FacilityNotificationDialog() {
     result.match(
       () => {
         if (route) {
-          navigate("/" + route);
+          if (location.pathname !== "/" + route) {
+            navigate(route);
+          } else {
+            refetch();
+          }
         } else {
           refetch();
         }

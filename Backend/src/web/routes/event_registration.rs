@@ -2,10 +2,11 @@ use std::str::FromStr;
 
 use crate::context::Context;
 use crate::model::donation_history::{DonationHistoryForCreate, DonationHistoryModelController};
-use crate::model::enums::RegistrationStatus;
+use crate::model::enums::{EligibilityStatus, RegistrationStatus};
 use crate::model::registration::{
     RegistrationForCreate, RegistrationForUpdate, RegistrationModelController,
 };
+use crate::model::user::{UserForUpdate, UserModelController};
 use crate::model::user_notification::{UserNotificationForCreate, UserNotificationModelController};
 use crate::state::AppState;
 use crate::web::{Error, Result};
@@ -162,6 +163,17 @@ async fn update_registration_status_handler(
 
             DonationHistoryModelController::create(&context, model_manager, donation_history)
                 .await?;
+
+            let updated_user = UserForUpdate {
+                password: None,
+                email: None,
+                phone_number: None,
+                eligibility: Some(EligibilityStatus::Ineligible),
+                state_id: None,
+                district_id: None,
+            };
+
+            UserModelController::update(&context, model_manager, registration.user_id, updated_user).await?;
 
             let user_notification = UserNotificationForCreate {
                 description: "You have been marked as present from a blood donation event you are registered in."

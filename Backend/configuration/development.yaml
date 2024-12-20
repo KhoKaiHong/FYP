@@ -11,8 +11,6 @@ database:
   port: 5432
   database_name: "dev_db"
   require_ssl: false
-email_client:
-  resend_api_key: "re_ELknmXim_BxyHR5XiNCAu92pk51Lmwg7A"
 file_serving:
   web_folder: "web-folder/"
 frontend:

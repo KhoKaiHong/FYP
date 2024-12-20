@@ -44,11 +44,6 @@ pub struct ApplicationConfig {
 }
 
 #[derive(Deserialize, Clone, Debug)]
-pub struct EmailConfig {
-    pub resend_api_key: String,
-}
-
-#[derive(Deserialize, Clone, Debug)]
 pub struct FileConfig {
     pub web_folder: String,
 }
@@ -62,7 +57,6 @@ pub struct FrontendConfig {
 pub struct Config {
     pub application: ApplicationConfig,
     pub database: DatabaseConfig,
-    pub email_client: EmailConfig,
     pub file_serving: FileConfig,
     pub frontend: FrontendConfig,
 }
