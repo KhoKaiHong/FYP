@@ -68,14 +68,24 @@ function UserNotificationDialog() {
     );
   }
 
+  const hasUnreadNotifications = createMemo(() => {
+    const notifications = userNotifications();
+    if (!notifications) return false;
+    return notifications.some((notification) => !notification.isRead);
+  });
+
   const [currentPage, setCurrentPage] = createSignal(1);
   const pageSize = 5;
 
-  const sortedNotifications = createMemo(() => {
-    const sorted = [...(userNotifications() || [])].sort((a, b) => {
+  const paginatedNotifications = createMemo(() => {
+    const notifications = userNotifications();
+    if (!notifications || notifications.length === 0) return null;
+
+    const sorted = [...notifications].sort((a, b) => {
       if (a.isRead !== b.isRead) return a.isRead ? 1 : -1;
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
+
     const start = (currentPage() - 1) * pageSize;
     return sorted.slice(start, start + pageSize);
   });
@@ -88,8 +98,11 @@ function UserNotificationDialog() {
     <Dialog>
       <DialogTrigger
         as={(props: DialogTriggerProps) => (
-          <Button variant="ghost" size={"icon"} {...props}>
+          <Button variant="ghost" size={"icon"} class="relative" {...props}>
             <Bell size={18} />
+            <Show when={hasUnreadNotifications()}>
+              <div class="absolute top-[0.3rem] right-[0.3rem] w-2 h-2 bg-brand rounded-full" />
+            </Show>
           </Button>
         )}
       />
@@ -99,77 +112,82 @@ function UserNotificationDialog() {
         </DialogHeader>
         <div class="grid gap-6 py-2">
           <Show
-            when={sortedNotifications().length > 0}
+            when={paginatedNotifications()}
+            keyed
             fallback={
               <div class="text-muted-foreground">
                 You have no notifications.
               </div>
             }
           >
-            <For each={sortedNotifications()}>
-              {(notification) => (
-                <div class="flex justify-between gap-x-4">
-                  <div class="flex flex-col gap-y-2 w-full md:flex-row md:justify-between md:gap-x-4 md:gap-y-0 md:items-center">
-                    <div class="text-sm">{notification.description}</div>
-                    <div class="text-xs text-muted-foreground">
-                      {new Date(notification.createdAt).toLocaleString(
-                        "en-MY",
-                        {
-                          timeZone: "Asia/Kuala_Lumpur",
-                        }
-                      )}
-                    </div>
-                  </div>
+            {(notifications) => (
+              <>
+                <For each={notifications}>
+                  {(notification) => (
+                    <div class="flex justify-between gap-x-4">
+                      <div class="flex flex-col gap-y-2 w-full md:flex-row md:justify-between md:gap-x-4 md:gap-y-0 md:items-center">
+                        <div class="text-sm">{notification.description}</div>
+                        <div class="text-xs text-muted-foreground">
+                          {new Date(notification.createdAt).toLocaleString(
+                            "en-MY",
+                            {
+                              timeZone: "Asia/Kuala_Lumpur",
+                            }
+                          )}
+                        </div>
+                      </div>
 
-                  <Show
-                    when={notification.isRead}
-                    fallback={
-                      <Button
-                        onClick={() =>
-                          readNotification(
-                            notification.id,
-                            notification.redirect
-                          )
+                      <Show
+                        when={notification.isRead}
+                        fallback={
+                          <Button
+                            onClick={() =>
+                              readNotification(
+                                notification.id,
+                                notification.redirect
+                              )
+                            }
+                          >
+                            Read
+                          </Button>
                         }
                       >
-                        Read
-                      </Button>
-                    }
+                        <Button
+                          variant="outline"
+                          disabled={!notification.redirect}
+                          onClick={() => {
+                            if (notification.redirect) {
+                              navigate("/" + notification.redirect);
+                            }
+                          }}
+                        >
+                          Read
+                        </Button>
+                      </Show>
+                    </div>
+                  )}
+                </For>
+                <div class="flex justify-center items-center">
+                  <Pagination
+                    count={totalPages()}
+                    fixedItems
+                    page={currentPage()}
+                    onPageChange={setCurrentPage}
+                    itemComponent={(props) => (
+                      <PaginationItem page={props.page}>
+                        {props.page}
+                      </PaginationItem>
+                    )}
+                    ellipsisComponent={() => <PaginationEllipsis />}
                   >
-                    <Button
-                      variant="outline"
-                      disabled={!notification.redirect}
-                      onClick={() => {
-                        if (notification.redirect) {
-                          navigate("/" + notification.redirect);
-                        }
-                      }}
-                    >
-                      Read
-                    </Button>
-                  </Show>
-                </div>
-              )}
-            </For>
-            <div class="flex justify-center items-center">
-              <Pagination
-                count={totalPages()}
-                fixedItems
-                page={currentPage()}
-                onChange={setCurrentPage}
-                itemComponent={(props) => (
-                  <PaginationItem page={props.page}>
-                    {props.page}
-                  </PaginationItem>
-                )}
-                ellipsisComponent={() => <PaginationEllipsis />}
-              >
-                <PaginationPrevious />
+                    <PaginationPrevious />
 
-                <PaginationItems />
-                <PaginationNext />
-              </Pagination>
-            </div>
+                    <PaginationItems />
+                    <PaginationNext />
+                  </Pagination>
+                </div>
+              </>
+            )}
           </Show>
         </div>
       </DialogContent>
