@@ -73,7 +73,6 @@ impl UserNotificationModelController {
     }
 
     pub async fn create_bulk(
-        context: &Context,
         model_manager: &ModelManager,
         notification_created: UserNotificationForCreateBulk,
     ) -> Result<()> {

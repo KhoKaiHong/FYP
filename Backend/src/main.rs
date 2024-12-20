@@ -1,13 +1,15 @@
+mod application;
 mod auth;
 mod config;
 mod context;
 mod error;
+mod job;
 mod log;
 mod model;
+mod scheduler;
 mod state;
 mod utils;
 mod web;
-mod application;
 
 pub mod _dev_utils;
 
@@ -15,8 +17,8 @@ pub use self::error::{Error, Result};
 pub use config::config;
 
 use application::Application;
+use scheduler::CronJobScheduler;
 use state::AppState;
-use tracing::info;
 use tracing_subscriber::{self, EnvFilter};
 
 #[tokio::main]
@@ -34,13 +36,10 @@ async fn main() -> Result<()> {
     // Initialize AppState.
     let app_state = AppState::new().await?;
 
+    CronJobScheduler::run(app_state.clone()).await?;
+
     let application = Application::build_router(&app_state);
-    let application_task = tokio::spawn(application.run());
-
-    tokio::select! {
-        o = application_task => info!("Application task exited: {:?}", o),
-    };
-
-
+    application.run().await?;
+    
     Ok(())
 }

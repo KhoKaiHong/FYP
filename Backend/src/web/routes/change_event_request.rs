@@ -271,7 +271,6 @@ async fn update_change_event_request_facility_handler(
             };
 
             UserNotificationModelController::create_bulk(
-                &context,
                 model_manager,
                 user_notifications,
             )

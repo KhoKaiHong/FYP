@@ -2,7 +2,9 @@
 INSERT INTO users (ic_number, password, name, email, phone_number, blood_type, eligibility, state_id, district_id) VALUES
 ('900101-01-1234', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'John Doe', 'john.doe@example.com', '+6012-3456789', 'A+', 'Ineligible - Condition', 1, 1),
 ('900102-02-2345', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'Jane Smith', 'jane.smith@example.com', '+6012-3456790', 'B+', 'Eligible', 1, 1),
-('900103-03-3456', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'Ali Bin Ahmad', 'ali.ahmad@example.com', '+6012-3456791', 'O-', 'Eligible', 1, 1);
+('900103-03-3456', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'Ali Bin Ahmad', 'ali.ahmad@example.com', '+6012-3456791', 'O-', 'Eligible', 1, 1),
+('900104-04-4567', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'James', 'james@example.com', '+6012-3456792', 'B+', 'Ineligible', 1, 1),
+('900105-05-5678', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'Tan', 'tan@example.com', '+6012-3456793', 'O-', 'Ineligible', 1, 1);
 
 -- Insert data into event_organisers
 INSERT INTO event_organisers (email, password, name, phone_number) VALUES
@@ -42,6 +44,13 @@ INSERT INTO donation_history (user_id, event_id) VALUES
 (1000, NULL),
 (1001, 2),
 (1002, 3);
+
+INSERT INTO donation_history (user_id, event_id, created_at) VALUES
+(1003, 1, '2024-02-15 09:30:00'),
+(1003, 1, '2024-06-22 14:45:00'),
+(1004, 1, '2024-03-10 11:20:00'),
+(1004, 1, '2024-07-05 16:15:00'),
+(1003, 1, '2024-09-22 10:00:00');
 
 -- Insert new blood donation events requests
 INSERT INTO new_blood_donation_events_requests (
