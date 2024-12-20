@@ -10,8 +10,7 @@ import {
 import { parseErrorResponse } from "@/utils/error";
 import { fetchWithAuth } from "@/utils/fetch-auth";
 
-const BACKEND_PATH =
-  import.meta.env.VITE_BACKEND_PATH || "http://localhost:8000";
+const BACKEND_PATH = import.meta.env.VITE_BACKEND_PATH;
 
 export async function userRegister(
   userRegisterPayload: UserRegisterPayload

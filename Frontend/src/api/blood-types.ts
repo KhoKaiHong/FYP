@@ -3,8 +3,7 @@ import { AppError } from "@/types/error";
 import { BloodTypesResponse } from "@/types/blood-types";
 import { parseErrorResponse } from "@/utils/error";
 
-const BACKEND_PATH =
-  import.meta.env.VITE_BACKEND_PATH || "http://localhost:8000";
+const BACKEND_PATH = import.meta.env.VITE_BACKEND_PATH;
 
 export async function listBloodTypes(): Promise<
   Result<BloodTypesResponse, AppError>

@@ -12,8 +12,7 @@ import {
 } from "@/types/login";
 import { parseErrorResponse } from "@/utils/error";
 
-const BACKEND_PATH =
-  import.meta.env.VITE_BACKEND_PATH || "http://localhost:8000";
+const BACKEND_PATH = import.meta.env.VITE_BACKEND_PATH;
 
 export async function userLogin(
   userLoginPayload: UserLoginPayload

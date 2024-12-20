@@ -3,8 +3,7 @@ import { AppError } from "@/types/error";
 import { LogoutResponse } from "@/types/logout";
 import { parseErrorResponse } from "@/utils/error";
 
-const BACKEND_PATH =
-  import.meta.env.VITE_BACKEND_PATH || "http://localhost:8000";
+const BACKEND_PATH = import.meta.env.VITE_BACKEND_PATH;
 
 export async function logout(): Promise<Result<LogoutResponse, AppError>> {
   // Retrieve tokens from localStorage
@@ -15,7 +14,10 @@ export async function logout(): Promise<Result<LogoutResponse, AppError>> {
     return err({ message: "NO_AUTH" });
   }
 
-  const makeLogoutRequest = async (accessToken: string, refreshToken: string): Promise<Result<LogoutResponse, AppError>> => {
+  const makeLogoutRequest = async (
+    accessToken: string,
+    refreshToken: string
+  ): Promise<Result<LogoutResponse, AppError>> => {
     try {
       const response = await fetch(`${BACKEND_PATH}/api/logout`, {
         method: "POST",
@@ -23,7 +25,7 @@ export async function logout(): Promise<Result<LogoutResponse, AppError>> {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({refreshToken}),
+        body: JSON.stringify({ refreshToken }),
       });
 
       if (response.ok) {
@@ -73,7 +75,10 @@ export async function logout(): Promise<Result<LogoutResponse, AppError>> {
         localStorage.setItem("refreshToken", refreshData.data.refreshToken);
 
         // Retry the logout request with the new access token
-        return await makeLogoutRequest(refreshData.data.accessToken, refreshData.data.refreshToken);
+        return await makeLogoutRequest(
+          refreshData.data.accessToken,
+          refreshData.data.refreshToken
+        );
       }
 
       const errorResponse = await refreshResponse.json();

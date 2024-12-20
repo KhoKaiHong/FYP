@@ -3,10 +3,11 @@ import { AppError } from "@/types/error";
 import { LogoutAllResponse } from "@/types/logoutAll";
 import { parseErrorResponse } from "@/utils/error";
 
-const BACKEND_PATH =
-  import.meta.env.VITE_BACKEND_PATH || "http://localhost:8000";
+const BACKEND_PATH = import.meta.env.VITE_BACKEND_PATH;
 
-export async function logoutAll(): Promise<Result<LogoutAllResponse, AppError>> {
+export async function logoutAll(): Promise<
+  Result<LogoutAllResponse, AppError>
+> {
   // Retrieve tokens from localStorage
   const accessToken = localStorage.getItem("accessToken");
   const refreshToken = localStorage.getItem("refreshToken");

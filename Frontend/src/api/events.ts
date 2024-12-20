@@ -4,8 +4,7 @@ import { EventsResponse } from "@/types/events";
 import { parseErrorResponse } from "@/utils/error";
 import { fetchWithAuth } from "@/utils/fetch-auth";
 
-const BACKEND_PATH =
-  import.meta.env.VITE_BACKEND_PATH || "http://localhost:8000";
+const BACKEND_PATH = import.meta.env.VITE_BACKEND_PATH;
 
 export async function listEvents(): Promise<Result<EventsResponse, AppError>> {
   try {
