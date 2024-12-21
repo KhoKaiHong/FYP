@@ -100,7 +100,7 @@ async fn post_new_event_request_handler(
         facility_id: payload.facility_id,
     };
 
-    FacilityNotificationModelController::create(&context, model_manager, notification).await?;
+    FacilityNotificationModelController::create(model_manager, notification).await?;
 
     let body = Json(json!({
         "data": {

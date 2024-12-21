@@ -175,7 +175,7 @@ async fn refresh_facility_token(
         .map_err(|_| Error::RefreshFailInvalidRefreshToken)?;
 
     let facility_session =
-        FacilitySessionModelController::get(&context, model_manager, refresh_token_jti)
+        FacilitySessionModelController::get(model_manager, refresh_token_jti)
             .await
             .map_err(|err| match err {
                 model::Error::EntityNotFound {
@@ -208,7 +208,6 @@ async fn refresh_facility_token(
         };
 
         FacilitySessionModelController::update(
-            &context,
             &model_manager,
             updated_facility_session,
             refresh_token_jti,

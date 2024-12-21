@@ -50,7 +50,6 @@ async fn read_facility_notification(
     let model_manager = &app_state.model_manager;
 
     FacilityNotificationModelController::read_notification(
-        &context,
         model_manager,
         payload.notification_id,
     )

@@ -131,9 +131,7 @@ async fn facility_login_handler(
         facility_id: facility.id,
     };
 
-    let context = Context::new(facility.id, Role::BloodCollectionFacility, access_token_id);
-
-    FacilitySessionModelController::create(&context, &app_state.model_manager, facility_session)
+    FacilitySessionModelController::create(&app_state.model_manager, facility_session)
         .await?;
 
     let body = Json(json!({

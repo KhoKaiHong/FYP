@@ -81,8 +81,6 @@ async fn facility_register_handler(
 ) -> Result<Json<Value>> {
     debug!("{:<12} - facility_register_api", "HANDLER");
 
-    let context = Context::root_ctx();
-
     let password_hash = encrypt_password(&payload.password).await?;
 
     let registered_facility = FacilityForCreate {
@@ -94,7 +92,7 @@ async fn facility_register_handler(
         state_id: payload.state_id,
     };
 
-    FacilityModelController::create(&context, &app_state.model_manager, registered_facility)
+    FacilityModelController::create(&app_state.model_manager, registered_facility)
         .await?;
 
     let body = Json(json!({

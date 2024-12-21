@@ -5,7 +5,7 @@ use crate::model::facility::{FacilityForUpdate, FacilityModelController};
 use crate::state::AppState;
 use crate::web::{Error, Result};
 use axum::extract::State;
-use axum::routing::{patch, get};
+use axum::routing::{get, patch};
 use axum::{Json, Router};
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -34,8 +34,7 @@ async fn facility_update_handler(
 
     if let (Some(password), Some(current_password)) = (payload.password, payload.current_password) {
         let facility =
-        FacilityModelController::get(&context, &app_state.model_manager, context.user_id())
-                .await?;
+            FacilityModelController::get(&app_state.model_manager, context.user_id()).await?;
 
         validate_password(&current_password, &facility.password)
             .await
@@ -56,13 +55,7 @@ async fn facility_update_handler(
         };
 
         // Update user with new details
-        FacilityModelController::update(
-            &context,
-            model_manager,
-            context.user_id(),
-            updated_details,
-        )
-        .await?;
+        FacilityModelController::update(model_manager, context.user_id(), updated_details).await?;
     } else {
         // If no password update, prepare update details without password
         let updated_details = FacilityForUpdate {
@@ -74,13 +67,7 @@ async fn facility_update_handler(
         };
 
         // Update user with new details
-        FacilityModelController::update(
-            &context,
-            model_manager,
-            context.user_id(),
-            updated_details,
-        )
-        .await?;
+        FacilityModelController::update(model_manager, context.user_id(), updated_details).await?;
     }
 
     let body = Json(json!({
@@ -103,10 +90,7 @@ struct FacilityUpdatePayload {
     phone_number: Option<String>,
 }
 
-
-async fn facility_list_handler(
-    State(app_state): State<AppState>,
-) -> Result<Json<Value>> {
+async fn facility_list_handler(State(app_state): State<AppState>) -> Result<Json<Value>> {
     debug!("{:<12} - list_facilities_api", "HANDLER");
 
     let model_manager = &app_state.model_manager;

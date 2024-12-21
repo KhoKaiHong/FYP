@@ -1,27 +1,14 @@
-use crate::context::Context;
+// Modules
 use crate::model::EntityErrorField::{I64Error, StringError};
 use crate::model::{Error, ModelManager, Result};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use sqlx::postgres::PgDatabaseError;
 use sqlx::FromRow;
 
-// region:    --- Facility Types
-
-// Not needed if state and district name is required
-#[derive(Debug, FromRow)]
-pub struct Facility {
-    pub id: i64,
-    pub email: String,
-    pub password: String,
-    pub name: String,
-    pub address: String,
-    pub phone_number: String,
-    pub state_id: i32,
-}
-
+// Facility
 #[derive(Debug, FromRow, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct FacilityWithLocation {
+pub struct Facility {
     pub id: i64,
     pub email: String,
     #[serde(skip_serializing)]
@@ -33,7 +20,7 @@ pub struct FacilityWithLocation {
     pub state_name: String,
 }
 
-#[derive(Deserialize)]
+// Fields used to create a Facility.
 pub struct FacilityForCreate {
     pub email: String,
     pub password: String,
@@ -43,7 +30,7 @@ pub struct FacilityForCreate {
     pub state_id: i32,
 }
 
-#[derive(Deserialize)]
+// Fields used to update a Facility
 pub struct FacilityForUpdate {
     pub email: Option<String>,
     pub password: Option<String>,
@@ -52,14 +39,12 @@ pub struct FacilityForUpdate {
     pub phone_number: Option<String>,
 }
 
-// endregion:    --- Facility Types
-
-// region:    --- Facility Model Controller
+// Facility Model Controller
 pub struct FacilityModelController;
 
 impl FacilityModelController {
+    // Creates a facility
     pub async fn create(
-        context: &Context,
         model_manager: &ModelManager,
         facility_created: FacilityForCreate,
     ) -> Result<i64> {
@@ -81,11 +66,8 @@ impl FacilityModelController {
         Ok(id)
     }
 
-    pub async fn get(
-        context: &Context,
-        model_manager: &ModelManager,
-        id: i64,
-    ) -> Result<FacilityWithLocation> {
+    // Gets a facility by its id
+    pub async fn get(model_manager: &ModelManager, id: i64) -> Result<Facility> {
         let db = model_manager.db();
 
         let facility = sqlx::query_as(
@@ -102,10 +84,8 @@ impl FacilityModelController {
         Ok(facility)
     }
 
-    pub async fn get_by_email(
-        model_manager: &ModelManager,
-        email: &str,
-    ) -> Result<FacilityWithLocation> {
+    // Gets a facility by its email
+    pub async fn get_by_email(model_manager: &ModelManager, email: &str) -> Result<Facility> {
         let db = model_manager.db();
 
         let facility = sqlx::query_as(
@@ -122,9 +102,8 @@ impl FacilityModelController {
         Ok(facility)
     }
 
-    pub async fn list(
-        model_manager: &ModelManager,
-    ) -> Result<Vec<FacilityWithLocation>> {
+    // Lists all facilities
+    pub async fn list(model_manager: &ModelManager) -> Result<Vec<Facility>> {
         let db = model_manager.db();
 
         let facilities = sqlx::query_as("SELECT blood_collection_facilities.*, states.name AS state_name FROM blood_collection_facilities JOIN states ON blood_collection_facilities.state_id = states.id ORDER BY id")
@@ -134,8 +113,8 @@ impl FacilityModelController {
         Ok(facilities)
     }
 
+    // Updates a facility
     pub async fn update(
-        context: &Context,
         model_manager: &ModelManager,
         id: i64,
         facility_updated: FacilityForUpdate,
@@ -216,9 +195,8 @@ impl FacilityModelController {
         Ok(())
     }
 }
-// endregion: --- Facility Model Controller
 
-// check for duplicate constraints
+// Function that checks for duplicate constraint errors
 fn check_duplicate(err: sqlx::Error) -> Error {
     match err {
         sqlx::Error::Database(ref e) => {
@@ -248,8 +226,7 @@ fn check_duplicate(err: sqlx::Error) -> Error {
     }
 }
 
-// Backend/src/model/facility.rs
-// region:    --- Tests
+// Unit tests
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -260,9 +237,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_create() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let facility_created = FacilityForCreate {
             email: "test_create_ok@example.com".to_string(),
             password: "welcome".to_string(),
@@ -272,12 +248,12 @@ mod tests {
             state_id: 1,
         };
 
-        // -- Exec
+        // Execute
         let id =
-            FacilityModelController::create(&context, &model_manager, facility_created).await?;
+            FacilityModelController::create(&model_manager, facility_created).await?;
 
-        // -- Check
-        let facility = FacilityModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let facility = FacilityModelController::get(&model_manager, id).await?;
         assert_eq!(facility.email, "test_create_ok@example.com");
         assert_eq!(facility.password, "welcome");
         assert_eq!(facility.name, "Test Facility");
@@ -299,15 +275,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_get_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let id = 100;
 
-        // -- Exec
-        let res = FacilityModelController::get(&context, &model_manager, id).await;
+        // Execute
+        let res = FacilityModelController::get(&model_manager, id).await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,
@@ -325,9 +300,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_list() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
 
         let facility_created1 = FacilityForCreate {
             email: "test_email1@example.com".to_string(),
@@ -347,9 +321,9 @@ mod tests {
         };
 
         let id1 =
-            FacilityModelController::create(&context, &model_manager, facility_created1).await?;
+            FacilityModelController::create(&model_manager, facility_created1).await?;
         let id2 =
-            FacilityModelController::create(&context, &model_manager, facility_created2).await?;
+            FacilityModelController::create(&model_manager, facility_created2).await?;
         let facilities = FacilityModelController::list(&model_manager).await?;
 
         // Check
@@ -387,9 +361,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_update_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let facility_created = FacilityForCreate {
             email: "test_list_ok@example.com".to_string(),
             password: "welcome".to_string(),
@@ -400,7 +373,7 @@ mod tests {
         };
 
         let id =
-            FacilityModelController::create(&context, &model_manager, facility_created).await?;
+            FacilityModelController::create(&model_manager, facility_created).await?;
 
         let facility_updated = FacilityForUpdate {
             email: Some("new_email@gmail.com".to_string()),
@@ -410,10 +383,10 @@ mod tests {
             phone_number: Some("987654321".to_string()),
         };
 
-        FacilityModelController::update(&context, &model_manager, id, facility_updated).await?;
+        FacilityModelController::update(&model_manager, id, facility_updated).await?;
 
-        // -- Check
-        let facility = FacilityModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let facility = FacilityModelController::get(&model_manager, id).await?;
         assert_eq!(facility.email, "new_email@gmail.com");
         assert_eq!(facility.password, "welcome");
         assert_eq!(facility.name, "New name");
@@ -434,9 +407,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn get_by_email_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let facility_created = FacilityForCreate {
             email: "test_email@example.com".to_string(),
             password: "welcome".to_string(),
@@ -447,13 +419,13 @@ mod tests {
         };
 
         let id =
-            FacilityModelController::create(&context, &model_manager, facility_created).await?;
+            FacilityModelController::create(&model_manager, facility_created).await?;
 
-        // -- Exec
+        // Execute
         let facility =
             FacilityModelController::get_by_email(&model_manager, "test_email@example.com").await?;
 
-        // -- Check
+        // Check
         assert_eq!(facility.password, "welcome");
         assert_eq!(facility.name, "Test Facility 01");
         assert_eq!(facility.address, "123 Fake St");
@@ -474,14 +446,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn get_by_email_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
 
-        // -- Exec
+        // Execute
         let res =
             FacilityModelController::get_by_email(&model_manager, "test_list_ok@example.com").await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,

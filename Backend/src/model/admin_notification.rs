@@ -84,20 +84,7 @@ impl AdminNotificationModelController {
         Ok(notification)
     }
 
-    // Lists all admin notifications.
-    pub async fn list(
-        model_manager: &ModelManager,
-    ) -> Result<Vec<AdminNotification>> {
-        let db = model_manager.db();
-
-        let notifications = sqlx::query_as("SELECT * FROM admin_notifications ORDER BY id")
-            .fetch_all(db)
-            .await?;
-
-        Ok(notifications)
-    }
-
-    // Lists all admin notifications for a specific admin id.
+    // Lists all admin notifications for a specific admin.
     pub async fn list_by_admin_id(
         model_manager: &ModelManager,
         admin_id: i64,
@@ -202,67 +189,6 @@ mod tests {
             ),
             "EntityNotFound not matching"
         );
-
-        Ok(())
-    }
-
-    #[tokio::test]
-    #[serial]
-    async fn test_list() -> Result<()> {
-        // Setup
-        let model_manager = _dev_utils::init_test().await;
-
-        let notification_created1 = AdminNotificationForCreate {
-            description: "test_description1".to_string(),
-            redirect: None,
-            admin_id: 1,
-        };
-        let notification_created2 = AdminNotificationForCreate {
-            description: "test_description2".to_string(),
-            redirect: Some(String::from("event")),
-            admin_id: 2,
-        };
-
-        // Execute
-        let id1 = AdminNotificationModelController::create(
-            &model_manager,
-            notification_created1,
-        )
-        .await?;
-        let id2 = AdminNotificationModelController::create(
-            &model_manager,
-            notification_created2,
-        )
-        .await?;
-        let notifications: Vec<AdminNotification> =
-            AdminNotificationModelController::list(&model_manager).await?;
-
-        // Check
-        assert_eq!(notifications.len(), 2);
-        assert_eq!(notifications[0].id, id1);
-        assert_eq!(notifications[1].id, id2);
-        assert_eq!(notifications[0].description, "test_description1");
-        assert_eq!(notifications[1].description, "test_description2");
-        assert_eq!(notifications[0].redirect, None);
-        assert_eq!(notifications[1].redirect, Some(String::from("event")));
-        assert_eq!(notifications[0].admin_id, 1);
-        assert_eq!(notifications[1].admin_id, 2);
-        assert_eq!(notifications[0].is_read, false);
-        assert_eq!(notifications[1].is_read, false);
-
-        for notification in notifications.iter() {
-            println!("notification: {:?}", notification);
-        }
-
-        // Clean
-        sqlx::query("DELETE FROM admin_notifications WHERE id = $1")
-            .bind(id1)
-            .execute(model_manager.db())
-            .await?;
-        sqlx::query("DELETE FROM admin_notifications WHERE id = $1")
-            .bind(id2)
-            .execute(model_manager.db())
-            .await?;
 
         Ok(())
     }

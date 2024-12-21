@@ -69,7 +69,7 @@ async fn get_facility_credentials(
     context: &Context,
     model_manager: &ModelManager,
 ) -> Result<Json<Value>> {
-    let facility = FacilityModelController::get(context, model_manager, context.user_id())
+    let facility = FacilityModelController::get(model_manager, context.user_id())
         .await
         .map_err(|err| match err {
             model::Error::EntityNotFound {

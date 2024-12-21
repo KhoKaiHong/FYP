@@ -92,7 +92,7 @@ async fn logout_all_facility(
     refresh_token_jti: Uuid,
     model_manager: &ModelManager,
 ) -> Result<()> {
-    FacilitySessionModelController::check(&context, model_manager, refresh_token_jti)
+    FacilitySessionModelController::check(model_manager, refresh_token_jti, context.token_id(), context.user_id())
         .await
         .map_err(|err| match err {
             model::Error::EntityNotFound {
@@ -103,7 +103,6 @@ async fn logout_all_facility(
         })?;
 
     FacilitySessionModelController::delete_by_facility_id(
-        &context,
         model_manager,
         context.user_id(),
     )
