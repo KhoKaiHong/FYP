@@ -52,7 +52,6 @@ async fn read_organiser_notification(
     let model_manager = &app_state.model_manager;
 
     OrganiserNotificationModelController::read_notification(
-        &context,
         model_manager,
         payload.notification_id,
     )

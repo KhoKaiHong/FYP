@@ -246,7 +246,6 @@ async fn update_change_event_request_facility_handler(
             };
 
             OrganiserNotificationModelController::create(
-                &context,
                 model_manager,
                 organiser_notification,
             )
@@ -283,7 +282,6 @@ async fn update_change_event_request_facility_handler(
             };
 
             OrganiserNotificationModelController::create(
-                &context,
                 model_manager,
                 organiser_notification,
             )

@@ -92,7 +92,7 @@ async fn post_new_event_request_handler(
         district_id: payload.district_id,
     };
 
-    NewEventRequestModelController::create(&context, model_manager, new_event_request).await?;
+    NewEventRequestModelController::create(model_manager, new_event_request).await?;
 
     let notification = FacilityNotificationForCreate {
         description: "You have a pending new event proposal.".to_string(),
@@ -183,11 +183,11 @@ async fn update_new_event_request_facility_handler(
         rejection_reason: payload.rejection_reason,
     };
 
-    NewEventRequestModelController::update(&context, model_manager, payload.id, updated_request)
+    NewEventRequestModelController::update(model_manager, payload.id, updated_request)
         .await?;
 
     let new_event_details =
-        NewEventRequestModelController::get(&context, model_manager, payload.id).await?;
+        NewEventRequestModelController::get(model_manager, payload.id).await?;
 
     match status {
         EventRequestStatus::Approved => {
@@ -214,7 +214,6 @@ async fn update_new_event_request_facility_handler(
             };
 
             OrganiserNotificationModelController::create(
-                &context,
                 model_manager,
                 organiser_notification,
             )
@@ -250,7 +249,6 @@ async fn update_new_event_request_facility_handler(
             };
 
             OrganiserNotificationModelController::create(
-                &context,
                 model_manager,
                 organiser_notification,
             )
