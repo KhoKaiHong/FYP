@@ -24,6 +24,7 @@ pub struct FacilitySessionForCreate {
 pub struct FacilitySessionModelController;
 
 impl FacilitySessionModelController {
+    // Create a new facility session
     pub async fn create(
         model_manager: &ModelManager,
         facility_session_created: FacilitySessionForCreate,
@@ -42,6 +43,7 @@ impl FacilitySessionModelController {
         Ok(())
     }
 
+    // Get a facility session by its id
     pub async fn get(
         model_manager: &ModelManager,
         refresh_token_id: Uuid,
@@ -61,6 +63,7 @@ impl FacilitySessionModelController {
         Ok(facility_session)
     }
 
+    // Update a facility session
     pub async fn update(
         model_manager: &ModelManager,
         facility_session_updated: FacilitySessionForCreate,
@@ -87,6 +90,7 @@ impl FacilitySessionModelController {
         Ok(())
     }
 
+    // Delete a facility session
     pub async fn delete_by_session(
         model_manager: &ModelManager,
         refresh_token_id: Uuid,
@@ -112,6 +116,7 @@ impl FacilitySessionModelController {
         Ok(())
     }
 
+    // Delete all facility sessions of a facility id
     pub async fn delete_by_facility_id(
         model_manager: &ModelManager,
         facility_id: i64,
@@ -134,6 +139,7 @@ impl FacilitySessionModelController {
         Ok(())
     }
 
+    // Check if a facility session exists
     pub async fn check(
         model_manager: &ModelManager,
         refresh_token_id: Uuid,
@@ -156,9 +162,8 @@ impl FacilitySessionModelController {
         Ok(())
     }
 }
-// endregion:    --- Facility Session Model Controller
 
-// region:    --- Tests
+// Unit tests
 #[cfg(test)]
 mod tests {
     use super::*;
