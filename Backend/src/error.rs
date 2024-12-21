@@ -15,6 +15,8 @@ pub enum Error {
 
 	// -- Application Error
 	ApplicationError,
+
+	LoggingError,
 }
 
 // region:    --- Froms

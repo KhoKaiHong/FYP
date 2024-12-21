@@ -26,7 +26,7 @@ async fn list_history_by_user_id_handler(
     let model_manager = &app_state.model_manager;
 
     let history =
-        DonationHistoryModelController::list_by_user_id(&context, model_manager, context.user_id())
+        DonationHistoryModelController::list_by_user_id(model_manager, context.user_id())
             .await?;
 
     let body = Json(json!({

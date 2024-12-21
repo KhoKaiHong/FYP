@@ -1,33 +1,16 @@
-use crate::context::Context;
+// Modules
 use crate::model::EntityErrorField::I64Error;
 use crate::model::{Error, ModelManager, Result};
+
 use chrono::prelude::*;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 
-use super::organiser;
-
-// region:    --- Event Types
-#[derive(Debug, FromRow)]
-pub struct Event {
-    pub id: i64,
-    pub location: String,
-    pub address: String,
-    pub start_time: DateTime<Utc>,
-    pub end_time: DateTime<Utc>,
-    pub max_attendees: i32,
-    pub latitude: f64,
-    pub longitude: f64,
-    pub facility_id: i64,
-    pub state_id: i32,
-    pub district_id: i32,
-    pub organiser_id: i64,
-}
-
+// Event
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct EventWithInformation {
+pub struct Event {
     pub id: i64,
     pub location: String,
     pub address: String,
@@ -52,9 +35,10 @@ pub struct EventWithInformation {
     pub district_name: String,
 }
 
-impl<'r> FromRow<'r, PgRow> for EventWithInformation {
+// Defines how to convert a row from the database into an Event struct.
+impl<'r> FromRow<'r, PgRow> for Event {
     fn from_row(row: &'r PgRow) -> core::result::Result<Self, sqlx::Error> {
-        Ok(EventWithInformation {
+        Ok(Event {
             id: row.try_get("id")?,
             location: row.try_get("location")?,
             address: row.try_get("address")?,
@@ -81,7 +65,7 @@ impl<'r> FromRow<'r, PgRow> for EventWithInformation {
     }
 }
 
-#[derive(Deserialize)]
+// Fields used to create an Event.
 pub struct EventForCreate {
     pub location: String,
     pub address: String,
@@ -96,7 +80,7 @@ pub struct EventForCreate {
     pub district_id: i32,
 }
 
-#[derive(Deserialize)]
+// Fields used to update an Event
 pub struct EventForUpdate {
     pub location: Option<String>,
     pub address: Option<String>,
@@ -107,14 +91,12 @@ pub struct EventForUpdate {
     pub longitude: Option<f64>,
 }
 
-// endregion:    --- Event Types
-
-// region:    --- Event Model Controller
+// Event Model Controller
 pub struct EventModelController;
 
 impl EventModelController {
+    // Creates an Event
     pub async fn create(
-        context: &Context,
         model_manager: &ModelManager,
         event_created: EventForCreate,
     ) -> Result<i64> {
@@ -140,11 +122,11 @@ impl EventModelController {
         Ok(id)
     }
 
+    // Gets an Event by its id
     pub async fn get(
-        context: &Context,
         model_manager: &ModelManager,
         id: i64,
-    ) -> Result<EventWithInformation> {
+    ) -> Result<Event> {
         let db = model_manager.db();
 
         let event = sqlx::query_as(
@@ -192,10 +174,10 @@ impl EventModelController {
         Ok(event)
     }
 
+    // Lists all Events
     pub async fn list(
-        context: &Context,
         model_manager: &ModelManager,
-    ) -> Result<Vec<EventWithInformation>> {
+    ) -> Result<Vec<Event>> {
         let db = model_manager.db();
 
         let events = sqlx::query_as(
@@ -238,10 +220,10 @@ impl EventModelController {
         Ok(events)
     }
 
+    // Lists all future Events
     pub async fn list_future_events(
-        context: &Context,
         model_manager: &ModelManager,
-    ) -> Result<Vec<EventWithInformation>> {
+    ) -> Result<Vec<Event>> {
         let db = model_manager.db();
 
         let events = sqlx::query_as("
@@ -286,10 +268,11 @@ impl EventModelController {
         Ok(events)
     }
 
+    // Lists all Events for an Organiser
     pub async fn list_by_organiser(
         model_manager: &ModelManager,
         organiser_id: i64,
-    ) -> Result<Vec<EventWithInformation>> {
+    ) -> Result<Vec<Event>> {
         let db = model_manager.db();
 
         let events = sqlx::query_as(
@@ -335,10 +318,11 @@ impl EventModelController {
         Ok(events)
     }
 
+    // Lists all Events for a Facility
     pub async fn list_by_facility(
         model_manager: &ModelManager,
         facility_id: i64,
-    ) -> Result<Vec<EventWithInformation>> {
+    ) -> Result<Vec<Event>> {
         let db = model_manager.db();
 
         let events = sqlx::query_as(
@@ -384,8 +368,8 @@ impl EventModelController {
         Ok(events)
     }
 
+    // Updates an Event
     pub async fn update(
-        context: &Context,
         model_manager: &ModelManager,
         id: i64,
         event_updated: EventForUpdate,
@@ -472,30 +456,9 @@ impl EventModelController {
 
         Ok(())
     }
-
-    pub async fn delete(context: &Context, model_manager: &ModelManager, id: i64) -> Result<()> {
-        let db = model_manager.db();
-
-        let count = sqlx::query("DELETE from blood_donation_events where id = $1")
-            .bind(id)
-            .execute(db)
-            .await?
-            .rows_affected();
-
-        if count == 0 {
-            return Err(Error::EntityNotFound {
-                entity: "event",
-                field: I64Error(id),
-            });
-        }
-
-        Ok(())
-    }
 }
 
-// region:    --- Event Model Controller
-
-// region:    --- Tests
+// Unit tests
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -507,9 +470,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_create_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let test_time = Utc::now()
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
@@ -527,11 +489,11 @@ mod tests {
             district_id: 1,
         };
 
-        // -- Exec
-        let id = EventModelController::create(&context, &model_manager, event_created).await?;
+        // Execute
+        let id = EventModelController::create(&model_manager, event_created).await?;
 
-        // -- Check
-        let event = EventModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let event = EventModelController::get(&model_manager, id).await?;
 
         println!("event for test_create: {:?}", event);
 
@@ -545,7 +507,10 @@ mod tests {
         assert_eq!(event.district_id, 1);
 
         // Clean
-        EventModelController::delete(&context, &model_manager, id).await?;
+        sqlx::query("DELETE from blood_donation_events where id = $1")
+            .bind(id)
+            .execute(model_manager.db())
+            .await?;
 
         Ok(())
     }
@@ -553,15 +518,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_get_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let id = 100;
 
-        // -- Exec
-        let res = EventModelController::get(&context, &model_manager, id).await;
+        // Execute
+        let res = EventModelController::get(&model_manager, id).await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,
@@ -579,9 +543,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_list_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let test_time = Utc::now()
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
@@ -612,10 +575,12 @@ mod tests {
             district_id: 2,
         };
 
-        // -- Exec
-        let id1 = EventModelController::create(&context, &model_manager, event_created1).await?;
-        let id2 = EventModelController::create(&context, &model_manager, event_created2).await?;
-        let events = EventModelController::list(&context, &model_manager).await?;
+        // Execute
+        let id1 = EventModelController::create(&model_manager, event_created1).await?;
+        let id2 = EventModelController::create(&model_manager, event_created2).await?;
+
+        // Check
+        let events = EventModelController::list(&model_manager).await?;
 
         assert_eq!(events.len(), 5, "number of seeded events.");
         assert_eq!(events[3].address, "test_list_ok-event 01");
@@ -625,8 +590,15 @@ mod tests {
         println!("event2 for test_update: {:?}", events[4]);
 
         // Clean
-        EventModelController::delete(&context, &model_manager, id1).await?;
-        EventModelController::delete(&context, &model_manager, id2).await?;
+        sqlx::query("DELETE from blood_donation_events where id = $1")
+            .bind(id1)
+            .execute(model_manager.db())
+            .await?;
+
+        sqlx::query("DELETE from blood_donation_events where id = $1")
+            .bind(id2)
+            .execute(model_manager.db())
+            .await?;
 
         Ok(())
     }
@@ -634,9 +606,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_update_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let non_updated_time = Utc::now()
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
@@ -654,8 +625,8 @@ mod tests {
             district_id: 1,
         };
 
-        // -- Exec
-        let id = EventModelController::create(&context, &model_manager, event_created).await?;
+        // Execute
+        let id = EventModelController::create(&model_manager, event_created).await?;
 
         let updated_time = crate::utils::now_add_sec(300)
             .duration_trunc(TimeDelta::microseconds(1))
@@ -671,10 +642,10 @@ mod tests {
             longitude: Some(90.70668106095312),
         };
 
-        EventModelController::update(&context, &model_manager, id, event_updated).await?;
+        EventModelController::update(&model_manager, id, event_updated).await?;
 
-        // -- Check
-        let event = EventModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let event = EventModelController::get(&model_manager, id).await?;
         println!("event for test_update: {:?}", event);
         assert_eq!(event.address, "new_address@example.com");
         assert_eq!(event.start_time, non_updated_time);
@@ -684,35 +655,11 @@ mod tests {
         assert_eq!(event.longitude, 90.70668106095312);
 
         // Clean
-        EventModelController::delete(&context, &model_manager, id).await?;
-
-        Ok(())
-    }
-
-    #[tokio::test]
-    #[serial]
-    async fn test_delete_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
-        let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
-        let id = 100;
-
-        // -- Exec
-        let res = EventModelController::delete(&context, &model_manager, id).await;
-
-        // -- Check
-        assert!(
-            matches!(
-                res,
-                Err(Error::EntityNotFound {
-                    entity: "event",
-                    field: I64Error(100),
-                })
-            ),
-            "EntityNotFound not matching"
-        );
+        sqlx::query("DELETE from blood_donation_events where id = $1")
+            .bind(id)
+            .execute(model_manager.db())
+            .await?;
 
         Ok(())
     }
 }
-// endregion: --- Tests

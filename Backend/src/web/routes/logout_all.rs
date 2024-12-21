@@ -156,17 +156,22 @@ async fn logout_all_admin(
     refresh_token_jti: Uuid,
     model_manager: &ModelManager,
 ) -> Result<()> {
-    AdminSessionModelController::check(&context, model_manager, refresh_token_jti)
-        .await
-        .map_err(|err| match err {
-            model::Error::EntityNotFound {
-                entity: "admin_session",
-                field: UuidError(refresh_token_jti),
-            } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
-            _ => Error::ModelError(err),
-        })?;
+    AdminSessionModelController::check(
+        model_manager,
+        refresh_token_jti,
+        context.token_id(),
+        context.user_id(),
+    )
+    .await
+    .map_err(|err| match err {
+        model::Error::EntityNotFound {
+            entity: "admin_session",
+            field: UuidError(refresh_token_jti),
+        } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
+        _ => Error::ModelError(err),
+    })?;
 
-    AdminSessionModelController::delete_by_admin_id(&context, model_manager, context.user_id())
+    AdminSessionModelController::delete_by_admin_id(model_manager, context.user_id())
         .await
         .map_err(|err| match err {
             model::Error::EntityNotFound {

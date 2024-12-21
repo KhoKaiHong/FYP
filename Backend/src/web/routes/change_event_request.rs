@@ -86,7 +86,7 @@ async fn post_change_event_request_handler(
         .duration_trunc(TimeDelta::microseconds(1))
         .map_err(|_| Error::InvalidData("end time".to_string()))?;
 
-    let event = EventModelController::get(&context, model_manager, payload.event_id)
+    let event = EventModelController::get(model_manager, payload.event_id)
         .await
         .map_err(|e| match e {
             model::Error::EntityNotFound {
@@ -112,7 +112,7 @@ async fn post_change_event_request_handler(
         district_id: event.district_id,
     };
 
-    ChangeEventRequestModelController::create(&context, model_manager, change_event_request)
+    ChangeEventRequestModelController::create(model_manager, change_event_request)
         .await?;
 
     let notification = FacilityNotificationForCreate {
@@ -214,11 +214,11 @@ async fn update_change_event_request_facility_handler(
         rejection_reason: payload.rejection_reason,
     };
 
-    ChangeEventRequestModelController::update(&context, model_manager, payload.id, updated_request)
+    ChangeEventRequestModelController::update(model_manager, payload.id, updated_request)
         .await?;
 
     let updated_event_details =
-        ChangeEventRequestModelController::get(&context, model_manager, payload.id).await?;
+        ChangeEventRequestModelController::get(model_manager, payload.id).await?;
 
     match status {
         EventRequestStatus::Approved => {
@@ -233,7 +233,6 @@ async fn update_change_event_request_facility_handler(
             };
 
             EventModelController::update(
-                &context,
                 model_manager,
                 updated_event_details.event_id,
                 event_updated,

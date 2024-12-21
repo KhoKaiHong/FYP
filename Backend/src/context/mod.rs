@@ -1,10 +1,8 @@
-mod error;
-
+// Modules
+use crate::auth::Role;
 use uuid::Uuid;
 
-pub use self::error::{Error, Result};
-use crate::auth::Role;
-
+// Context for the application.
 #[derive(Clone, Debug)]
 pub struct Context {
     user_id: i64,
@@ -12,8 +10,8 @@ pub struct Context {
     token_id: Uuid,
 }
 
-// Constructor.
 impl Context {
+    // Generate a context for root user
     pub fn root_ctx() -> Self {
         Context {
             user_id: 0,
@@ -22,6 +20,7 @@ impl Context {
         }
     }
 
+    // Create a context for a user
     pub fn new(user_id: i64, role: Role, token_id: Uuid) -> Self {
         Context {
             user_id,
@@ -29,18 +28,18 @@ impl Context {
             token_id,
         }
     }
-}
 
-// Property Accessors.
-impl Context {
+    // Get the user id
     pub fn user_id(&self) -> i64 {
         self.user_id
     }
 
+    // Get the role
     pub fn role(&self) -> &Role {
         &self.role
     }
 
+    // Get the token id
     pub fn token_id(&self) -> Uuid {
         self.token_id
     }

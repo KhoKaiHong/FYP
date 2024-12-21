@@ -38,7 +38,7 @@ async fn list_admin_notifications(
 }
 
 async fn read_admin_notification(
-    context: Context,
+    _context: Context,
     State(app_state): State<AppState>,
     Json(payload): Json<ReadAdminNotificationPayload>,
 ) -> Result<Json<Value>> {
@@ -47,7 +47,6 @@ async fn read_admin_notification(
     let model_manager = &app_state.model_manager;
 
     AdminNotificationModelController::read_notification(
-        &context,
         model_manager,
         payload.notification_id,
     )

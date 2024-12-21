@@ -33,9 +33,8 @@ async fn list_events_handler(
     debug!("{:<12} - list_events_api", "HANDLER");
 
     let model_manager = &app_state.model_manager;
-    let context =  Context::root_ctx();
 
-    let events = EventModelController::list(&context, model_manager).await?;
+    let events = EventModelController::list(model_manager).await?;
 
     let body = Json(json!({
         "data": {
@@ -52,9 +51,8 @@ async fn list_future_events_handler(
     debug!("{:<12} - list_future_events_api", "HANDLER");
 
     let model_manager = &app_state.model_manager;
-    let context =  Context::root_ctx();
 
-    let events = EventModelController::list_future_events(&context, model_manager).await?;
+    let events = EventModelController::list_future_events(model_manager).await?;
 
     let body = Json(json!({
         "data": {

@@ -205,7 +205,7 @@ async fn update_new_event_request_facility_handler(
                 district_id: new_event_details.district_id,
             };
 
-            EventModelController::create(&context, model_manager, event_created).await?;
+            EventModelController::create(model_manager, event_created).await?;
 
             let organiser_notification = OrganiserNotificationForCreate {
                 description: "Your new event proposal has been accepted.".to_string(),

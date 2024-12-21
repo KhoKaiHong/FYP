@@ -1,14 +1,15 @@
-use crate::context::Context;
+// Modules
 use crate::model::EntityErrorField::I64Error;
 use crate::model::{Error, ModelManager, Result};
+
+use serde_with::skip_serializing_none;
 use chrono::prelude::*;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 
-// region:    --- Admin Notification Types
-
-#[serde_with::skip_serializing_none]
+// Admin Notification
+#[skip_serializing_none]
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AdminNotification {
@@ -20,6 +21,7 @@ pub struct AdminNotification {
     pub admin_id: i64,
 }
 
+// Defines how to convert a row from the database into an Admin Notification struct.
 impl<'r> FromRow<'r, PgRow> for AdminNotification {
     fn from_row(row: &'r PgRow) -> core::result::Result<Self, sqlx::Error> {
         Ok(AdminNotification {
@@ -33,21 +35,19 @@ impl<'r> FromRow<'r, PgRow> for AdminNotification {
     }
 }
 
-#[derive(Deserialize)]
+// Fields used to create an Admin Notification.
 pub struct AdminNotificationForCreate {
     pub description: String,
     pub redirect: Option<String>,
     pub admin_id: i64,
 }
 
-// endregion:    --- Admin Notification Types
-
-// region:    --- Admin Notification Model Controller
+// Admin Notification Model Controller
 pub struct AdminNotificationModelController;
 
 impl AdminNotificationModelController {
+    // Creates an admin notification.
     pub async fn create(
-        context: &Context,
         model_manager: &ModelManager,
         notification_created: AdminNotificationForCreate,
     ) -> Result<i64> {
@@ -65,8 +65,8 @@ impl AdminNotificationModelController {
         Ok(id)
     }
 
+    // Gets an admin notification by its id.
     pub async fn get(
-        context: &Context,
         model_manager: &ModelManager,
         id: i64,
     ) -> Result<AdminNotification> {
@@ -84,8 +84,8 @@ impl AdminNotificationModelController {
         Ok(notification)
     }
 
+    // Lists all admin notifications.
     pub async fn list(
-        context: &Context,
         model_manager: &ModelManager,
     ) -> Result<Vec<AdminNotification>> {
         let db = model_manager.db();
@@ -97,6 +97,7 @@ impl AdminNotificationModelController {
         Ok(notifications)
     }
 
+    // Lists all admin notifications for a specific admin id.
     pub async fn list_by_admin_id(
         model_manager: &ModelManager,
         admin_id: i64,
@@ -112,8 +113,8 @@ impl AdminNotificationModelController {
         Ok(notifications)
     }
 
+    // Marks an admin notification as read.
     pub async fn read_notification(
-        context: &Context,
         model_manager: &ModelManager,
         id: i64,
     ) -> Result<()> {
@@ -135,38 +136,34 @@ impl AdminNotificationModelController {
         Ok(())
     }
 }
-// endregion: --- Admin Notification Model Controller
 
-// Backend/src/model/Admin.rs
-// region:    --- Tests
+// Unit tests
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{_dev_utils, auth::Role};
+    use crate::_dev_utils;
     use anyhow::Result;
     use serial_test::serial;
-    use uuid::Uuid;
 
     #[tokio::test]
     #[serial]
     async fn test_create() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let notification_created = AdminNotificationForCreate {
             description: "test_description".to_string(),
             redirect: None,
             admin_id: 1,
         };
 
-        // -- Exec
+        // Execute
         let id =
-            AdminNotificationModelController::create(&context, &model_manager, notification_created)
+            AdminNotificationModelController::create(&model_manager, notification_created)
                 .await?;
 
-        // -- Check
+        // Check
         let notification =
-            AdminNotificationModelController::get(&context, &model_manager, id).await?;
+            AdminNotificationModelController::get(&model_manager, id).await?;
         assert_eq!(notification.id, id);
         assert_eq!(notification.redirect, None);
         assert_eq!(notification.description, "test_description");
@@ -187,15 +184,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_get_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let id = 100;
 
-        // -- Exec
-        let res = AdminNotificationModelController::get(&context, &model_manager, id).await;
+        // Execute
+        let res = AdminNotificationModelController::get(&model_manager, id).await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,
@@ -213,9 +209,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_list() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
 
         let notification_created1 = AdminNotificationForCreate {
             description: "test_description1".to_string(),
@@ -228,20 +223,19 @@ mod tests {
             admin_id: 2,
         };
 
+        // Execute
         let id1 = AdminNotificationModelController::create(
-            &context,
             &model_manager,
             notification_created1,
         )
         .await?;
         let id2 = AdminNotificationModelController::create(
-            &context,
             &model_manager,
             notification_created2,
         )
         .await?;
         let notifications: Vec<AdminNotification> =
-            AdminNotificationModelController::list(&context, &model_manager).await?;
+            AdminNotificationModelController::list(&model_manager).await?;
 
         // Check
         assert_eq!(notifications.len(), 2);
@@ -276,9 +270,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_list_by_admin_id() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::new(1, Role::Admin, Uuid::new_v4());
 
         let notification_created1 = AdminNotificationForCreate {
             description: "test_description1".to_string(),
@@ -296,20 +289,18 @@ mod tests {
             admin_id: 1,
         };
 
+        // Execute
         let id1 = AdminNotificationModelController::create(
-            &context,
             &model_manager,
             notification_created1,
         )
         .await?;
         let id2 = AdminNotificationModelController::create(
-            &context,
             &model_manager,
             notification_created2,
         )
         .await?;
         let id3 = AdminNotificationModelController::create(
-            &context,
             &model_manager,
             notification_created3,
         )
@@ -354,25 +345,24 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_read_notification() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup 
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
-
+        
         let notification_created = AdminNotificationForCreate {
             description: "test_description".to_string(),
             redirect: Some(String::from("event")),
             admin_id: 1,
         };
 
-        // -- Exec
+        // Execute
         let id =
-            AdminNotificationModelController::create(&context, &model_manager, notification_created)
+            AdminNotificationModelController::create(&model_manager, notification_created)
                 .await?;
 
-        AdminNotificationModelController::read_notification(&context, &model_manager, id).await?;
+        AdminNotificationModelController::read_notification(&model_manager, id).await?;
 
-        // -- Check
-        let notification = AdminNotificationModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let notification = AdminNotificationModelController::get(&model_manager, id).await?;
         assert_eq!(notification.id, id);
         assert_eq!(notification.description, "test_description");
         assert_eq!(notification.redirect, Some(String::from("event")));

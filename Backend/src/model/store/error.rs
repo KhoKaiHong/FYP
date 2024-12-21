@@ -1,3 +1,4 @@
+// Modules
 use serde::Serialize;
 
 pub type Result<T> = core::result::Result<T, Error>;
@@ -7,7 +8,7 @@ pub enum Error {
     FailToCreatePool(String),
 }
 
-// region:    --- Error Boilerplate
+// Error Boilerplate
 impl core::fmt::Display for Error {
     fn fmt(&self, fmt: &mut core::fmt::Formatter) -> core::result::Result<(), core::fmt::Error> {
         write!(fmt, "{self:?}")
@@ -15,4 +16,3 @@ impl core::fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
-// endregion: --- Error Boilerplate

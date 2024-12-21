@@ -161,7 +161,7 @@ async fn update_registration_status_handler(
                 event_id: Some(registration.event_id),
             };
 
-            DonationHistoryModelController::create(&context, model_manager, donation_history)
+            DonationHistoryModelController::create(model_manager, donation_history)
                 .await?;
 
             let updated_user = UserForUpdate {

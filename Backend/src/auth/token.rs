@@ -1,14 +1,15 @@
-use super::Role;
-use crate::auth::{Error, Result};
+// Modules
+use crate::auth::{Role, Error, Result};
 use crate::config;
-use crate::utils::{
-    format_time, now_add_sec, now_utc, parse_utc_from_str, parse_utc_from_timestamp,
-};
+use crate::utils::now_add_sec;
+
+use chrono::prelude::*;
 use jsonwebtoken::errors::ErrorKind;
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
+// Access token claims
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AccessTokenClaims {
     jti: String,
@@ -19,14 +20,18 @@ pub struct AccessTokenClaims {
 }
 
 impl AccessTokenClaims {
+    // Create a new access token
     fn new(jti: &str, id: i64, role: &Role) -> Self {
         let duration: i64;
         let jti = jti.to_string();
 
         match role {
+            // 15 minutes
             Role::User => duration = 900,
             Role::Organiser => duration = 900,
+            // 10 minutes
             Role::BloodCollectionFacility => duration = 600,
+            // 5 minutes
             Role::Admin => duration = 300,
         }
 
@@ -34,24 +39,28 @@ impl AccessTokenClaims {
             jti,
             id,
             role: role.to_string(),
-            iat: now_utc().timestamp(),
+            iat: Utc::now().timestamp(),
             exp: now_add_sec(duration).timestamp(),
         }
     }
 
+    // Get the jti
     pub fn jti(&self) -> &str {
         &self.jti
     }
 
+    // Get the id
     pub fn id(&self) -> i64 {
         self.id
     }
 
+    // Get the role
     pub fn role(&self) -> Result<Role> {
         Role::from_str(&self.role).map_err(|_| Error::AccessTokenInvalidFormat)
     }
 }
 
+// Function that generates an access token
 pub fn generate_access_token(jti: &str, id: i64, role: &Role) -> Result<String> {
     jsonwebtoken::encode(
         &Header::new(Algorithm::HS512),
@@ -61,6 +70,7 @@ pub fn generate_access_token(jti: &str, id: i64, role: &Role) -> Result<String> 
     .map_err(|_| Error::FailGenerateAccessToken)
 }
 
+// Function that validates an access token (checks if it has expired)
 pub fn validate_access_token(access_token: &str) -> Result<AccessTokenClaims> {
     let claims = jsonwebtoken::decode::<AccessTokenClaims>(
         access_token,
@@ -76,6 +86,7 @@ pub fn validate_access_token(access_token: &str) -> Result<AccessTokenClaims> {
     Ok(claims)
 }
 
+// Function that parses an access token (does not check if it has expired)
 pub fn parse_access_token(access_token: &str) -> Result<AccessTokenClaims> {
     let mut validation_strategy = Validation::new(Algorithm::HS512);
     validation_strategy.validate_exp = false;
@@ -91,6 +102,7 @@ pub fn parse_access_token(access_token: &str) -> Result<AccessTokenClaims> {
     Ok(claims)
 }
 
+// Refresh token claims
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RefreshTokenClaims {
     jti: String,
@@ -99,6 +111,7 @@ pub struct RefreshTokenClaims {
 }
 
 impl RefreshTokenClaims {
+    // Create a new refresh token
     fn new(jti: &str, role: &Role) -> Self {
         let duration: i64;
         let jti = jti.to_string();
@@ -115,30 +128,34 @@ impl RefreshTokenClaims {
 
         RefreshTokenClaims {
             jti,
-            iat: now_utc().timestamp(),
+            iat: Utc::now().timestamp(),
             exp: now_add_sec(duration).timestamp(),
         }
     }
 
+    // Create a new refresh token with a specific expiration
     fn new_with_duration(jti: &str, duration: i64) -> Self {
         let jti = jti.to_string();
 
         RefreshTokenClaims {
             jti,
-            iat: now_utc().timestamp(),
+            iat: Utc::now().timestamp(),
             exp: duration,
         }
     }
 
+    // Get the jti
     pub fn jti(&self) -> &str {
         &self.jti
     }
 
+    // Get the expiration
     pub fn exp(&self) -> i64 {
         self.exp
     }
 }
 
+// Function that generates a refresh token
 pub fn generate_refresh_token(jti: &str, role: &Role) -> Result<String> {
     jsonwebtoken::encode(
         &Header::new(Algorithm::HS512),
@@ -148,6 +165,7 @@ pub fn generate_refresh_token(jti: &str, role: &Role) -> Result<String> {
     .map_err(|_| Error::FailGenerateRefreshToken)
 }
 
+// Function that renews a refresh token
 pub fn renew_refresh_token(jti: &str, duration: i64) -> Result<String> {
     jsonwebtoken::encode(
         &Header::new(Algorithm::HS512),
@@ -157,6 +175,7 @@ pub fn renew_refresh_token(jti: &str, duration: i64) -> Result<String> {
     .map_err(|_| Error::FailGenerateRefreshToken)
 }
 
+// Function that validates a refresh token (checks if it has expired)
 pub fn validate_refresh_token(refresh_token: &str) -> Result<RefreshTokenClaims> {
     let claims = jsonwebtoken::decode::<RefreshTokenClaims>(
         refresh_token,
@@ -172,6 +191,7 @@ pub fn validate_refresh_token(refresh_token: &str) -> Result<RefreshTokenClaims>
     Ok(claims)
 }
 
+// Function that parses a refresh token (does not check if it has expired)
 pub fn parse_refresh_token(refresh_token: &str) -> Result<RefreshTokenClaims> {
     let mut validation_strategy = Validation::new(Algorithm::HS512);
     validation_strategy.validate_exp = false;
@@ -187,9 +207,11 @@ pub fn parse_refresh_token(refresh_token: &str) -> Result<RefreshTokenClaims> {
     Ok(claims)
 }
 
+// Tests
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils::parse_utc_from_timestamp;
     use anyhow::Result;
     use chrono::TimeDelta;
     use serial_test::serial;

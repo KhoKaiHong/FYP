@@ -1,36 +1,17 @@
-use crate::context::Context;
+// Modules
 use crate::model::enums::EventRequestStatus;
 use crate::model::EntityErrorField::I64Error;
 use crate::model::{Error, ModelManager, Result};
+
 use chrono::prelude::*;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
 
-// region:    --- New Event Request Types
-#[derive(Debug, FromRow)]
-pub struct ChangeEventRequest {
-    pub id: i64,
-    pub location: String,
-    pub address: String,
-    pub start_time: DateTime<Utc>,
-    pub end_time: DateTime<Utc>,
-    pub max_attendees: i32,
-    pub latitude: f64,
-    pub longitude: f64,
-    pub status: EventRequestStatus,
-    pub change_reason: String,
-    pub rejection_reason: Option<String>,
-    pub event_id: i64,
-    pub facility_id: i64,
-    pub state_id: i32,
-    pub district_id: i32,
-    pub organiser_id: i64,
-}
-
+// Change Event Request
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct ChangeEventRequestWithInformation {
+pub struct ChangeEventRequest {
     pub id: i64,
     pub location: String,
     pub address: String,
@@ -58,9 +39,10 @@ pub struct ChangeEventRequestWithInformation {
     pub district_name: String,
 }
 
-impl<'r> FromRow<'r, PgRow> for ChangeEventRequestWithInformation {
+// Defines how to convert a row from the database into a Change Event Request struct.
+impl<'r> FromRow<'r, PgRow> for ChangeEventRequest {
     fn from_row(row: &'r PgRow) -> core::result::Result<Self, sqlx::Error> {
-        Ok(ChangeEventRequestWithInformation {
+        Ok(ChangeEventRequest {
             id: row.try_get("id")?,
             location: row.try_get("location")?,
             address: row.try_get("address")?,
@@ -90,7 +72,7 @@ impl<'r> FromRow<'r, PgRow> for ChangeEventRequestWithInformation {
     }
 }
 
-#[derive(Deserialize)]
+// Fields used to create a Change Event Request.
 pub struct ChangeEventRequestForCreate {
     pub location: String,
     pub address: String,
@@ -107,20 +89,18 @@ pub struct ChangeEventRequestForCreate {
     pub district_id: i32,
 }
 
-#[derive(Deserialize)]
+// Fields used to update a Change Event Request
 pub struct ChangeEventRequestForUpdate {
     pub status: EventRequestStatus,
     pub rejection_reason: Option<String>,
 }
 
-// endregion:    --- New Event Request Types
-
-// region:    --- New Event Request Model Controller
+// Change Event Request Model Controller
 pub struct ChangeEventRequestModelController;
 
 impl ChangeEventRequestModelController {
+    // Creates a Change Event Request, provided that there is no existing pending request from the same event and organiser.
     pub async fn create(
-        context: &Context,
         model_manager: &ModelManager,
         request_created: ChangeEventRequestForCreate,
     ) -> Result<i64> {
@@ -163,11 +143,11 @@ impl ChangeEventRequestModelController {
         Ok(id)
     }
 
+    // Gets a Change Event Request by its id
     pub async fn get(
-        context: &Context,
         model_manager: &ModelManager,
         id: i64,
-    ) -> Result<ChangeEventRequestWithInformation> {
+    ) -> Result<ChangeEventRequest> {
         let db = model_manager.db();
 
         let event = sqlx::query_as(
@@ -184,23 +164,11 @@ impl ChangeEventRequestModelController {
         Ok(event)
     }
 
-    pub async fn list(
-        context: &Context,
-        model_manager: &ModelManager,
-    ) -> Result<Vec<ChangeEventRequestWithInformation>> {
-        let db = model_manager.db();
-
-        let events = sqlx::query_as("SELECT change_blood_donation_events_requests.*, blood_collection_facilities.email AS facility_email, blood_collection_facilities.name AS facility_name, blood_collection_facilities.address AS facility_address, blood_collection_facilities.phone_number AS facility_phone_number, event_organisers.email AS organiser_email, event_organisers.name AS organiser_name, event_organisers.phone_number AS organiser_phone_number, states.name AS state_name, districts.name AS district_name FROM change_blood_donation_events_requests JOIN blood_collection_facilities ON change_blood_donation_events_requests.facility_id = blood_collection_facilities.id JOIN event_organisers ON change_blood_donation_events_requests.organiser_id = event_organisers.id JOIN states ON change_blood_donation_events_requests.state_id = states.id JOIN districts ON change_blood_donation_events_requests.district_id = districts.id ORDER BY id")
-            .fetch_all(db)
-            .await?;
-
-        Ok(events)
-    }
-
+    // Lists all change events for an organiser
     pub async fn list_by_organiser(
         model_manager: &ModelManager,
         organiser_id: i64, 
-    ) -> Result<Vec<ChangeEventRequestWithInformation>> {
+    ) -> Result<Vec<ChangeEventRequest>> {
         let db = model_manager.db();
 
         let events = sqlx::query_as("SELECT change_blood_donation_events_requests.*, blood_collection_facilities.email AS facility_email, blood_collection_facilities.name AS facility_name, blood_collection_facilities.address AS facility_address, blood_collection_facilities.phone_number AS facility_phone_number, event_organisers.email AS organiser_email, event_organisers.name AS organiser_name, event_organisers.phone_number AS organiser_phone_number, states.name AS state_name, districts.name AS district_name FROM change_blood_donation_events_requests JOIN blood_collection_facilities ON change_blood_donation_events_requests.facility_id = blood_collection_facilities.id JOIN event_organisers ON change_blood_donation_events_requests.organiser_id = event_organisers.id JOIN states ON change_blood_donation_events_requests.state_id = states.id JOIN districts ON change_blood_donation_events_requests.district_id = districts.id WHERE organiser_id = $1 ORDER BY id")
@@ -211,10 +179,11 @@ impl ChangeEventRequestModelController {
         Ok(events)
     }
 
+    // Lists all change events for a facility
     pub async fn list_by_facility(
         model_manager: &ModelManager,
         facility_id: i64, 
-    ) -> Result<Vec<ChangeEventRequestWithInformation>> {
+    ) -> Result<Vec<ChangeEventRequest>> {
         let db = model_manager.db();
 
         let events = sqlx::query_as("SELECT change_blood_donation_events_requests.*, blood_collection_facilities.email AS facility_email, blood_collection_facilities.name AS facility_name, blood_collection_facilities.address AS facility_address, blood_collection_facilities.phone_number AS facility_phone_number, event_organisers.email AS organiser_email, event_organisers.name AS organiser_name, event_organisers.phone_number AS organiser_phone_number, states.name AS state_name, districts.name AS district_name FROM change_blood_donation_events_requests JOIN blood_collection_facilities ON change_blood_donation_events_requests.facility_id = blood_collection_facilities.id JOIN event_organisers ON change_blood_donation_events_requests.organiser_id = event_organisers.id JOIN states ON change_blood_donation_events_requests.state_id = states.id JOIN districts ON change_blood_donation_events_requests.district_id = districts.id WHERE facility_id = $1 ORDER BY id")
@@ -225,8 +194,8 @@ impl ChangeEventRequestModelController {
         Ok(events)
     }
 
+    // Updates a change event request
     pub async fn update(
-        context: &Context,
         model_manager: &ModelManager,
         id: i64,
         updated_request: ChangeEventRequestForUpdate,
@@ -254,24 +223,20 @@ impl ChangeEventRequestModelController {
     }
 }
 
-// endregion:    --- New Event Request Model Controller
-
-// region:    --- Tests
+// Unit tests
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{_dev_utils, auth::Role};
+    use crate::_dev_utils;
     use anyhow::Result;
     use chrono::{DurationRound, TimeDelta};
     use serial_test::serial;
-    use uuid::Uuid;
 
     #[tokio::test]
     #[serial]
     async fn test_create_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let test_time = Utc::now()
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
@@ -291,13 +256,13 @@ mod tests {
             district_id: 1,
         };
 
-        // -- Exec
+        // Execute
         let id =
-            ChangeEventRequestModelController::create(&context, &model_manager, change_request)
+            ChangeEventRequestModelController::create(&model_manager, change_request)
                 .await?;
 
-        // -- Check
-        let event = ChangeEventRequestModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let event = ChangeEventRequestModelController::get(&model_manager, id).await?;
 
         println!("event for test_create: {:?}", event);
 
@@ -325,15 +290,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_get_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let id = 100;
 
-        // -- Exec
-        let res = ChangeEventRequestModelController::get(&context, &model_manager, id).await;
+        // Execute
+        let res = ChangeEventRequestModelController::get(&model_manager, id).await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,
@@ -350,80 +314,9 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn test_list_ok() -> Result<()> {
-        // -- Setup & Fixtures
-        let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
-        let test_time = Utc::now()
-            .duration_trunc(TimeDelta::microseconds(1))
-            .unwrap();
-        let change_request_1 = ChangeEventRequestForCreate {
-            location: "test location 1".to_string(),
-            address: "test_list_ok-event 01".to_string(),
-            start_time: test_time,
-            end_time: test_time,
-            max_attendees: 10,
-            latitude: 3.1732962387784367,
-            longitude: 101.70668106095312,
-            change_reason: "test_change_reason_1".to_string(),
-            event_id: 1,
-            facility_id: 1,
-            organiser_id: 1,
-            state_id: 1,
-            district_id: 1,
-        };
-        let change_request_2 = ChangeEventRequestForCreate {
-            location: "test location 2".to_string(),
-            address: "test_list_ok-event 02".to_string(),
-            start_time: test_time,
-            end_time: test_time,
-            max_attendees: 20,
-            latitude: 3.1732962387784367,
-            longitude: 101.70668106095312,
-            change_reason: "test_change_reason_2".to_string(),
-            event_id: 2,
-            facility_id: 2,
-            organiser_id: 2,
-            state_id: 2,
-            district_id: 2,
-        };
-
-        // -- Exec
-        let id1 =
-            ChangeEventRequestModelController::create(&context, &model_manager, change_request_1)
-                .await?;
-        let id2 =
-            ChangeEventRequestModelController::create(&context, &model_manager, change_request_2)
-                .await?;
-        let events = ChangeEventRequestModelController::list(&context, &model_manager).await?;
-
-        assert_eq!(events.len(), 2, "number of seeded events.");
-        assert_eq!(events[0].address, "test_list_ok-event 01");
-        assert_eq!(events[1].address, "test_list_ok-event 02");
-
-        println!("event1 for test_update: {:?}", events[0]);
-        println!("event2 for test_update: {:?}", events[1]);
-
-        // Clean
-        sqlx::query("DELETE FROM change_blood_donation_events_requests WHERE id = $1")
-            .bind(id1)
-            .execute(model_manager.db())
-            .await?;
-
-        sqlx::query("DELETE FROM change_blood_donation_events_requests WHERE id = $1")
-            .bind(id2)
-            .execute(model_manager.db())
-            .await?;
-
-        Ok(())
-    }
-
-    #[tokio::test]
-    #[serial]
     async fn test_list_by_organiser_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::new(1, Role::Organiser, Uuid::new_v4());
         let test_time = Utc::now()
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
@@ -473,18 +366,20 @@ mod tests {
             district_id: 2,
         };
 
-        // -- Exec
+        // Execute
         let id1 =
-            ChangeEventRequestModelController::create(&context, &model_manager, change_request_1)
+            ChangeEventRequestModelController::create(&model_manager, change_request_1)
                 .await?;
         let id2 =
-            ChangeEventRequestModelController::create(&context, &model_manager, change_request_2)
+            ChangeEventRequestModelController::create(&model_manager, change_request_2)
                 .await?;
         let id3 =
-            ChangeEventRequestModelController::create(&context, &model_manager, change_request_3)
+            ChangeEventRequestModelController::create(&model_manager, change_request_3)
                 .await?;
+
+        // Check
         let events =
-            ChangeEventRequestModelController::list_by_organiser(&model_manager, context.user_id()).await?;
+            ChangeEventRequestModelController::list_by_organiser(&model_manager, 1).await?;
 
         assert_eq!(events.len(), 2, "number of seeded requests.");
         assert_eq!(events[0].address, "test_list_ok-event 01");
@@ -512,9 +407,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_list_by_facility_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::new(1, Role::BloodCollectionFacility, Uuid::new_v4());
         let test_time = Utc::now()
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
@@ -564,18 +458,20 @@ mod tests {
             district_id: 2,
         };
 
-        // -- Exec
+        // Execute
         let id1 =
-            ChangeEventRequestModelController::create(&context, &model_manager, change_request_1)
+            ChangeEventRequestModelController::create(&model_manager, change_request_1)
                 .await?;
         let id2 =
-            ChangeEventRequestModelController::create(&context, &model_manager, change_request_2)
+            ChangeEventRequestModelController::create(&model_manager, change_request_2)
                 .await?;
         let id3 =
-            ChangeEventRequestModelController::create(&context, &model_manager, change_request_3)
+            ChangeEventRequestModelController::create(&model_manager, change_request_3)
                 .await?;
+
+        // Check
         let events =
-            ChangeEventRequestModelController::list_by_facility(&model_manager, context.user_id()).await?;
+            ChangeEventRequestModelController::list_by_facility(&model_manager, 1).await?;
 
         assert_eq!(events.len(), 2, "number of seeded requests.");
         assert_eq!(events[0].address, "test_list_ok-event 01");
@@ -603,9 +499,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_update_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let non_updated_time = Utc::now()
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
@@ -625,9 +520,9 @@ mod tests {
             district_id: 1,
         };
 
-        // -- Exec
+        // Execute
         let id =
-            ChangeEventRequestModelController::create(&context, &model_manager, change_request)
+            ChangeEventRequestModelController::create(&model_manager, change_request)
                 .await?;
 
         let updated_request = ChangeEventRequestForUpdate {
@@ -635,11 +530,11 @@ mod tests {
             rejection_reason: Some("Rejected".to_string()),
         };
 
-        ChangeEventRequestModelController::update(&context, &model_manager, id, updated_request)
+        ChangeEventRequestModelController::update(&model_manager, id, updated_request)
             .await?;
 
-        // -- Check
-        let event = ChangeEventRequestModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let event = ChangeEventRequestModelController::get(&model_manager, id).await?;
         println!("event for test_update: {:?}", event);
         assert_eq!(event.status, EventRequestStatus::Rejected);
         assert_eq!(event.rejection_reason, Some(String::from("Rejected")));
@@ -653,4 +548,3 @@ mod tests {
         Ok(())
     }
 }
-// endregion: --- Tests

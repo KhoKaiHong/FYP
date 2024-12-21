@@ -115,7 +115,7 @@ async fn get_admin_credentials(
     context: &Context,
     model_manager: &ModelManager,
 ) -> Result<Json<Value>> {
-    let admin = AdminModelController::get(context, model_manager, context.user_id())
+    let admin = AdminModelController::get(model_manager, context.user_id())
         .await
         .map_err(|err| match err {
             model::Error::EntityNotFound {

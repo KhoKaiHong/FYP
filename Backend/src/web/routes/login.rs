@@ -220,10 +220,8 @@ async fn admin_login_handler(
 ) -> Result<Json<Value>> {
     debug!("{:<12} - admin_login_api", "HANDLER");
 
-    let context = Context::root_ctx();
-
     let admin =
-        AdminModelController::get_by_email(&context, &app_state.model_manager, &payload.email)
+        AdminModelController::get_by_email(&app_state.model_manager, &payload.email)
             .await
             .map_err(|err| match err {
                 model::Error::EntityNotFound {
@@ -252,9 +250,7 @@ async fn admin_login_handler(
         admin_id: admin.id,
     };
 
-    let context = Context::new(admin.id, Role::Admin, access_token_id);
-
-    AdminSessionModelController::create(&context, &app_state.model_manager, admin_session).await?;
+    AdminSessionModelController::create(&app_state.model_manager, admin_session).await?;
 
     let body = Json(json!({
         "data": {

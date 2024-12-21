@@ -1,4 +1,4 @@
-// region:    --- Modules
+// Modules
 
 mod error;
 pub mod password;
@@ -7,5 +7,3 @@ pub mod role;
 
 pub use self::error::{Error, Result};
 pub use self::role::Role;
-
-// endregion: --- Modules

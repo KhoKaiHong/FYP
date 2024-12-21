@@ -1,3 +1,4 @@
+// Modules
 mod error;
 
 pub mod reset_eligibility;

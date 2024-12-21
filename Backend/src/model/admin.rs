@@ -1,12 +1,11 @@
-use crate::context::Context;
+// Modules
 use crate::model::EntityErrorField::{I64Error, StringError};
 use crate::model::{Error, ModelManager, Result};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use sqlx::postgres::PgDatabaseError;
 use sqlx::FromRow;
 
-// region:    --- Admin Types
-
+// Admin
 #[derive(Debug, FromRow, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Admin {
@@ -17,28 +16,26 @@ pub struct Admin {
     pub name: String,
 }
 
-#[derive(Deserialize)]
+// Fields used to create an admin.
 pub struct AdminForCreate {
     pub email: String,
     pub password: String,
     pub name: String,
 }
 
-#[derive(Deserialize)]
+// Fields used to update an admin
 pub struct AdminForUpdate {
     pub email: Option<String>,
     pub password: Option<String>,
     pub name: Option<String>,
 }
 
-// endregion: --- Admin Types
-
-// region:    --- User Model Controller
+// Admin Model Controller
 pub struct AdminModelController;
 
 impl AdminModelController {
+    // Creates an admin
     pub async fn create(
-        context: &Context,
         model_manager: &ModelManager,
         admin_created: AdminForCreate,
     ) -> Result<i64> {
@@ -57,7 +54,8 @@ impl AdminModelController {
         Ok(id)
     }
 
-    pub async fn get(context: &Context, model_manager: &ModelManager, id: i64) -> Result<Admin> {
+    // Gets admin by id
+    pub async fn get(model_manager: &ModelManager, id: i64) -> Result<Admin> {
         let db = model_manager.db();
 
         let admin = sqlx::query_as("SELECT * from admins WHERE id = $1")
@@ -72,8 +70,8 @@ impl AdminModelController {
         Ok(admin)
     }
 
+    // Gets admin by email
     pub async fn get_by_email(
-        context: &Context,
         model_manager: &ModelManager,
         email: &str,
     ) -> Result<Admin> {
@@ -91,18 +89,8 @@ impl AdminModelController {
         Ok(admin)
     }
 
-    pub async fn list(context: &Context, model_manager: &ModelManager) -> Result<Vec<Admin>> {
-        let db = model_manager.db();
-
-        let admins = sqlx::query_as("SELECT * from admins ORDER BY id")
-            .fetch_all(db)
-            .await?;
-
-        Ok(admins)
-    }
-
+    // Updates admin
     pub async fn update(
-        context: &Context,
         model_manager: &ModelManager,
         id: i64,
         admin_updated: AdminForUpdate,
@@ -161,28 +149,9 @@ impl AdminModelController {
 
         Ok(())
     }
-
-    pub async fn delete(context: &Context, model_manager: &ModelManager, id: i64) -> Result<()> {
-        let db = model_manager.db();
-
-        let count = sqlx::query("DELETE from admins where id = $1")
-            .bind(id)
-            .execute(db)
-            .await?
-            .rows_affected();
-
-        if count == 0 {
-            return Err(Error::EntityNotFound {
-                entity: "admin",
-                field: I64Error(id),
-            });
-        }
-
-        Ok(())
-    }
 }
 
-// check for duplicate constraints
+// Function that checks for duplicate constraint errors
 fn check_duplicate(err: sqlx::Error) -> Error {
     match err {
         sqlx::Error::Database(ref e) => {
@@ -206,7 +175,7 @@ fn check_duplicate(err: sqlx::Error) -> Error {
     }
 }
 
-// region:    --- Tests
+// Unit tests
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -217,20 +186,19 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_create_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let admin_created = AdminForCreate {
             email: "admin@example.com".to_string(),
             password: "password".to_string(),
             name: "John Doe".to_string(),
         };
 
-        // -- Exec
-        let id = AdminModelController::create(&context, &model_manager, admin_created).await?;
+        // Execute
+        let id = AdminModelController::create(&model_manager, admin_created).await?;
 
-        // -- Check
-        let admin = AdminModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let admin = AdminModelController::get(&model_manager, id).await?;
         assert_eq!(admin.email, "admin@example.com");
         assert_eq!(admin.password, "password");
         assert_eq!(admin.name, "John Doe");
@@ -238,7 +206,10 @@ mod tests {
         println!("\n\nadmin: {:?}", admin);
 
         // Clean
-        AdminModelController::delete(&context, &model_manager, id).await?;
+        sqlx::query("DELETE from admins where id = $1")
+            .bind(id)
+            .execute(model_manager.db())
+            .await?;
 
         Ok(())
     }
@@ -246,22 +217,21 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_get_by_email_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let admin_created = AdminForCreate {
             email: "admin@example.com".to_string(),
             password: "password".to_string(),
             name: "John Doe".to_string(),
         };
 
-        // -- Exec
-        let id = AdminModelController::create(&context, &model_manager, admin_created).await?;
+        // Execute
+        let id = AdminModelController::create(&model_manager, admin_created).await?;
         let admin =
-            AdminModelController::get_by_email(&context, &model_manager, "admin@example.com")
+            AdminModelController::get_by_email(&model_manager, "admin@example.com")
                 .await?;
 
-        // -- Check
+        // Check
         assert_eq!(admin.email, "admin@example.com");
         assert_eq!(admin.password, "password");
         assert_eq!(admin.name, "John Doe");
@@ -269,7 +239,10 @@ mod tests {
         println!("\n\nadmin: {:?}", admin);
 
         // Clean
-        AdminModelController::delete(&context, &model_manager, id).await?;
+        sqlx::query("DELETE from admins where id = $1")
+            .bind(id)
+            .execute(model_manager.db())
+            .await?;
 
         Ok(())
     }
@@ -277,15 +250,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_get_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let id = 100;
 
-        // -- Exec
-        let res = AdminModelController::get(&context, &model_manager, id).await;
+        // Execute
+        let res = AdminModelController::get(&model_manager, id).await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,
@@ -304,15 +276,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_get_by_email_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let email = "admin@example.com".to_string();
 
-        // -- Exec
-        let res = AdminModelController::get_by_email(&context, &model_manager, &email).await;
+        // Execute
+        let res = AdminModelController::get_by_email(&model_manager, &email).await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,
@@ -330,57 +301,17 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn test_list() -> Result<()> {
-        // -- Setup & Fixtures
-        let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
-        let admin_created1 = AdminForCreate {
-            email: "1admin@example.com".to_string(),
-            password: "password".to_string(),
-            name: "John Doe".to_string(),
-        };
-        let admin_created2 = AdminForCreate {
-            email: "2admin@example.com".to_string(),
-            password: "password".to_string(),
-            name: "Jane Doe".to_string(),
-        };
-
-        // -- Exec
-        let id1 = AdminModelController::create(&context, &model_manager, admin_created1).await?;
-        let id2 = AdminModelController::create(&context, &model_manager, admin_created2).await?;
-        let admins = AdminModelController::list(&context, &model_manager).await?;
-
-        // -- Check
-        // Seeded 5 at the first place
-        assert_eq!(admins.len(), 5);
-        assert_eq!(admins[3].email, "1admin@example.com");
-        assert_eq!(admins[4].email, "2admin@example.com");
-
-        for admin in admins {
-            println!("admin: {:?}", admin);
-        }
-
-        // Clean
-        AdminModelController::delete(&context, &model_manager, id1).await?;
-        AdminModelController::delete(&context, &model_manager, id2).await?;
-
-        Ok(())
-    }
-
-    #[tokio::test]
-    #[serial]
     async fn test_update() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let admin_created = AdminForCreate {
             email: "admin@example.com".to_string(),
             password: "password".to_string(),
             name: "John Doe".to_string(),
         };
 
-        // -- Exec
-        let id = AdminModelController::create(&context, &model_manager, admin_created).await?;
+        // Execute
+        let id = AdminModelController::create(&model_manager, admin_created).await?;
 
         let admin_updated = AdminForUpdate {
             email: Some("newadmin@example.com".to_string()),
@@ -388,10 +319,10 @@ mod tests {
             name: Some("Jane Doe".to_string()),
         };
 
-        AdminModelController::update(&context, &model_manager, id, admin_updated).await?;
+        AdminModelController::update(&model_manager, id, admin_updated).await?;
 
-        // -- Check
-        let admin = AdminModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let admin = AdminModelController::get(&model_manager, id).await?;
         assert_eq!(admin.email, "newadmin@example.com");
         assert_eq!(admin.password, "password");
         assert_eq!(admin.name, "Jane Doe");
@@ -399,7 +330,10 @@ mod tests {
         println!("\n\nadmin: {:?}", admin);
 
         // Clean
-        AdminModelController::delete(&context, &model_manager, id).await?;
+        sqlx::query("DELETE from admins where id = $1")
+            .bind(id)
+            .execute(model_manager.db())
+            .await?;
 
         Ok(())
     }

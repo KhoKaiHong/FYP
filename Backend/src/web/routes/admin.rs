@@ -28,7 +28,7 @@ async fn admin_update_handler(
 
     if let (Some(password), Some(current_password)) = (payload.password, payload.current_password) {
         let admin =
-            AdminModelController::get(&context, &app_state.model_manager, context.user_id())
+            AdminModelController::get(&app_state.model_manager, context.user_id())
                 .await?;
 
         validate_password(&current_password, &admin.password)
@@ -49,7 +49,6 @@ async fn admin_update_handler(
 
         // Update user with new details
         AdminModelController::update(
-            &context,
             model_manager,
             context.user_id(),
             updated_details,
@@ -65,7 +64,6 @@ async fn admin_update_handler(
 
         // Update user with new details
         AdminModelController::update(
-            &context,
             model_manager,
             context.user_id(),
             updated_details,

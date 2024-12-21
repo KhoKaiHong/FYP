@@ -303,7 +303,7 @@ async fn refresh_admin_token(
         .map_err(|_| Error::RefreshFailInvalidRefreshToken)?;
 
     let admin_session =
-        AdminSessionModelController::get(&context, model_manager, refresh_token_jti)
+        AdminSessionModelController::get(model_manager, refresh_token_jti)
             .await
             .map_err(|err| match err {
                 model::Error::EntityNotFound {
@@ -336,7 +336,6 @@ async fn refresh_admin_token(
         };
 
         AdminSessionModelController::update(
-            &context,
             &model_manager,
             updated_admin_session,
             refresh_token_jti,

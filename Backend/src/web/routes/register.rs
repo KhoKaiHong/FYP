@@ -161,8 +161,6 @@ async fn admin_register_handler(
 ) -> Result<Json<Value>> {
     debug!("{:<12} - admin_register_api", "HANDLER");
 
-    let context = Context::root_ctx();
-
     let password_hash = encrypt_password(&payload.password).await?;
 
     let registered_admin = AdminForCreate {
@@ -171,7 +169,7 @@ async fn admin_register_handler(
         name: payload.name,
     };
 
-    AdminModelController::create(&context, &app_state.model_manager, registered_admin).await?;
+    AdminModelController::create(&app_state.model_manager, registered_admin).await?;
 
     let body = Json(json!({
         "data": {

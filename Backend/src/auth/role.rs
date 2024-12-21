@@ -1,3 +1,4 @@
+// Roles for the application
 #[derive(Debug, strum_macros::Display, strum_macros::EnumString, Clone)]
 pub enum Role {
     User,

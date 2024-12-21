@@ -20,9 +20,8 @@ async fn list_districts_handler(
     debug!("{:<12} - list_districts_api", "HANDLER");
 
     let model_manager = &app_state.model_manager;
-    let context =  Context::root_ctx();
 
-    let districts = DistrictModelController::list_with_state(&context, model_manager).await?;
+    let districts = DistrictModelController::list(model_manager).await?;
 
     let body = Json(json!({
         "data": {

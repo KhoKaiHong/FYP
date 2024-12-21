@@ -1,17 +1,18 @@
+// Modules
 use serde::Serialize;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Debug, Serialize)]
 pub enum Error {
-	// -- Pwd
+	// Password Errors
 	FailedToHashPassword,
 	PasswordNotMatching,
 	FailSpawnBlockForEncrypt,
 	PasswordHashWrongFormat,
 	FailSpawnBlockForValidate,
 
-	// -- Token
+	// Token Errors
 	FailGenerateAccessToken,
 	FailGenerateRefreshToken,
 	AccessTokenInvalidFormat,
@@ -20,7 +21,7 @@ pub enum Error {
 	RefreshTokenExpired,
 }
 
-// region:    --- Error Boilerplate
+// Error Boilerplate
 impl core::fmt::Display for Error {
 	fn fmt(
 		&self,
@@ -31,4 +32,3 @@ impl core::fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
-// endregion: --- Error Boilerplate

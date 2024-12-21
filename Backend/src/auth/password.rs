@@ -1,16 +1,15 @@
-use super::{Error, Result};
-use argon2::{
-    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
-    Argon2,
+// Modules
+use crate::auth::{Error, Result};
+use argon2::password_hash::{
+    rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString,
 };
-
-// tokio::task::spawn_blocking is used as argon2 will block the async executor. 
-// With many requests, OS thread will be held and cannot be moved.
+use argon2::Argon2;
 
 // Encrypt the password using argon2 algorithm
 pub async fn encrypt_password(password: &str) -> Result<String> {
     let password = password.to_owned();
 
+    // As argon2 is blocking, we need to spawn a blocking task to prevent async executer to be blocked
     tokio::task::spawn_blocking(move || {
         let salt = SaltString::generate(&mut OsRng);
 
@@ -27,7 +26,7 @@ pub async fn encrypt_password(password: &str) -> Result<String> {
     .map_err(|_| Error::FailSpawnBlockForEncrypt)?
 }
 
-// Validate a password using the same algorithm
+// Validate a password using the argon2 algorithm
 pub async fn validate_password(password: &str, password_hash: &str) -> Result<()> {
     let password = password.to_owned();
     let password_hash = password_hash.to_owned();
@@ -44,18 +43,16 @@ pub async fn validate_password(password: &str, password_hash: &str) -> Result<()
     .map_err(|_| Error::FailSpawnBlockForValidate)?
 }
 
-// region:    --- Tests
-
+// Tests
 #[cfg(test)]
 mod tests {
     use super::*;
-	use anyhow::Result;
+    use anyhow::Result;
     use serial_test::serial;
 
     #[tokio::test]
     #[serial]
     async fn password_test() -> Result<()> {
-        // -- Exec
         let password = "test_password";
         let password_hashed = encrypt_password(password).await?;
 
@@ -63,5 +60,3 @@ mod tests {
         Ok(())
     }
 }
-
-// endregion: --- Tests
