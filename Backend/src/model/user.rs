@@ -1,28 +1,13 @@
-use crate::context::Context;
+// Modules
 use crate::model::enums::{BloodType, EligibilityStatus};
 use crate::model::EntityErrorField::{I64Error, StringError};
 use crate::model::{Error, ModelManager, Result};
+
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgDatabaseError;
 use sqlx::FromRow;
 
-// region:    --- User Types
-
-// Not needed if state and district name is required
-#[derive(Debug, FromRow)]
-pub struct User {
-    pub id: i64,
-    pub ic_number: String,
-    pub password: String,
-    pub name: String,
-    pub email: String,
-    pub phone_number: String,
-    pub blood_type: String,
-    pub eligibility: EligibilityStatus,
-    pub state_id: i32,
-    pub district_id: i32,
-}
-
+// User
 #[derive(Debug, FromRow, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UserWithLocation {
@@ -41,6 +26,7 @@ pub struct UserWithLocation {
     pub district_name: String,
 }
 
+// Fields used to create a user.
 #[derive(Deserialize)]
 pub struct UserForCreate {
     pub ic_number: String,
@@ -53,6 +39,7 @@ pub struct UserForCreate {
     pub district_id: i32,
 }
 
+// Fields used to update a user.
 #[derive(Deserialize)]
 pub struct UserForUpdate {
     pub password: Option<String>,
@@ -62,17 +49,13 @@ pub struct UserForUpdate {
     pub state_id: Option<i32>,
     pub district_id: Option<i32>,
 }
-// endregion: --- User Types
 
-// region:    --- User Model Controller
+// User Model Controller
 pub struct UserModelController;
 
 impl UserModelController {
-    pub async fn create(
-        context: &Context,
-        model_manager: &ModelManager,
-        user_created: UserForCreate,
-    ) -> Result<i64> {
+    // Creates a new user.
+    pub async fn create(model_manager: &ModelManager, user_created: UserForCreate) -> Result<i64> {
         let db = model_manager.db();
 
         let (id,) = sqlx::query_as::<_, (i64,)>(
@@ -93,11 +76,8 @@ impl UserModelController {
         Ok(id)
     }
 
-    pub async fn get(
-        context: &Context,
-        model_manager: &ModelManager,
-        id: i64,
-    ) -> Result<UserWithLocation> {
+    // Gets a user by id.
+    pub async fn get(model_manager: &ModelManager, id: i64) -> Result<UserWithLocation> {
         let db = model_manager.db();
 
         let user = sqlx::query_as("SELECT users.*, states.name AS state_name, districts.name AS district_name FROM users JOIN states ON users.state_id = states.id JOIN districts ON users.district_id = districts.id WHERE users.id = $1")
@@ -112,6 +92,7 @@ impl UserModelController {
         Ok(user)
     }
 
+    // Gets a user by IC number.
     pub async fn get_by_ic_number(
         model_manager: &ModelManager,
         ic_number: &str,
@@ -130,10 +111,8 @@ impl UserModelController {
         Ok(user)
     }
 
-    pub async fn list(
-        context: &Context,
-        model_manager: &ModelManager,
-    ) -> Result<Vec<UserWithLocation>> {
+    // Lists all users.
+    pub async fn list(model_manager: &ModelManager) -> Result<Vec<UserWithLocation>> {
         let db = model_manager.db();
 
         let users = sqlx::query_as("SELECT users.*, states.name AS state_name, districts.name AS district_name FROM users JOIN states ON users.state_id = states.id JOIN districts ON users.district_id = districts.id")
@@ -143,6 +122,7 @@ impl UserModelController {
         Ok(users)
     }
 
+    // Lists all eligible users for a district.
     pub async fn list_eligible_by_district(
         model_manager: &ModelManager,
         district_id: i32,
@@ -157,8 +137,8 @@ impl UserModelController {
         Ok(users)
     }
 
+    // Updates a user.
     pub async fn update(
-        context: &Context,
         model_manager: &ModelManager,
         id: i64,
         user_updated: UserForUpdate,
@@ -244,9 +224,8 @@ impl UserModelController {
         Ok(())
     }
 }
-// endregion: --- User Model Controller
 
-// check for duplicate constraints
+// Function to check for duplicate constraint errors
 fn check_duplicate(err: sqlx::Error) -> Error {
     match err {
         sqlx::Error::Database(ref e) => {
@@ -278,8 +257,7 @@ fn check_duplicate(err: sqlx::Error) -> Error {
     }
 }
 
-// Backend/src/model/user.rs
-// region:    --- Tests
+// Unit tests
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -290,9 +268,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_create_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let user_created = UserForCreate {
             ic_number: "1234567890".to_string(),
             password: "password".to_string(),
@@ -304,11 +281,11 @@ mod tests {
             district_id: 1,
         };
 
-        // -- Exec
-        let id = UserModelController::create(&context, &model_manager, user_created).await?;
+        // Execute
+        let id = UserModelController::create(&model_manager, user_created).await?;
 
-        // -- Check
-        let user = UserModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let user = UserModelController::get(&model_manager, id).await?;
         assert_eq!(user.ic_number, "1234567890");
         assert_eq!(user.password, "password");
         assert_eq!(user.name, "John Doe");
@@ -333,15 +310,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_get_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup 
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let id = 100;
 
-        // -- Exec
-        let res = UserModelController::get(&context, &model_manager, id).await;
+        // Execute
+        let res = UserModelController::get(&model_manager, id).await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,
@@ -360,9 +336,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_list() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let user_created1 = UserForCreate {
             ic_number: "1234567890".to_string(),
             password: "password".to_string(),
@@ -384,13 +359,12 @@ mod tests {
             district_id: 2,
         };
 
-        // -- Exec
-        let id1 = UserModelController::create(&context, &model_manager, user_created1).await?;
-        let id2 = UserModelController::create(&context, &model_manager, user_created2).await?;
-        let users = UserModelController::list(&context, &model_manager).await?;
+        // Execute
+        let id1 = UserModelController::create(&model_manager, user_created1).await?;
+        let id2 = UserModelController::create(&model_manager, user_created2).await?;
+        let users = UserModelController::list(&model_manager).await?;
 
-        // -- Check
-        // Seeded 5 at the first place
+        // Check
         assert_eq!(users.len(), 5);
         assert_eq!(users[3].ic_number, "1234567890");
         assert_eq!(users[4].ic_number, "9876543210");
@@ -415,9 +389,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_update() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let user_created = UserForCreate {
             ic_number: "1234567890".to_string(),
             password: "password".to_string(),
@@ -429,8 +402,8 @@ mod tests {
             district_id: 1,
         };
 
-        // -- Exec
-        let id = UserModelController::create(&context, &model_manager, user_created).await?;
+        // Execute
+        let id = UserModelController::create(&model_manager, user_created).await?;
 
         let user_updated = UserForUpdate {
             password: Some("new_password".to_string()),
@@ -441,10 +414,10 @@ mod tests {
             district_id: Some(2),
         };
 
-        UserModelController::update(&context, &model_manager, id, user_updated).await?;
+        UserModelController::update(&model_manager, id, user_updated).await?;
 
-        // -- Check
-        let user = UserModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let user = UserModelController::get(&model_manager, id).await?;
         assert_eq!(user.ic_number, "1234567890");
         assert_eq!(user.password, "new_password");
         assert_eq!(user.name, "John Doe");
@@ -469,9 +442,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn get_by_email_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let user_created = UserForCreate {
             ic_number: "1234567890".to_string(),
             password: "password".to_string(),
@@ -483,12 +455,12 @@ mod tests {
             district_id: 1,
         };
 
-        let id = UserModelController::create(&context, &model_manager, user_created).await?;
+        let id = UserModelController::create(&model_manager, user_created).await?;
 
-        // -- Exec
+        // Execute
         let user = UserModelController::get_by_ic_number(&model_manager, "1234567890").await?;
 
-        // -- Check
+        // Check
         assert_eq!(user.email, "john@example.com");
         assert_eq!(user.password, "password");
         assert_eq!(user.name, "John Doe");
@@ -511,13 +483,13 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn get_by_email_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
 
-        // -- Exec
+        // Execute
         let res = UserModelController::get_by_ic_number(&model_manager, "invalidic").await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,
@@ -533,4 +505,3 @@ mod tests {
         Ok(())
     }
 }
-// endregion: --- Tests

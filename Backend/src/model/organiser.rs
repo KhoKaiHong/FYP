@@ -1,12 +1,12 @@
-use crate::context::Context;
+// Modules
 use crate::model::EntityErrorField::{I64Error, StringError};
 use crate::model::{Error, ModelManager, Result};
+
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgDatabaseError;
 use sqlx::FromRow;
 
-// region:    --- Organiser Types
-
+// Organiser
 #[derive(Debug, FromRow, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Organiser {
@@ -18,6 +18,7 @@ pub struct Organiser {
     pub phone_number: String,
 }
 
+// Fields used to create an organiser.
 #[derive(Deserialize)]
 pub struct OrganiserForCreate {
     pub email: String,
@@ -26,6 +27,7 @@ pub struct OrganiserForCreate {
     pub phone_number: String,
 }
 
+// Fields used to update an organiser.
 #[derive(Deserialize)]
 pub struct OrganiserForUpdate {
     pub email: Option<String>,
@@ -34,14 +36,12 @@ pub struct OrganiserForUpdate {
     pub phone_number: Option<String>,
 }
 
-// endregion:    --- Organiser Types
-
-// region:    --- Organiser Model Controller
+// Organiser Model Controller
 pub struct OrganiserModelController;
 
 impl OrganiserModelController {
+    // Creates an organiser.
     pub async fn create(
-        context: &Context,
         model_manager: &ModelManager,
         organiser_created: OrganiserForCreate,
     ) -> Result<i64> {
@@ -61,11 +61,8 @@ impl OrganiserModelController {
         Ok(id)
     }
 
-    pub async fn get(
-        context: &Context,
-        model_manager: &ModelManager,
-        id: i64,
-    ) -> Result<Organiser> {
+    // Gets an organiser by id.
+    pub async fn get(model_manager: &ModelManager, id: i64) -> Result<Organiser> {
         let db = model_manager.db();
 
         let organiser = sqlx::query_as("SELECT * FROM event_organisers WHERE id = $1")
@@ -80,6 +77,7 @@ impl OrganiserModelController {
         Ok(organiser)
     }
 
+    // Gets an organiser by email.
     pub async fn get_by_email(model_manager: &ModelManager, email: &str) -> Result<Organiser> {
         let db = model_manager.db();
 
@@ -95,18 +93,8 @@ impl OrganiserModelController {
         Ok(organiser)
     }
 
-    pub async fn list(context: &Context, model_manager: &ModelManager) -> Result<Vec<Organiser>> {
-        let db = model_manager.db();
-
-        let organisers = sqlx::query_as("SELECT * FROM event_organisers ORDER BY id")
-            .fetch_all(db)
-            .await?;
-
-        Ok(organisers)
-    }
-
+    // Updates an organiser.
     pub async fn update(
-        context: &Context,
         model_manager: &ModelManager,
         id: i64,
         organiser_updated: OrganiserForUpdate,
@@ -178,9 +166,8 @@ impl OrganiserModelController {
         Ok(())
     }
 }
-// endregion: --- Organiser Model Controller
 
-// check for duplicate constraints
+// Function that checks for duplicate constraint errors
 fn check_duplicate(err: sqlx::Error) -> Error {
     match err {
         sqlx::Error::Database(ref e) => {
@@ -208,8 +195,7 @@ fn check_duplicate(err: sqlx::Error) -> Error {
     }
 }
 
-// Backend/src/model/organiser.rs
-// region:    --- Tests
+// Unit tests
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -220,9 +206,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_create() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let organiser_created = OrganiserForCreate {
             email: "test_create_ok@example.com".to_string(),
             password: "welcome".to_string(),
@@ -230,12 +215,11 @@ mod tests {
             phone_number: "1234567890".to_string(),
         };
 
-        // -- Exec
-        let id =
-            OrganiserModelController::create(&context, &model_manager, organiser_created).await?;
+        // Execute
+        let id = OrganiserModelController::create(&model_manager, organiser_created).await?;
 
-        // -- Check
-        let organiser = OrganiserModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let organiser = OrganiserModelController::get(&model_manager, id).await?;
         assert_eq!(organiser.email, "test_create_ok@example.com");
         assert_eq!(organiser.password, "welcome");
         assert_eq!(organiser.name, "Test Organiser");
@@ -255,15 +239,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_get_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let id = 100;
 
-        // -- Exec
-        let res = OrganiserModelController::get(&context, &model_manager, id).await;
+        // Execute
+        let res = OrganiserModelController::get(&model_manager, id).await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,
@@ -280,66 +263,9 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn test_list() -> Result<()> {
-        // -- Setup & Fixtures
-        let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
-
-        let organiser_created1 = OrganiserForCreate {
-            email: "test_email1@example.com".to_string(),
-            password: "welcome1".to_string(),
-            name: "Test Organiser 01".to_string(),
-            phone_number: "1234567890".to_string(),
-        };
-        let organiser_created2 = OrganiserForCreate {
-            email: "test_email2@example.com".to_string(),
-            password: "welcome2".to_string(),
-            name: "Test Organiser 02".to_string(),
-            phone_number: "987654321".to_string(),
-        };
-
-        let id1 =
-            OrganiserModelController::create(&context, &model_manager, organiser_created1).await?;
-        let id2 =
-            OrganiserModelController::create(&context, &model_manager, organiser_created2).await?;
-        let organisers = OrganiserModelController::list(&context, &model_manager).await?;
-
-        // Check
-        assert_eq!(organisers.len(), 5, "Number of organisers");
-        assert_eq!(organisers[3].id, id1);
-        assert_eq!(organisers[4].id, id2);
-        assert_eq!(organisers[3].email, "test_email1@example.com");
-        assert_eq!(organisers[4].email, "test_email2@example.com");
-        assert_eq!(organisers[3].password, "welcome1");
-        assert_eq!(organisers[4].password, "welcome2");
-        assert_eq!(organisers[3].name, "Test Organiser 01");
-        assert_eq!(organisers[4].name, "Test Organiser 02");
-        assert_eq!(organisers[3].phone_number, "1234567890");
-        assert_eq!(organisers[4].phone_number, "987654321");
-
-        for organiser in organisers.iter() {
-            println!("organiser: {:?}", organiser);
-        }
-
-        // Clean
-        sqlx::query("DELETE FROM event_organisers WHERE id = $1")
-            .bind(id1)
-            .execute(model_manager.db())
-            .await?;
-        sqlx::query("DELETE FROM event_organisers WHERE id = $1")
-            .bind(id2)
-            .execute(model_manager.db())
-            .await?;
-
-        Ok(())
-    }
-
-    #[tokio::test]
-    #[serial]
     async fn test_update_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let organiser_created = OrganiserForCreate {
             email: "test_list_ok@example.com".to_string(),
             password: "welcome".to_string(),
@@ -347,8 +273,7 @@ mod tests {
             phone_number: "1234567890".to_string(),
         };
 
-        let id =
-            OrganiserModelController::create(&context, &model_manager, organiser_created).await?;
+        let id = OrganiserModelController::create(&model_manager, organiser_created).await?;
 
         let organiser_updated = OrganiserForUpdate {
             email: Some("new_email@gmail.com".to_string()),
@@ -357,10 +282,10 @@ mod tests {
             phone_number: None,
         };
 
-        OrganiserModelController::update(&context, &model_manager, id, organiser_updated).await?;
+        OrganiserModelController::update(&model_manager, id, organiser_updated).await?;
 
-        // -- Check
-        let organiser = OrganiserModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let organiser = OrganiserModelController::get(&model_manager, id).await?;
         assert_eq!(organiser.email, "new_email@gmail.com");
         assert_eq!(organiser.password, "welcome");
         assert_eq!(organiser.name, "New name");
@@ -380,9 +305,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn get_by_email_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let organiser_created = OrganiserForCreate {
             email: "test_create_ok@example.com".to_string(),
             password: "welcome".to_string(),
@@ -390,15 +314,14 @@ mod tests {
             phone_number: "1234567890".to_string(),
         };
 
-        let id =
-            OrganiserModelController::create(&context, &model_manager, organiser_created).await?;
+        let id = OrganiserModelController::create(&model_manager, organiser_created).await?;
 
-        // -- Exec
+        // Execute
         let organiser =
             OrganiserModelController::get_by_email(&model_manager, "test_create_ok@example.com")
                 .await?;
 
-        // -- Check
+        // Check
         assert_eq!(organiser.email, "test_create_ok@example.com");
         assert_eq!(organiser.password, "welcome");
         assert_eq!(organiser.name, "Test Organiser");
@@ -418,15 +341,15 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn get_by_email_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
 
-        // -- Exec
+        // Execute
         let res =
             OrganiserModelController::get_by_email(&model_manager, "test_list_ok@example.com")
                 .await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,

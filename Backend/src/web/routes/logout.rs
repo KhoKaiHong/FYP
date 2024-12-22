@@ -64,15 +64,20 @@ async fn logout_user(
     refresh_token_jti: Uuid,
     model_manager: &ModelManager,
 ) -> Result<()> {
-    UserSessionModelController::delete_by_session(&context, model_manager, refresh_token_jti)
-        .await
-        .map_err(|err| match err {
-            model::Error::EntityNotFound {
-                entity: "user_session",
-                field: UuidError(refresh_token_jti),
-            } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
-            _ => Error::ModelError(err),
-        })?;
+    UserSessionModelController::delete_by_session(
+        model_manager,
+        refresh_token_jti,
+        context.token_id(),
+        context.user_id(),
+    )
+    .await
+    .map_err(|err| match err {
+        model::Error::EntityNotFound {
+            entity: "user_session",
+            field: UuidError(refresh_token_jti),
+        } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
+        _ => Error::ModelError(err),
+    })?;
 
     Ok(())
 }
@@ -82,15 +87,20 @@ async fn logout_facility(
     refresh_token_jti: Uuid,
     model_manager: &ModelManager,
 ) -> Result<()> {
-    FacilitySessionModelController::delete_by_session(model_manager, refresh_token_jti, context.token_id(), context.user_id())
-        .await
-        .map_err(|err| match err {
-            model::Error::EntityNotFound {
-                entity: "facility_session",
-                field: UuidError(refresh_token_jti),
-            } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
-            _ => Error::ModelError(err),
-        })?;
+    FacilitySessionModelController::delete_by_session(
+        model_manager,
+        refresh_token_jti,
+        context.token_id(),
+        context.user_id(),
+    )
+    .await
+    .map_err(|err| match err {
+        model::Error::EntityNotFound {
+            entity: "facility_session",
+            field: UuidError(refresh_token_jti),
+        } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
+        _ => Error::ModelError(err),
+    })?;
 
     Ok(())
 }
@@ -100,15 +110,20 @@ async fn logout_organiser(
     refresh_token_jti: Uuid,
     model_manager: &ModelManager,
 ) -> Result<()> {
-    OrganiserSessionModelController::delete_by_session(&context, model_manager, refresh_token_jti)
-        .await
-        .map_err(|err| match err {
-            model::Error::EntityNotFound {
-                entity: "organiser_session",
-                field: UuidError(refresh_token_jti),
-            } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
-            _ => Error::ModelError(err),
-        })?;
+    OrganiserSessionModelController::delete_by_session(
+        model_manager,
+        refresh_token_jti,
+        context.token_id(),
+        context.user_id(),
+    )
+    .await
+    .map_err(|err| match err {
+        model::Error::EntityNotFound {
+            entity: "organiser_session",
+            field: UuidError(refresh_token_jti),
+        } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
+        _ => Error::ModelError(err),
+    })?;
 
     Ok(())
 }
@@ -118,15 +133,20 @@ async fn logout_admin(
     refresh_token_jti: Uuid,
     model_manager: &ModelManager,
 ) -> Result<()> {
-    AdminSessionModelController::delete_by_session(model_manager, refresh_token_jti, context.token_id(), context.user_id())
-        .await
-        .map_err(|err| match err {
-            model::Error::EntityNotFound {
-                entity: "admin_session",
-                field: UuidError(refresh_token_jti),
-            } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
-            _ => Error::ModelError(err),
-        })?;
+    AdminSessionModelController::delete_by_session(
+        model_manager,
+        refresh_token_jti,
+        context.token_id(),
+        context.user_id(),
+    )
+    .await
+    .map_err(|err| match err {
+        model::Error::EntityNotFound {
+            entity: "admin_session",
+            field: UuidError(refresh_token_jti),
+        } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
+        _ => Error::ModelError(err),
+    })?;
 
     Ok(())
 }

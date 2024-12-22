@@ -2,7 +2,6 @@ use crate::auth::{
     self, password::validate_password, token::generate_access_token, token::generate_refresh_token,
     Role,
 };
-use crate::context::Context;
 use crate::model;
 use crate::model::admin::AdminModelController;
 use crate::model::admin_session::{AdminSessionForCreate, AdminSessionModelController};
@@ -67,9 +66,7 @@ async fn user_login_handler(
         user_id: user.id,
     };
 
-    let context = Context::new(user.id, Role::User, access_token_id);
-
-    UserSessionModelController::create(&context, &app_state.model_manager, user_session).await?;
+    UserSessionModelController::create(&app_state.model_manager, user_session).await?;
 
     let body = Json(json!({
         "data": {
@@ -189,9 +186,7 @@ async fn organiser_login_handler(
         organiser_id: organiser.id,
     };
 
-    let context = Context::new(organiser.id, Role::Organiser, access_token_id);
-
-    OrganiserSessionModelController::create(&context, &app_state.model_manager, organiser_session)
+    OrganiserSessionModelController::create(&app_state.model_manager, organiser_session)
         .await?;
 
     let body = Json(json!({

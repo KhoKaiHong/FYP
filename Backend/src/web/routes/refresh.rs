@@ -111,7 +111,7 @@ async fn refresh_user_token(
     let refresh_token_jti = Uuid::try_parse(refresh_token_claims.jti())
         .map_err(|_| Error::RefreshFailInvalidRefreshToken)?;
 
-    let user_session = UserSessionModelController::get(&context, model_manager, refresh_token_jti)
+    let user_session = UserSessionModelController::get(model_manager, refresh_token_jti)
         .await
         .map_err(|err| match err {
             model::Error::EntityNotFound {
@@ -143,13 +143,8 @@ async fn refresh_user_token(
             user_id: access_token_claims.id(),
         };
 
-        UserSessionModelController::update(
-            &context,
-            &model_manager,
-            updated_user_session,
-            refresh_token_jti,
-        )
-        .await?;
+        UserSessionModelController::update(&model_manager, updated_user_session, refresh_token_jti)
+            .await?;
         Ok((new_access_token, new_refresh_token))
     } else {
         Err(Error::RefreshFailNoSessionFound)
@@ -174,16 +169,15 @@ async fn refresh_facility_token(
     let refresh_token_jti = Uuid::try_parse(refresh_token_claims.jti())
         .map_err(|_| Error::RefreshFailInvalidRefreshToken)?;
 
-    let facility_session =
-        FacilitySessionModelController::get(model_manager, refresh_token_jti)
-            .await
-            .map_err(|err| match err {
-                model::Error::EntityNotFound {
-                    entity: "facility_session",
-                    field: UuidError(refresh_token_jti),
-                } if refresh_token_jti == refresh_token_jti => Error::RefreshFailNoSessionFound,
-                _ => Error::ModelError(err),
-            })?;
+    let facility_session = FacilitySessionModelController::get(model_manager, refresh_token_jti)
+        .await
+        .map_err(|err| match err {
+            model::Error::EntityNotFound {
+                entity: "facility_session",
+                field: UuidError(refresh_token_jti),
+            } if refresh_token_jti == refresh_token_jti => Error::RefreshFailNoSessionFound,
+            _ => Error::ModelError(err),
+        })?;
 
     if facility_session.facility_id == access_token_claims.id()
         && facility_session.access_token_id == access_token_jti
@@ -237,16 +231,15 @@ async fn refresh_organiser_token(
     let refresh_token_jti = Uuid::try_parse(refresh_token_claims.jti())
         .map_err(|_| Error::RefreshFailInvalidRefreshToken)?;
 
-    let organiser_session =
-        OrganiserSessionModelController::get(&context, model_manager, refresh_token_jti)
-            .await
-            .map_err(|err| match err {
-                model::Error::EntityNotFound {
-                    entity: "organiser_session",
-                    field: UuidError(refresh_token_jti),
-                } if refresh_token_jti == refresh_token_jti => Error::RefreshFailNoSessionFound,
-                _ => Error::ModelError(err),
-            })?;
+    let organiser_session = OrganiserSessionModelController::get(model_manager, refresh_token_jti)
+        .await
+        .map_err(|err| match err {
+            model::Error::EntityNotFound {
+                entity: "organiser_session",
+                field: UuidError(refresh_token_jti),
+            } if refresh_token_jti == refresh_token_jti => Error::RefreshFailNoSessionFound,
+            _ => Error::ModelError(err),
+        })?;
 
     if organiser_session.organiser_id == access_token_claims.id()
         && organiser_session.access_token_id == access_token_jti
@@ -271,7 +264,6 @@ async fn refresh_organiser_token(
         };
 
         OrganiserSessionModelController::update(
-            &context,
             &model_manager,
             updated_organiser_session,
             refresh_token_jti,
@@ -301,16 +293,15 @@ async fn refresh_admin_token(
     let refresh_token_jti = Uuid::try_parse(refresh_token_claims.jti())
         .map_err(|_| Error::RefreshFailInvalidRefreshToken)?;
 
-    let admin_session =
-        AdminSessionModelController::get(model_manager, refresh_token_jti)
-            .await
-            .map_err(|err| match err {
-                model::Error::EntityNotFound {
-                    entity: "admin_session",
-                    field: UuidError(refresh_token_jti),
-                } if refresh_token_jti == refresh_token_jti => Error::RefreshFailNoSessionFound,
-                _ => Error::ModelError(err),
-            })?;
+    let admin_session = AdminSessionModelController::get(model_manager, refresh_token_jti)
+        .await
+        .map_err(|err| match err {
+            model::Error::EntityNotFound {
+                entity: "admin_session",
+                field: UuidError(refresh_token_jti),
+            } if refresh_token_jti == refresh_token_jti => Error::RefreshFailNoSessionFound,
+            _ => Error::ModelError(err),
+        })?;
 
     if admin_session.admin_id == access_token_claims.id()
         && admin_session.access_token_id == access_token_jti

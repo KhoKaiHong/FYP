@@ -46,7 +46,7 @@ async fn get_user_credentials(
     context: &Context,
     model_manager: &ModelManager,
 ) -> Result<Json<Value>> {
-    let user = UserModelController::get(context, model_manager, context.user_id())
+    let user = UserModelController::get(model_manager, context.user_id())
         .await
         .map_err(|err| match err {
             model::Error::EntityNotFound {
@@ -92,7 +92,7 @@ async fn get_organiser_credentials(
     context: &Context,
     model_manager: &ModelManager,
 ) -> Result<Json<Value>> {
-    let organiser = OrganiserModelController::get(context, model_manager, context.user_id())
+    let organiser = OrganiserModelController::get(model_manager, context.user_id())
         .await
         .map_err(|err| match err {
             model::Error::EntityNotFound {

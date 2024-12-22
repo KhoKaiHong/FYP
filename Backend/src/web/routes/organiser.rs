@@ -28,7 +28,7 @@ async fn organiser_update_handler(
 
     if let (Some(password), Some(current_password)) = (payload.password, payload.current_password) {
         let organiser =
-            OrganiserModelController::get(&context, &app_state.model_manager, context.user_id())
+            OrganiserModelController::get(&app_state.model_manager, context.user_id())
                 .await?;
 
         validate_password(&current_password, &organiser.password)
@@ -50,7 +50,6 @@ async fn organiser_update_handler(
 
         // Update user with new details
         OrganiserModelController::update(
-            &context,
             model_manager,
             context.user_id(),
             updated_details,
@@ -67,7 +66,6 @@ async fn organiser_update_handler(
 
         // Update user with new details
         OrganiserModelController::update(
-            &context,
             model_manager,
             context.user_id(),
             updated_details,

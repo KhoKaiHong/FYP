@@ -20,9 +20,8 @@ async fn list_states_handler(
     debug!("{:<12} - list_states_api", "HANDLER");
 
     let model_manager = &app_state.model_manager;
-    let context =  Context::root_ctx();
 
-    let states = StateModelController::list(&context, model_manager).await?;
+    let states = StateModelController::list(model_manager).await?;
 
     let body = Json(json!({
         "data": {

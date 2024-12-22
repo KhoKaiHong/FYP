@@ -55,10 +55,11 @@ async fn event_registration_handler(
 
     let registration = RegistrationForCreate {
         event_id: payload.event_id,
+        user_id: context.user_id(),
     };
 
     let registration_id =
-        RegistrationModelController::create(&context, model_manager, registration).await?;
+        RegistrationModelController::create(model_manager, registration).await?;
 
     let body = Json(json!({
         "data": {
@@ -85,7 +86,7 @@ async fn list_registrations_by_event_id(
     let model_manager = &app_state.model_manager;
 
     let registrations =
-        RegistrationModelController::list_by_event_id(&context, model_manager, payload.event_id)
+        RegistrationModelController::list_by_event_id(model_manager, payload.event_id)
             .await?;
 
     let body = Json(json!({
@@ -122,7 +123,6 @@ async fn update_registration_status_handler(
     match status {
         RegistrationStatus::Absent => {
             RegistrationModelController::update(
-                &context,
                 model_manager,
                 payload.registration_id,
                 registration_updated,
@@ -130,7 +130,7 @@ async fn update_registration_status_handler(
             .await?;
 
             let registration =
-                RegistrationModelController::get(&context, model_manager, payload.registration_id)
+                RegistrationModelController::get(model_manager, payload.registration_id)
                     .await?;
 
             let user_notification = UserNotificationForCreate {
@@ -140,12 +140,11 @@ async fn update_registration_status_handler(
                 user_id: registration.user_id,
             };
 
-            UserNotificationModelController::create(&context, model_manager, user_notification)
+            UserNotificationModelController::create(model_manager, user_notification)
                 .await?;
         }
         RegistrationStatus::Attended => {
             RegistrationModelController::update(
-                &context,
                 model_manager,
                 payload.registration_id,
                 registration_updated,
@@ -153,7 +152,7 @@ async fn update_registration_status_handler(
             .await?;
 
             let registration =
-                RegistrationModelController::get(&context, model_manager, payload.registration_id)
+                RegistrationModelController::get(model_manager, payload.registration_id)
                     .await?;
 
             let donation_history = DonationHistoryForCreate {
@@ -173,7 +172,7 @@ async fn update_registration_status_handler(
                 district_id: None,
             };
 
-            UserModelController::update(&context, model_manager, registration.user_id, updated_user).await?;
+            UserModelController::update(model_manager, registration.user_id, updated_user).await?;
 
             let user_notification = UserNotificationForCreate {
                 description: "You have been marked as present from a blood donation event you are registered in."
@@ -182,7 +181,7 @@ async fn update_registration_status_handler(
                 user_id: registration.user_id,
             };
 
-            UserNotificationModelController::create(&context, model_manager, user_notification)
+            UserNotificationModelController::create(model_manager, user_notification)
                 .await?;
         }
         RegistrationStatus::Registered => {

@@ -1,25 +1,17 @@
-use crate::context::Context;
+// Modules
+use crate::model::enums::{BloodType, RegistrationStatus};
 use crate::model::EntityErrorField::I64Error;
 use crate::model::{Error, ModelManager, Result};
-use crate::model::enums::{BloodType, RegistrationStatus};
+
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgRow;
-use sqlx::{FromRow, Row, Type};
+use sqlx::{FromRow, Row};
 
-// region:    --- Registration Types
-#[derive(Debug, FromRow)]
-pub struct Registration {
-    pub id: i64,
-    pub status: RegistrationStatus,
-    pub event_id: i64,
-    pub user_id: i64,
-    pub registered_at: DateTime<Utc>,
-}
-
+// Registration
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct RegistrationWithInformation {
+pub struct Registration {
     pub id: i64,
     pub status: RegistrationStatus,
     pub event_id: i64,
@@ -39,9 +31,10 @@ pub struct RegistrationWithInformation {
     pub registered_at: DateTime<Utc>,
 }
 
-impl<'r> FromRow<'r, PgRow> for RegistrationWithInformation {
+// Defines how to convert a row from the database into an Registration struct.
+impl<'r> FromRow<'r, PgRow> for Registration {
     fn from_row(row: &'r PgRow) -> core::result::Result<Self, sqlx::Error> {
-        Ok(RegistrationWithInformation {
+        Ok(Registration {
             id: row.try_get("id")?,
             status: row.try_get("status")?,
             event_location: row.try_get("event_location")?,
@@ -65,27 +58,27 @@ impl<'r> FromRow<'r, PgRow> for RegistrationWithInformation {
     }
 }
 
+// Fields used to create a registration.
 #[derive(Deserialize)]
 pub struct RegistrationForCreate {
     pub event_id: i64,
+    pub user_id: i64,
 }
 
+// Fields used to uptdate a registration.
 #[derive(Deserialize)]
 pub struct RegistrationForUpdate {
     pub status: Option<RegistrationStatus>,
 }
 
-// endregion:    --- Registration Types
-
-// region:    --- Registration Errors to propagate to client
+// Registration Errors to propagate to client
 #[derive(Debug, Serialize)]
 pub enum RegistrationError {
     EventAtCapacity,
     ExistingEventRegistration,
 }
-// endregion:    --- Registration Errors to propagate to client
 
-// region:    --- Error Boilerplate
+// Error boilerplate
 impl core::fmt::Display for RegistrationError {
     fn fmt(&self, fmt: &mut core::fmt::Formatter) -> core::result::Result<(), core::fmt::Error> {
         write!(fmt, "{self:?}")
@@ -93,14 +86,13 @@ impl core::fmt::Display for RegistrationError {
 }
 
 impl std::error::Error for RegistrationError {}
-// endregion: --- Error Boilerplate
 
-// region:    --- Registration Model Controller
+// Registration Model Controller
 pub struct RegistrationModelController;
 
 impl RegistrationModelController {
+    // Creates a new registration
     pub async fn create(
-        context: &Context,
         model_manager: &ModelManager,
         registration_created: RegistrationForCreate,
     ) -> Result<i64> {
@@ -129,15 +121,17 @@ impl RegistrationModelController {
             FOR UPDATE
             ",
         )
-        .bind(context.user_id())
+        .bind(registration_created.user_id)
         .fetch_optional(&mut *transaction)
         .await?;
 
         if already_registered.is_some() {
             transaction.rollback().await?;
-            return Err(Error::EventRegistration(RegistrationError::ExistingEventRegistration)); 
+            return Err(Error::EventRegistration(
+                RegistrationError::ExistingEventRegistration,
+            ));
         }
-    
+
         if current_attendees >= max_attendees as i64 {
             transaction.rollback().await?;
             return Err(Error::EventRegistration(RegistrationError::EventAtCapacity));
@@ -147,7 +141,7 @@ impl RegistrationModelController {
             "INSERT INTO registrations (event_id, user_id) values ($1, $2) returning id",
         )
         .bind(registration_created.event_id)
-        .bind(context.user_id())
+        .bind(registration_created.user_id)
         .fetch_one(&mut *transaction)
         .await?;
 
@@ -156,11 +150,8 @@ impl RegistrationModelController {
         Ok(id)
     }
 
-    pub async fn get(
-        context: &Context,
-        model_manager: &ModelManager,
-        id: i64,
-    ) -> Result<RegistrationWithInformation> {
+    // Gets a new registration
+    pub async fn get(model_manager: &ModelManager, id: i64) -> Result<Registration> {
         let db = model_manager.db();
 
         let registration = sqlx::query_as(
@@ -177,26 +168,11 @@ impl RegistrationModelController {
         Ok(registration)
     }
 
-    pub async fn list(
-        context: &Context,
-        model_manager: &ModelManager,
-    ) -> Result<Vec<RegistrationWithInformation>> {
-        let db = model_manager.db();
-
-        let registrations = sqlx::query_as(
-            "SELECT registrations.*, blood_donation_events.location AS event_location, blood_donation_events.address AS event_address, blood_donation_events.start_time AS event_start_time, blood_donation_events.end_time AS event_end_time, blood_donation_events.max_attendees AS event_max_attendees, blood_donation_events.latitude AS event_latitude, blood_donation_events.longitude AS event_longitude, users.ic_number AS user_ic_number, users.name AS user_name, users.email AS user_email, users.phone_number AS user_phone_number, users.blood_type AS user_blood_type FROM registrations JOIN blood_donation_events ON registrations.event_id = blood_donation_events.id JOIN users ON registrations.user_id = users.id ORDER BY id",
-        )
-        .fetch_all(db)
-        .await?;
-
-        Ok(registrations)
-    }
-
+    // Lists all registrations for an event
     pub async fn list_by_event_id(
-        context: &Context,
         model_manager: &ModelManager,
         event_id: i64,
-    ) -> Result<Vec<RegistrationWithInformation>> {
+    ) -> Result<Vec<Registration>> {
         let db = model_manager.db();
 
         sqlx::query_as::<_, (i32,)>("SELECT 1 FROM blood_donation_events WHERE id = $1")
@@ -218,10 +194,11 @@ impl RegistrationModelController {
         Ok(registrations)
     }
 
+    // Lists all registrations for a user
     pub async fn list_by_user_id(
         model_manager: &ModelManager,
         user_id: i64,
-    ) -> Result<Vec<RegistrationWithInformation>> {
+    ) -> Result<Vec<Registration>> {
         let db = model_manager.db();
 
         let registrations = sqlx::query_as(
@@ -234,8 +211,8 @@ impl RegistrationModelController {
         Ok(registrations)
     }
 
+    // Updates a registration
     pub async fn update(
-        context: &Context,
         model_manager: &ModelManager,
         id: i64,
         registration_updated: RegistrationForUpdate,
@@ -269,27 +246,8 @@ impl RegistrationModelController {
         Ok(())
     }
 
-    pub async fn delete(context: &Context, model_manager: &ModelManager, id: i64) -> Result<()> {
-        let db = model_manager.db();
-
-        let count = sqlx::query("DELETE from registrations where id = $1")
-            .bind(id)
-            .execute(db)
-            .await?
-            .rows_affected();
-
-        if count == 0 {
-            return Err(Error::EntityNotFound {
-                entity: "registration",
-                field: I64Error(id),
-            });
-        }
-
-        Ok(())
-    }
-
+    // Gets number of registrations for an event
     pub async fn get_num_of_registrations(
-        context: &Context,
         model_manager: &ModelManager,
         event_id: i64,
     ) -> Result<i64> {
@@ -315,32 +273,29 @@ impl RegistrationModelController {
     }
 }
 
-// region:    --- Tests
+// Unit tests
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{_dev_utils, auth::Role};
+    use crate::_dev_utils;
     use anyhow::Result;
     use serial_test::serial;
-    use uuid::Uuid;
 
     #[tokio::test]
     #[serial]
     async fn test_create_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::new(1000, Role::User, Uuid::new_v4());
         let registration_created = RegistrationForCreate {
             event_id: 1,
+            user_id: 1000,
         };
 
-        // -- Exec
-        let id =
-            RegistrationModelController::create(&context, &model_manager, registration_created)
-                .await?;
+        // Execute
+        let id = RegistrationModelController::create(&model_manager, registration_created).await?;
 
-        // -- Check
-        let registration = RegistrationModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let registration = RegistrationModelController::get(&model_manager, id).await?;
 
         println!("registration for test_create: {:?}", registration);
 
@@ -349,7 +304,10 @@ mod tests {
         assert_eq!(registration.status, RegistrationStatus::Registered);
 
         // Clean
-        RegistrationModelController::delete(&context, &model_manager, id).await?;
+        sqlx::query("DELETE from registrations where id = $1")
+            .bind(id)
+            .execute(model_manager.db())
+            .await?;
 
         Ok(())
     }
@@ -357,15 +315,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_get_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let id = 100;
 
-        // -- Exec
-        let res = RegistrationModelController::get(&context, &model_manager, id).await;
+        // Execute
+        let res = RegistrationModelController::get(&model_manager, id).await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,
@@ -382,64 +339,25 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn test_list_ok() -> Result<()> {
-        // -- Setup & Fixtures
-        let model_manager = _dev_utils::init_test().await;
-        let context1 = Context::new(1000, Role::User, Uuid::new_v4());
-        let registration_created1 = RegistrationForCreate {
-            event_id: 1,
-        };
-        let context2 = Context::new(1001, Role::User, Uuid::new_v4());
-        let registration_created2 = RegistrationForCreate {
-            event_id: 2,
-        };
-
-        // -- Exec
-        let id1 =
-            RegistrationModelController::create(&context1, &model_manager, registration_created1)
-                .await?;
-        let id2 =
-            RegistrationModelController::create(&context2, &model_manager, registration_created2)
-                .await?;
-        let registrations = RegistrationModelController::list(&context1, &model_manager).await?;
-
-        assert_eq!(registrations.len(), 5, "number of seeded registrations.");
-        assert_eq!(registrations[3].event_id, 1);
-        assert_eq!(registrations[4].event_id, 2);
-
-        println!("registration1 for test_update: {:?}", registrations[3]);
-        println!("registration2 for test_update: {:?}", registrations[4]);
-
-        // Clean
-        RegistrationModelController::delete(&context1, &model_manager, id1).await?;
-        RegistrationModelController::delete(&context2, &model_manager, id2).await?;
-
-        Ok(())
-    }
-
-    #[tokio::test]
-    #[serial]
     async fn test_list_by_event_id() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context1 = Context::new(1000, Role::User, Uuid::new_v4());
         let registration_created1 = RegistrationForCreate {
             event_id: 1,
+            user_id: 1000,
         };
-        let context2 = Context::new(1001, Role::User, Uuid::new_v4());
         let registration_created2 = RegistrationForCreate {
             event_id: 1,
+            user_id: 1001,
         };
 
-        // -- Exec
+        // Execute
         let id1 =
-            RegistrationModelController::create(&context1, &model_manager, registration_created1)
-                .await?;
+            RegistrationModelController::create(&model_manager, registration_created1).await?;
         let id2 =
-            RegistrationModelController::create(&context2, &model_manager, registration_created2)
-                .await?;
+            RegistrationModelController::create(&model_manager, registration_created2).await?;
         let registrations =
-            RegistrationModelController::list_by_event_id(&context1, &model_manager, 1).await?;
+            RegistrationModelController::list_by_event_id(&model_manager, 1).await?;
 
         assert_eq!(registrations.len(), 3, "number of seeded registrations.");
         assert_eq!(registrations[1].event_id, 1);
@@ -449,8 +367,14 @@ mod tests {
         println!("registration2 for test_update: {:?}", registrations[2]);
 
         // Clean
-        RegistrationModelController::delete(&context1, &model_manager, id1).await?;
-        RegistrationModelController::delete(&context1, &model_manager, id2).await?;
+        sqlx::query("DELETE from registrations where id = $1")
+            .bind(id1)
+            .execute(model_manager.db())
+            .await?;
+        sqlx::query("DELETE from registrations where id = $1")
+            .bind(id2)
+            .execute(model_manager.db())
+            .await?;
 
         Ok(())
     }
@@ -458,15 +382,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_list_by_event_id_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let id = 100;
 
-        // -- Exec
-        let res = RegistrationModelController::list_by_event_id(&context, &model_manager, id).await;
+        // Execute
+        let res = RegistrationModelController::list_by_event_id(&model_manager, id).await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,
@@ -485,61 +408,34 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_update_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::new(1000, Role::User, Uuid::new_v4());
         let registration_created = RegistrationForCreate {
             event_id: 1,
+            user_id: 1000,
         };
 
-        // -- Exec
-        let id =
-            RegistrationModelController::create(&context, &model_manager, registration_created)
-                .await?;
+        // Execute
+        let id = RegistrationModelController::create(&model_manager, registration_created).await?;
 
         let registration_updated = RegistrationForUpdate {
             status: Some(RegistrationStatus::Attended),
         };
 
-        RegistrationModelController::update(&context, &model_manager, id, registration_updated)
-            .await?;
+        RegistrationModelController::update(&model_manager, id, registration_updated).await?;
 
-        // -- Check
-        let registration = RegistrationModelController::get(&context, &model_manager, id).await?;
+        // Check
+        let registration = RegistrationModelController::get(&model_manager, id).await?;
         println!("registration for test_update: {:?}", registration);
         assert_eq!(registration.event_id, 1);
         assert_eq!(registration.user_id, 1000);
         assert_eq!(registration.status, RegistrationStatus::Attended);
 
         // Clean
-        RegistrationModelController::delete(&context, &model_manager, id).await?;
-
-        Ok(())
-    }
-
-    #[tokio::test]
-    #[serial]
-    async fn test_delete_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
-        let model_manager = _dev_utils::init_test().await;
-        let context = Context::new(1000, Role::User, Uuid::new_v4());
-        let id = 100;
-
-        // -- Exec
-        let res = RegistrationModelController::delete(&context, &model_manager, id).await;
-
-        // -- Check
-        assert!(
-            matches!(
-                res,
-                Err(Error::EntityNotFound {
-                    entity: "registration",
-                    field: I64Error(100),
-                })
-            ),
-            "Expected EntityNotFound error, got: {:?}",
-            res
-        );
+        sqlx::query("DELETE from registrations where id = $1")
+            .bind(id)
+            .execute(model_manager.db())
+            .await?;
 
         Ok(())
     }
@@ -547,34 +443,37 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_get_num_of_registrations() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context1 = Context::new(1000, Role::User, Uuid::new_v4());
         let registration_created1 = RegistrationForCreate {
             event_id: 1,
+            user_id: 1000,
         };
-        let context2 = Context::new(1001, Role::User, Uuid::new_v4());
         let registration_created2 = RegistrationForCreate {
             event_id: 1,
+            user_id: 1001,
         };
 
-        // -- Exec
+        // Execute
         let id1 =
-            RegistrationModelController::create(&context1, &model_manager, registration_created1)
-                .await?;
+            RegistrationModelController::create(&model_manager, registration_created1).await?;
         let id2 =
-            RegistrationModelController::create(&context2, &model_manager, registration_created2)
-                .await?;
+            RegistrationModelController::create(&model_manager, registration_created2).await?;
         let num_of_registrations =
-            RegistrationModelController::get_num_of_registrations(&context1, &model_manager, 1)
-                .await?;
+            RegistrationModelController::get_num_of_registrations(&model_manager, 1).await?;
 
-        // -- Check
+        // Check
         assert_eq!(num_of_registrations, 3);
 
         // Clean
-        RegistrationModelController::delete(&context1, &model_manager, id1).await?;
-        RegistrationModelController::delete(&context1, &model_manager, id2).await?;
+        sqlx::query("DELETE from registrations where id = $1")
+            .bind(id1)
+            .execute(model_manager.db())
+            .await?;
+        sqlx::query("DELETE from registrations where id = $1")
+            .bind(id2)
+            .execute(model_manager.db())
+            .await?;
 
         Ok(())
     }
@@ -582,17 +481,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_get_num_of_registrations_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let id = 100;
 
-        // -- Exec
-        let res =
-            RegistrationModelController::get_num_of_registrations(&context, &model_manager, id)
-                .await;
+        // Execute
+        let res = RegistrationModelController::get_num_of_registrations(&model_manager, id).await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,

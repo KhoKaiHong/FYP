@@ -27,8 +27,7 @@ async fn user_update_handler(
     let model_manager = &app_state.model_manager;
 
     if let (Some(password), Some(current_password)) = (payload.password, payload.current_password) {
-        let user =
-            UserModelController::get(&context, &app_state.model_manager, context.user_id()).await?;
+        let user = UserModelController::get(&app_state.model_manager, context.user_id()).await?;
 
         validate_password(&current_password, &user.password)
             .await
@@ -48,9 +47,9 @@ async fn user_update_handler(
             state_id: payload.state_id,
             district_id: payload.district_id,
         };
-        
+
         // Update user with new details
-        UserModelController::update(&context, model_manager, context.user_id(), updated_details)
+        UserModelController::update(model_manager, context.user_id(), updated_details)
             .await?;
     } else {
         // If no password update, prepare update details without password
@@ -62,9 +61,9 @@ async fn user_update_handler(
             state_id: payload.state_id,
             district_id: payload.district_id,
         };
-        
+
         // Update user with new details
-        UserModelController::update(&context, model_manager, context.user_id(), updated_details)
+        UserModelController::update(model_manager, context.user_id(), updated_details)
             .await?;
     }
 

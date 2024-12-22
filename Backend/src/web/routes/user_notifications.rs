@@ -49,7 +49,7 @@ async fn read_user_notification(
 
     let model_manager = &app_state.model_manager;
 
-    UserNotificationModelController::read_notification(&context, model_manager, payload.notification_id)
+    UserNotificationModelController::read_notification(model_manager, payload.notification_id)
         .await?;
 
     let body = Json(json!({

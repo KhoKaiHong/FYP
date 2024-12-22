@@ -64,17 +64,22 @@ async fn logout_all_user(
     refresh_token_jti: Uuid,
     model_manager: &ModelManager,
 ) -> Result<()> {
-    UserSessionModelController::check(&context, model_manager, refresh_token_jti)
-        .await
-        .map_err(|err| match err {
-            model::Error::EntityNotFound {
-                entity: "user_session",
-                field: UuidError(refresh_token_jti),
-            } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
-            _ => Error::ModelError(err),
-        })?;
+    UserSessionModelController::check(
+        model_manager,
+        refresh_token_jti,
+        context.token_id(),
+        context.user_id(),
+    )
+    .await
+    .map_err(|err| match err {
+        model::Error::EntityNotFound {
+            entity: "user_session",
+            field: UuidError(refresh_token_jti),
+        } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
+        _ => Error::ModelError(err),
+    })?;
 
-    UserSessionModelController::delete_by_user_id(&context, model_manager, context.user_id())
+    UserSessionModelController::delete_by_user_id(model_manager, context.user_id())
         .await
         .map_err(|err| match err {
             model::Error::EntityNotFound {
@@ -92,28 +97,30 @@ async fn logout_all_facility(
     refresh_token_jti: Uuid,
     model_manager: &ModelManager,
 ) -> Result<()> {
-    FacilitySessionModelController::check(model_manager, refresh_token_jti, context.token_id(), context.user_id())
-        .await
-        .map_err(|err| match err {
-            model::Error::EntityNotFound {
-                entity: "facility_session",
-                field: UuidError(refresh_token_jti),
-            } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
-            _ => Error::ModelError(err),
-        })?;
-
-    FacilitySessionModelController::delete_by_facility_id(
+    FacilitySessionModelController::check(
         model_manager,
+        refresh_token_jti,
+        context.token_id(),
         context.user_id(),
     )
     .await
     .map_err(|err| match err {
         model::Error::EntityNotFound {
             entity: "facility_session",
-            field: I64Error(facility_id),
-        } if facility_id == context.user_id() => Error::LogoutFailNoSessionFound,
+            field: UuidError(refresh_token_jti),
+        } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
         _ => Error::ModelError(err),
     })?;
+
+    FacilitySessionModelController::delete_by_facility_id(model_manager, context.user_id())
+        .await
+        .map_err(|err| match err {
+            model::Error::EntityNotFound {
+                entity: "facility_session",
+                field: I64Error(facility_id),
+            } if facility_id == context.user_id() => Error::LogoutFailNoSessionFound,
+            _ => Error::ModelError(err),
+        })?;
 
     Ok(())
 }
@@ -123,29 +130,30 @@ async fn logout_all_organiser(
     refresh_token_jti: Uuid,
     model_manager: &ModelManager,
 ) -> Result<()> {
-    OrganiserSessionModelController::check(&context, model_manager, refresh_token_jti)
-        .await
-        .map_err(|err| match err {
-            model::Error::EntityNotFound {
-                entity: "organiser_session",
-                field: UuidError(refresh_token_jti),
-            } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
-            _ => Error::ModelError(err),
-        })?;
-
-    OrganiserSessionModelController::delete_by_organiser_id(
-        &context,
+    OrganiserSessionModelController::check(
         model_manager,
+        refresh_token_jti,
+        context.token_id(),
         context.user_id(),
     )
     .await
     .map_err(|err| match err {
         model::Error::EntityNotFound {
             entity: "organiser_session",
-            field: I64Error(organiser_id),
-        } if organiser_id == context.user_id() => Error::LogoutFailNoSessionFound,
+            field: UuidError(refresh_token_jti),
+        } if refresh_token_jti == refresh_token_jti => Error::LogoutFailNoSessionFound,
         _ => Error::ModelError(err),
     })?;
+
+    OrganiserSessionModelController::delete_by_organiser_id(model_manager, context.user_id())
+        .await
+        .map_err(|err| match err {
+            model::Error::EntityNotFound {
+                entity: "organiser_session",
+                field: I64Error(organiser_id),
+            } if organiser_id == context.user_id() => Error::LogoutFailNoSessionFound,
+            _ => Error::ModelError(err),
+        })?;
 
     Ok(())
 }

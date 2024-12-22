@@ -1,11 +1,12 @@
-use crate::context::Context;
+// Modules
 use crate::model::EntityErrorField::{I64Error, UuidError};
 use crate::model::{Error, ModelManager, Result};
+
 use serde::Deserialize;
 use sqlx::FromRow;
 use uuid::Uuid;
 
-// region:    --- User Session Types
+// User Session
 #[derive(Debug, FromRow)]
 pub struct UserSession {
     pub refresh_token_id: Uuid,
@@ -13,20 +14,20 @@ pub struct UserSession {
     pub user_id: i64,
 }
 
+// Fields used to create a user session.
 #[derive(Debug, Deserialize)]
 pub struct UserSessionForCreate {
     pub refresh_token_id: Uuid,
     pub access_token_id: Uuid,
     pub user_id: i64,
 }
-// endregion:    --- User Session Types
 
-// region:    --- User Session Model Controller
+// User Session Model Controller
 pub struct UserSessionModelController;
 
 impl UserSessionModelController {
+    // Creates a new user session.
     pub async fn create(
-        context: &Context,
         model_manager: &ModelManager,
         user_session_created: UserSessionForCreate,
     ) -> Result<()> {
@@ -44,11 +45,8 @@ impl UserSessionModelController {
         Ok(())
     }
 
-    pub async fn get(
-        context: &Context,
-        model_manager: &ModelManager,
-        refresh_token_id: Uuid,
-    ) -> Result<UserSession> {
+    // Gets a user session by its id.
+    pub async fn get(model_manager: &ModelManager, refresh_token_id: Uuid) -> Result<UserSession> {
         let db = model_manager.db();
 
         let user_session =
@@ -64,23 +62,8 @@ impl UserSessionModelController {
         Ok(user_session)
     }
 
-    pub async fn list_by_user_id(
-        context: &Context,
-        model_manager: &ModelManager,
-        user_id: i64,
-    ) -> Result<Vec<UserSession>> {
-        let db = model_manager.db();
-
-        let user_sessions = sqlx::query_as("SELECT * FROM user_sessions WHERE user_id = $1")
-            .bind(user_id)
-            .fetch_all(db)
-            .await?;
-
-        Ok(user_sessions)
-    }
-
+    // Updates a user session.
     pub async fn update(
-        context: &Context,
         model_manager: &ModelManager,
         user_session_updated: UserSessionForCreate,
         refresh_token_id: Uuid,
@@ -106,39 +89,18 @@ impl UserSessionModelController {
         Ok(())
     }
 
-    pub async fn delete(
-        context: &Context,
-        model_manager: &ModelManager,
-        refresh_token_id: Uuid,
-    ) -> Result<()> {
-        let db = model_manager.db();
-
-        let count = sqlx::query("DELETE FROM user_sessions WHERE refresh_token_id = $1")
-            .bind(refresh_token_id)
-            .execute(db)
-            .await?
-            .rows_affected();
-
-        if count == 0 {
-            return Err(Error::EntityNotFound {
-                entity: "user_session",
-                field: UuidError(refresh_token_id),
-            });
-        }
-
-        Ok(())
-    }
-
+    // Deletes a user session by its id.
     pub async fn delete_by_session(
-        context: &Context,
         model_manager: &ModelManager,
         refresh_token_id: Uuid,
+        access_token_id: Uuid,
+        user_id: i64,
     ) -> Result<()> {
         let db = model_manager.db();
         let count = sqlx::query("DELETE FROM user_sessions WHERE refresh_token_id = $1 AND access_token_id = $2 AND user_id = $3")
             .bind(refresh_token_id)
-            .bind(context.token_id())
-            .bind(context.user_id())
+            .bind(access_token_id)
+            .bind(user_id)
             .execute(db)
             .await?
             .rows_affected();
@@ -151,11 +113,8 @@ impl UserSessionModelController {
         Ok(())
     }
 
-    pub async fn delete_by_user_id(
-        context: &Context,
-        model_manager: &ModelManager,
-        user_id: i64,
-    ) -> Result<()> {
+    // Deletes all user sessions for a user.
+    pub async fn delete_by_user_id(model_manager: &ModelManager, user_id: i64) -> Result<()> {
         let db = model_manager.db();
 
         let count = sqlx::query("DELETE FROM user_sessions WHERE user_id = $1")
@@ -174,17 +133,19 @@ impl UserSessionModelController {
         Ok(())
     }
 
+    // Checks if a user session exists.
     pub async fn check(
-        context: &Context,
         model_manager: &ModelManager,
         refresh_token_id: Uuid,
+        access_token_id: Uuid,
+        user_id: i64,
     ) -> Result<()> {
         let db = model_manager.db();
 
         sqlx::query_as::<_, (i32,)>("SELECT 1 FROM user_sessions WHERE refresh_token_id = $1 AND access_token_id = $2 AND user_id = $3 ")
             .bind(refresh_token_id)
-            .bind(context.token_id())
-            .bind(context.user_id())
+            .bind(access_token_id)
+            .bind(user_id)
             .fetch_optional(db)
             .await?
             .ok_or(Error::EntityNotFound {
@@ -195,9 +156,8 @@ impl UserSessionModelController {
         Ok(())
     }
 }
-// endregion:    --- User Session Model Controller
 
-// region:    --- Tests
+// Unit tests
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -208,9 +168,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_create_ok() -> Result<()> {
-        // -- Setup & Fixtures
-        let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
+        // Setup
+        let model_manager: ModelManager = _dev_utils::init_test().await;
 
         let refresh_token_id = Uuid::new_v4();
         let access_token_id = Uuid::new_v4();
@@ -221,17 +180,20 @@ mod tests {
             user_id: 1000,
         };
 
-        // -- Exec
-        UserSessionModelController::create(&context, &model_manager, user_session_created).await?;
+        // Execute
+        UserSessionModelController::create(&model_manager, user_session_created).await?;
 
-        // -- Check
+        // Check
         let user_session =
-            UserSessionModelController::get(&context, &model_manager, refresh_token_id).await?;
+            UserSessionModelController::get(&model_manager, refresh_token_id).await?;
         println!("\n\nuser_session: {:?}", user_session);
         assert_eq!(user_session.user_id, 1000);
 
         // Clean
-        UserSessionModelController::delete(&context, &model_manager, refresh_token_id).await?;
+        sqlx::query("DELETE FROM user_sessions WHERE refresh_token_id = $1")
+            .bind(refresh_token_id)
+            .execute(model_manager.db())
+            .await?;
 
         Ok(())
     }
@@ -239,15 +201,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_get_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let id = Uuid::new_v4();
 
-        // -- Exec
-        let res = UserSessionModelController::get(&context, &model_manager, id).await;
+        // Execute
+        let res = UserSessionModelController::get(&model_manager, id).await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,
@@ -264,52 +225,9 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn test_list_by_user_id() -> Result<()> {
-        // -- Setup & Fixtures
-        let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
-
-        let refresh_token_id1 = Uuid::new_v4();
-        let access_token_id1 = Uuid::new_v4();
-
-        let user_session_created1 = UserSessionForCreate {
-            refresh_token_id: refresh_token_id1,
-            access_token_id: access_token_id1,
-            user_id: 1000,
-        };
-
-        let refresh_token_id2 = Uuid::new_v4();
-        let access_token_id2 = Uuid::new_v4();
-
-        let user_session_created2 = UserSessionForCreate {
-            refresh_token_id: refresh_token_id2,
-            access_token_id: access_token_id2,
-            user_id: 1000,
-        };
-
-        // -- Exec
-        UserSessionModelController::create(&context, &model_manager, user_session_created1).await?;
-        UserSessionModelController::create(&context, &model_manager, user_session_created2).await?;
-        let user_sessions =
-            UserSessionModelController::list_by_user_id(&context, &model_manager, 1000).await?;
-
-        assert_eq!(user_sessions.len(), 2, "number of seeded user_sessions.");
-        assert_eq!(user_sessions[0].user_id, 1000);
-        assert_eq!(user_sessions[1].user_id, 1000);
-
-        // Clean
-        UserSessionModelController::delete(&context, &model_manager, refresh_token_id1).await?;
-        UserSessionModelController::delete(&context, &model_manager, refresh_token_id2).await?;
-
-        Ok(())
-    }
-
-    #[tokio::test]
-    #[serial]
     async fn test_update_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
 
         let refresh_token_id = Uuid::new_v4();
         let access_token_id = Uuid::new_v4();
@@ -320,8 +238,8 @@ mod tests {
             user_id: 1000,
         };
 
-        // -- Exec
-        UserSessionModelController::create(&context, &model_manager, user_session_created).await?;
+        // Execute
+        UserSessionModelController::create(&model_manager, user_session_created).await?;
 
         let refresh_token_id_updated = Uuid::new_v4();
         let access_token_id_updated = Uuid::new_v4();
@@ -332,59 +250,20 @@ mod tests {
             user_id: 1001,
         };
 
-        UserSessionModelController::update(
-            &context,
-            &model_manager,
-            user_session_updated,
-            refresh_token_id,
-        )
-        .await?;
+        UserSessionModelController::update(&model_manager, user_session_updated, refresh_token_id)
+            .await?;
 
+        // Check
         let user_session =
-            UserSessionModelController::get(&context, &model_manager, refresh_token_id_updated)
-                .await?;
+            UserSessionModelController::get(&model_manager, refresh_token_id_updated).await?;
         assert_eq!(user_session.access_token_id, access_token_id_updated);
         assert_eq!(user_session.user_id, 1001);
 
-        UserSessionModelController::delete(&context, &model_manager, refresh_token_id_updated)
+        // Clean
+        sqlx::query("DELETE FROM user_sessions WHERE refresh_token_id = $1")
+            .bind(refresh_token_id_updated)
+            .execute(model_manager.db())
             .await?;
-
-        Ok(())
-    }
-
-    #[tokio::test]
-    #[serial]
-    async fn test_delete_ok() -> Result<()> {
-        // -- Setup & Fixtures
-        let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
-
-        let refresh_token_id = Uuid::new_v4();
-        let access_token_id = Uuid::new_v4();
-
-        let user_session_created = UserSessionForCreate {
-            refresh_token_id,
-            access_token_id,
-            user_id: 1000,
-        };
-
-        // -- Exec
-        let id = UserSessionModelController::create(&context, &model_manager, user_session_created)
-            .await?;
-        UserSessionModelController::delete(&context, &model_manager, refresh_token_id).await?;
-
-        // -- Check
-        let res = UserSessionModelController::get(&context, &model_manager, refresh_token_id).await;
-        assert!(
-            matches!(
-                res,
-                Err(Error::EntityNotFound {
-                    entity: "user_session",
-                    field: UuidError(id),
-                }) if id == refresh_token_id
-            ),
-            "EntityNotFound not matching"
-        );
 
         Ok(())
     }
@@ -392,9 +271,8 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_delete_by_user_id_ok() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
 
         let refresh_token_id1 = Uuid::new_v4();
         let access_token_id1 = Uuid::new_v4();
@@ -414,14 +292,13 @@ mod tests {
             user_id: 1000,
         };
 
-        // -- Exec
-        UserSessionModelController::create(&context, &model_manager, user_session_created1).await?;
-        UserSessionModelController::create(&context, &model_manager, user_session_created2).await?;
-        UserSessionModelController::delete_by_user_id(&context, &model_manager, 1000).await?;
+        // Execute
+        UserSessionModelController::create(&model_manager, user_session_created1).await?;
+        UserSessionModelController::create(&model_manager, user_session_created2).await?;
+        UserSessionModelController::delete_by_user_id(&model_manager, 1000).await?;
 
-        // -- Check
-        let res =
-            UserSessionModelController::get(&context, &model_manager, refresh_token_id1).await;
+        // Check
+        let res = UserSessionModelController::get(&model_manager, refresh_token_id1).await;
 
         assert!(
             matches!(
@@ -434,8 +311,7 @@ mod tests {
             "EntityNotFound not matching"
         );
 
-        let res =
-            UserSessionModelController::get(&context, &model_manager, refresh_token_id2).await;
+        let res = UserSessionModelController::get(&model_manager, refresh_token_id2).await;
 
         assert!(
             matches!(
@@ -454,15 +330,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_delete_by_user_id_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
-        let context = Context::root_ctx();
         let id = 100;
 
-        // -- Exec
-        let res = UserSessionModelController::delete_by_user_id(&context, &model_manager, id).await;
+        // Execute
+        let res = UserSessionModelController::delete_by_user_id(&model_manager, id).await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,

@@ -252,7 +252,6 @@ async fn update_change_event_request_facility_handler(
             .await?;
 
             let attendees_ids: Vec<i64> = RegistrationModelController::list_by_event_id(
-                &context,
                 model_manager,
                 updated_event_details.event_id,
             )

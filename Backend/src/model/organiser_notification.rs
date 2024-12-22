@@ -136,7 +136,7 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_create() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
         let notification_created = OrganiserNotificationForCreate {
             description: "test_description".to_string(),
@@ -144,12 +144,12 @@ mod tests {
             organiser_id: 1,
         };
 
-        // -- Exec
+        // Execute
         let id =
             OrganiserNotificationModelController::create(&model_manager, notification_created)
                 .await?;
 
-        // -- Check
+        // Check
         let notification =
             OrganiserNotificationModelController::get(&model_manager, id).await?;
         assert_eq!(notification.id, id);
@@ -172,14 +172,14 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_get_err_not_found() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
         let id = 100;
 
-        // -- Exec
+        // Execute
         let res = OrganiserNotificationModelController::get(&model_manager, id).await;
 
-        // -- Check
+        // Check
         assert!(
             matches!(
                 res,
@@ -197,7 +197,7 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_list_by_organiser_id() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
 
         let notification_created1 = OrganiserNotificationForCreate {
@@ -271,7 +271,7 @@ mod tests {
     #[tokio::test]
     #[serial]
     async fn test_read_notification() -> Result<()> {
-        // -- Setup & Fixtures
+        // Setup
         let model_manager = _dev_utils::init_test().await;
 
         let notification_created = OrganiserNotificationForCreate {
@@ -280,14 +280,14 @@ mod tests {
             organiser_id: 1,
         };
 
-        // -- Exec
+        // Execute
         let id =
             OrganiserNotificationModelController::create(&model_manager, notification_created)
                 .await?;
 
         OrganiserNotificationModelController::read_notification(&model_manager, id).await?;
 
-        // -- Check
+        // Check
         let notification = OrganiserNotificationModelController::get(&model_manager, id).await?;
         assert_eq!(notification.id, id);
         assert_eq!(notification.description, "test_description");

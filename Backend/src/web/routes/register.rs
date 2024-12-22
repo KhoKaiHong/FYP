@@ -51,7 +51,7 @@ async fn user_register_handler(
         district_id: payload.district_id,
     };
 
-    UserModelController::create(&context, &app_state.model_manager, registered_user).await?;
+    UserModelController::create(&app_state.model_manager, registered_user).await?;
 
     let body = Json(json!({
         "data": {
@@ -121,8 +121,6 @@ async fn organiser_register_handler(
 ) -> Result<Json<Value>> {
     debug!("{:<12} - organiser_register_api", "HANDLER");
 
-    let context = Context::root_ctx();
-
     let password_hash = encrypt_password(&payload.password).await?;
 
     let registered_organiser = OrganiserForCreate {
@@ -132,7 +130,7 @@ async fn organiser_register_handler(
         phone_number: payload.phone_number,
     };
 
-    OrganiserModelController::create(&context, &app_state.model_manager, registered_organiser)
+    OrganiserModelController::create(&app_state.model_manager, registered_organiser)
         .await?;
 
     let body = Json(json!({
