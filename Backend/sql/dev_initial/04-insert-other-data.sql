@@ -1,22 +1,31 @@
--- Insert data into users
+-- Insert data into users (10 users added)
 INSERT INTO users (ic_number, password, name, email, phone_number, blood_type, eligibility, state_id, district_id) VALUES
-('900101-01-1234', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'John Doe', 'john.doe@example.com', '+6012-3456789', 'A+', 'Ineligible - Condition', 1, 1),
-('900102-02-2345', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'Jane Smith', 'jane.smith@example.com', '+6012-3456790', 'B+', 'Eligible', 1, 1),
-('900103-03-3456', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'Ali Bin Ahmad', 'ali.ahmad@example.com', '+6012-3456791', 'O-', 'Eligible', 1, 1),
-('900104-04-4567', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'James', 'james@example.com', '+6012-3456792', 'B+', 'Ineligible', 1, 1),
-('900105-05-5678', '$argon2id$v=19$m=16,t=2,p=1$aGVsbG80dDM$wDfiMZQUyIUHkEd8m/j9Cw', 'Tan', 'tan@example.com', '+6012-3456793', 'O-', 'Ineligible', 1, 1);
+('850101-10-5001', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Ahmad bin Ali', 'ahmad.ali@example.com', '+6016-1234567', 'O+', 'Eligible', 1, 1),
+('780515-08-5502', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Lim Mei Ling', 'mei.ling@example.com', '+6016-9876543', 'B-', 'Ineligible - Condition', 9, 5),
+('921120-05-5203', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Suresh Kumar', 'suresh.kumar@example.com', '+6016-5551212', 'A+', 'Eligible', 12, 4), 
+('030310-12-5104', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Dayang Nurul', 'dayang.nurul@example.com', '+6016-1122334', 'AB+', 'Ineligible', 11, 14), 
+('800722-03-5305', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'David Wong', 'david.wong@example.com', '+6016-4455667', 'O-', 'Eligible', 10, 7), 
+('750918-02-5406', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Siti Aminah', 'siti.aminah@example.com', '+6016-7788990', 'A-', 'Ineligible - Condition', 3, 5), 
+('900605-07-5607', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Ramesh Rao', 'ramesh.rao@example.com', '+6016-3344556', 'B+', 'Eligible', 7, 8), 
+('721228-11-5708', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Noraini binti Omar', 'noraini.omar@example.com', '+6016-6677889', 'AB-', 'Ineligible', 5, 2), 
+('880402-09-5809', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Tan Ah Kau', 'ah.kau@example.com', '+6016-2233445', 'O+', 'Eligible', 2, 3), 
+('961015-06-5910', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Joseph ak Luyoh', 'joseph.luyoh@example.com', '+6016-8899001', 'A+', 'Ineligible - Condition', 6, 4);
 
--- Insert data into event_organisers
+-- Insert data into event_organisers (5 organisers added)
 INSERT INTO event_organisers (email, password, name, phone_number) VALUES
-('organiser1@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Blood Organiser 1', '60123456795'),
-('organiser2@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Blood Organiser 2', '60123456796'),
-('organiser3@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Blood Organiser 3', '60123456797');
+('st.john.ambulans@example.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'St. John Ambulans Malaysia', '+6018-1112223'),
+('malaysian.red.crescent@example.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Malaysian Red Crescent Society (MRCS)', '+6018-3334445'),
+('mercy.malaysia@example.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Mercy Malaysia', '+6018-5556667'),
+('world.vision.malaysia@example.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'World Vision Malaysia', '+6018-7778889'),
+('unicef.malaysia@example.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'UNICEF Malaysia', '+6018-9990001');
 
--- Insert data into admins
+-- Insert data into admins (5 admins added)
 INSERT INTO admins (email, password, name) VALUES
-('admin1@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Admin 1'),
-('admin2@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Admin 2'),
-('admin3@example.com', '$argon2id$v=19$m=16,t=2,p=1$YWJjZGVmZ2g$dxy5zcoYs+QaveCUO+t/8w', 'Admin 3');
+('farid@admin.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Farid bin Rahman'),
+('siew.ling@admin.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Siew Ling Tan'),
+('arun@admin.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Arun Kumar Subramaniam'),
+('noraidah@admin.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Noraidah bt. Abdullah'),
+('vincent@admin.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Vincent Raj');
 
 -- Insert data into blood_donation_events
 INSERT INTO blood_donation_events (location, address, start_time, end_time, max_attendees, latitude, longitude, facility_id, state_id, district_id, organiser_id) VALUES

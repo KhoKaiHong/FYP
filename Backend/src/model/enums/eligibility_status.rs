@@ -23,3 +23,27 @@ impl EligibilityStatusModelController {
         EligibilityStatus::iter().collect()
     }
 }
+
+// Unit tests
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::_dev_utils;
+    use anyhow::Result;
+    use serial_test::serial;
+
+    #[tokio::test]
+    #[serial]
+    async fn test_list() -> Result<()> {
+        // Setup
+        let model_manager = _dev_utils::init_test().await;
+
+        // Execute
+        let eligibility_statuses = EligibilityStatusModelController::list();
+
+        // Check
+        assert_eq!(eligibility_statuses.len(), 3);
+
+        Ok(())
+    }
+}
