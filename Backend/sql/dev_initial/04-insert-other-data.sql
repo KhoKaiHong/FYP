@@ -36,6 +36,27 @@ INSERT INTO blood_donation_events (location, address, start_time, end_time, max_
 ('Pavilion Bukit Jalil', 'Jalan Langgar, Alor Setar', '2024-12-31 4:00:00', '2024-12-31 9:00:00', 100, 3.1742962387784367, 101.70768106095312, 2, 1, 1, 2),
 ('Pavilion KL', 'Jalan Tun Razak, Kuala Lumpur', '2024-12-31 5:00:00', '2024-12-31 9:00:00', 70, 3.1752962387784367, 101.70868106095312, 3, 1, 1, 3);
 
+('AEON Mall Tebrau City', 'No. 1, Jalan Desa Tebrau', '2024-11-02 01:00:00', '2024-11-02 06:00:00', 50),
+('Aman Central', 'Lot 1-01, Aman Central', '2024-11-05 03:00:00', '2024-11-05 08:00:00', 100),
+('Central Square', 'Jalan Lagenda 1', '2024-11-12 03:00:00', '2024-11-12 09:00:00', 200),
+('KB Mall', 'Jalan Hamzah', '2024-11-20 01:00:00', '2024-11-20 06:00:00', 'Kota Bharu', 150),
+('Dataran Pahlawan Melaka Megamall', '2024-11-26 02:00:00', '2024-11-26 09:00:00', 300),
+('Mahkota Parade', 'No. 1, Jalan Merdeka', '2024-11-29 01:00:00', '2024-11-29 07:00:00', 250), 
+('Palm Mall', 'Jalan Sungai Ujong', '2024-12-02 02:00:00', '2024-12-02 08:00:00', 100),
+('East Coast Mall', 'Jalan Tun Ismail', '2024-12-09 03:00:00', '2024-12-09 07:00:00', 150),
+('Ipoh Parade', '105, Jalan Sultan Abdul Jalil', '2024-12-15 02:00:00', '2024-12-15 07:00:00', 250), 
+('Kompleks membeli-belah Padang Besar', '2024-12-19 01:00:00', '2024-12-19 08:00:00', 100), 
+('1st Avenue Mall', '182, Jalan Magazine', '2024-12-28 02:00:00', '2024-12-28 06:00:00', 50), 
+('Queensbay Mall', '100, Persiaran Bayan Indah', '2025-01-05 02:00:00', '2025-01-05 07:00:00', 200), 
+('Imago Shopping Mall', 'KK Times Square, Off Coastal Highway', '2025-01-12 03:00:00', '2025-01-12 09:00:00', 300), 
+('Vivacity Megamall', 'Jalan Wan Alwi', '2025-01-19 01:00:00', '2025-01-19 06:00:00', 100), 
+('1 Utama Shopping Centre', '1, Lebuh Bandar Utama, Bandar Utama', '2025-01-23 03:00:00', '2025-01-23 08:00:00', 200),
+('Sunway Pyramid', '3, Jalan PJS 11/15, Bandar Sunway', '2025-01-28 01:00:00', '2025-01-28 09:00:00', 100),
+('Mesra Mall', 'Lot 645, Jalan Pantai Chendering', '2025-02-03 03:00:00', '2025-02-03 06:00:00', 300),
+('Pavilion Kuala Lumpur', '168, Jalan Bukit Bintang', '2025-02-10 03:00:00', '2025-02-10 07:00:00', 150),
+('Financial Park Labuan', 'Jalan Merdeka', '2025-02-17 02:00:00', '2025-02-17 09:00:00', 100),
+('Alamanda Shopping Centre', 'Jalan Alamanda', '2025-02-25 01:00:00', '2025-02-25 08:00:00', 200, ); 
+
 -- Insert data into registrations
 INSERT INTO registrations (status, event_id, user_id) VALUES
 ('Registered', 1, 1002),
