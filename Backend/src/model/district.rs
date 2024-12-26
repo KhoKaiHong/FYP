@@ -17,6 +17,7 @@ pub struct District {
 pub struct DistrictModelController;
 
 impl DistrictModelController {
+    // Lists all districts
     pub async fn list(
         model_manager: &ModelManager,
     ) -> Result<Vec<District>> {
@@ -48,7 +49,7 @@ mod tests {
         let districts = DistrictModelController::list(&model_manager).await?;
 
         // Check
-        assert_eq!(districts.len(), 158, "number of districts.");
+        assert_eq!(districts.len(), 160, "number of districts.");
 
         Ok(())
     }

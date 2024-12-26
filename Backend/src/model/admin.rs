@@ -203,8 +203,6 @@ mod tests {
         assert_eq!(admin.password, "password");
         assert_eq!(admin.name, "John Doe");
 
-        println!("\n\nadmin: {:?}", admin);
-
         // Clean
         sqlx::query("DELETE from admins where id = $1")
             .bind(id)
@@ -235,8 +233,6 @@ mod tests {
         assert_eq!(admin.email, "admin@example.com");
         assert_eq!(admin.password, "password");
         assert_eq!(admin.name, "John Doe");
-
-        println!("\n\nadmin: {:?}", admin);
 
         // Clean
         sqlx::query("DELETE from admins where id = $1")
@@ -326,8 +322,6 @@ mod tests {
         assert_eq!(admin.email, "newadmin@example.com");
         assert_eq!(admin.password, "password");
         assert_eq!(admin.name, "Jane Doe");
-
-        println!("\n\nadmin: {:?}", admin);
 
         // Clean
         sqlx::query("DELETE from admins where id = $1")

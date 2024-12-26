@@ -1,15 +1,15 @@
 -- Insert data into users (10 users added)
 INSERT INTO users (ic_number, password, name, email, phone_number, blood_type, eligibility, state_id, district_id) VALUES
 ('850101-10-5001', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Ahmad bin Ali', 'ahmad.ali@example.com', '+6016-1234567', 'O+', 'Eligible', 1, 1),
-('780515-08-5502', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Lim Mei Ling', 'mei.ling@example.com', '+6016-9876543', 'B-', 'Ineligible - Condition', 9, 5),
-('921120-05-5203', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Suresh Kumar', 'suresh.kumar@example.com', '+6016-5551212', 'A+', 'Eligible', 12, 4), 
-('030310-12-5104', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Dayang Nurul', 'dayang.nurul@example.com', '+6016-1122334', 'AB+', 'Ineligible', 11, 14), 
+('921120-05-5203', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Suresh Kumar', 'suresh.kumar@example.com', '+6016-5551212', 'A+', 'Eligible', 12, 4),
 ('800722-03-5305', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'David Wong', 'david.wong@example.com', '+6016-4455667', 'O-', 'Eligible', 10, 7), 
-('750918-02-5406', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Siti Aminah', 'siti.aminah@example.com', '+6016-7788990', 'A-', 'Ineligible - Condition', 3, 5), 
-('900605-07-5607', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Ramesh Rao', 'ramesh.rao@example.com', '+6016-3344556', 'B+', 'Eligible', 7, 8), 
-('721228-11-5708', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Noraini binti Omar', 'noraini.omar@example.com', '+6016-6677889', 'AB-', 'Ineligible', 5, 2), 
+('900605-07-5607', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Ramesh Rao', 'ramesh.rao@example.com', '+6016-3344556', 'B+', 'Eligible', 7, 8),
 ('880402-09-5809', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Tan Ah Kau', 'ah.kau@example.com', '+6016-2233445', 'O+', 'Eligible', 2, 3), 
-('961015-06-5910', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Joseph ak Luyoh', 'joseph.luyoh@example.com', '+6016-8899001', 'A+', 'Ineligible - Condition', 6, 4);
+('961015-06-5910', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Joseph ak Luyoh', 'joseph.luyoh@example.com', '+6016-8899001', 'A+', 'Eligible', 6, 4), 
+('030310-12-5104', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Dayang Nurul', 'dayang.nurul@example.com', '+6016-1122334', 'AB+', 'Ineligible', 11, 14), 
+('750918-02-5406', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Siti Aminah', 'siti.aminah@example.com', '+6016-7788990', 'A-', 'Ineligible', 3, 5), 
+('721228-11-5708', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Noraini binti Omar', 'noraini.omar@example.com', '+6016-6677889', 'AB-', 'Ineligible', 5, 2),
+('780515-08-5502', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Lim Mei Ling', 'mei.ling@example.com', '+6016-9876543', 'B-', 'Ineligible - Condition', 9, 5);
 
 -- Insert data into event_organisers (5 organisers added)
 INSERT INTO event_organisers (email, password, name, phone_number) VALUES
@@ -27,114 +27,81 @@ INSERT INTO admins (email, password, name) VALUES
 ('noraidah@admin.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Noraidah bt. Abdullah'),
 ('vincent@admin.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Vincent Raj');
 
--- Insert data into blood_donation_events
+-- Insert data into blood_donation_events (19 added)
 INSERT INTO blood_donation_events (location, address, start_time, end_time, max_attendees, latitude, longitude, facility_id, state_id, district_id, organiser_id) VALUES
-('Mid Valley Megamall 1', 'Jalan Hospital, Johor Bahru', '2024-12-01 3:00:00', '2024-12-30 9:00:00', 50, 3.1712962387784367, 101.70368106095312, 1, 1, 1, 1),
-('Mid Valley Megamall 2', 'Jalan Hospital, Johor Bahru', '2024-12-10 3:00:00', '2024-12-30 9:00:00', 50, 3.1722962387784367, 101.70468106095312, 1, 1, 1, 1),
-('Mid Valley Megamall 3', 'Jalan Hospital, Johor Bahru', '2024-12-20 3:00:00', '2024-12-30 9:00:00', 50, 3.1732962387784367, 101.70568106095312, 1, 1, 1, 1),
-('Mid Valley Megamall 4', 'Jalan Hospital, Johor Bahru', '2024-12-30 3:00:00', '2024-12-30 9:00:00', 50, 3.1742962387784367, 101.70668106095312, 1, 1, 1, 1),
-('Pavilion Bukit Jalil', 'Jalan Langgar, Alor Setar', '2024-12-31 4:00:00', '2024-12-31 9:00:00', 100, 3.1742962387784367, 101.70768106095312, 2, 1, 1, 2),
-('Pavilion KL', 'Jalan Tun Razak, Kuala Lumpur', '2024-12-31 5:00:00', '2024-12-31 9:00:00', 70, 3.1752962387784367, 101.70868106095312, 3, 1, 1, 3);
+-- Past blood donation events
+('AEON Mall Tebrau City', '1, Jalan Desa Tebrau, Taman Desa Tebrau, 81100 Johor Bahru, Johor Darul Ta''zim', '2024-11-02 01:00:00', '2024-11-02 06:00:00', 50, 1.5504988882483934, 103.79546007121144, 1, 1, 2, 1),
+('Aman Central', 'Aman Central, 1, Darul Aman Hwy, Kampung Lubok Peringgi, 05100 Alor Setar, Kedah', '2024-11-05 03:00:00', '2024-11-05 08:00:00', 100, 6.126557473647973, 100.36635251644108, 3, 2, (SELECT id FROM districts WHERE name = 'Kota Setar'), 3),
+('Central Square', '4th Floor No, 4.09.01, 23, Jalan Kampung Baru, 08000 Sungai Petani, Kedah', '2024-11-12 03:00:00', '2024-11-12 09:00:00', 200, 5.636985974957746, 100.48850811177923, 3, 2, (SELECT id FROM districts WHERE name = 'Kuala Muda'), 4),
+('KB Mall', '1, Jalan Hamzah, Bandar Kota Bharu, 15050 Kota Bharu, Kelantan', '2024-11-20 01:00:00', '2024-11-20 06:00:00', 150, 6.117535241114517, 102.24020087379189, 4, 3, (SELECT id FROM districts WHERE name = 'Kota Bharu'), 5),
+('Dataran Pahlawan Melaka Megamall', 'Jln Merdeka, Banda Hilir, 75000 Melaka', '2024-11-26 02:00:00', '2024-11-26 09:00:00', 300, 2.190001569760413, 102.25044895653002, 5, 4, (SELECT id FROM districts WHERE name = 'Melaka Tengah'), 2),
+('Mahkota Parade', 'Lot B-02, Mahkota Parade, 1, Jln Merdeka, Taman Costa Mahkota, 75000 Melaka', '2024-11-29 01:00:00', '2024-11-29 07:00:00', 250, 2.189337789123672, 102.24980078669556, 5, 4, (SELECT id FROM districts WHERE name = 'Melaka Tengah'), 3),
+('Palm Mall', 'Palm Mall, Level 4, Jalan Sungai Ujong, Kemayan Square, 70200 Seremban, Negeri Sembilan', '2024-12-02 02:00:00', '2024-12-02 08:00:00', 100, 2.7200830958712503, 101.92291014211008, 6, 5, (SELECT id FROM districts WHERE name = 'Seremban'), 1),
+('East Coast Mall', 'Jalan Putra Square 6, Putra Square, 25200 Kuantan, Pahang', '2024-12-09 03:00:00', '2024-12-09 07:00:00', 150, 3.8185819301644415, 103.32625816792614, 7, 6, (SELECT id FROM districts WHERE name = 'Kuantan'), 2),
+('Ipoh Parade', '105, Jalan Sultan Abdul Jalil, Pusat Perdagangan Greentown, 30450 Ipoh, Perak', '2024-12-15 02:00:00', '2024-12-15 07:00:00', 250, 4.595751513218196, 101.08984128465725, 11, 7, (SELECT id FROM districts WHERE name = 'Kinta'), 3),
+('1st Avenue Mall', '182, Jalan Magazine, 10300 George Town, Pulau Pinang', '2024-12-28 02:00:00', '2024-12-28 06:00:00', 50, 5.413053410743275, 100.33116965721827, 10, 9, (SELECT id FROM districts WHERE name = 'Timur Laut'), 1),
+('Queensbay Mall', 'Queensbay Mall, 100, Persiaran Bayan Indah, 11900 Bayan Lepas, Pulau Pinang', '2025-01-05 02:00:00', '2025-01-05 07:00:00', 200, 5.333183408845015, 100.3066133670719, 10, 9, (SELECT id FROM districts WHERE name = 'Barat Daya'), 4),
+-- Upcoming blood donation events
+('Imago Shopping Mall', 'KK Times Square, Phase 2, Off Coastal Highway, 88100 Kota Kinabalu, Sabah', '2025-01-12 03:00:00', '2025-01-12 09:00:00', 300, 5.970860788846937, 116.06635592386823, 16, 10, (SELECT id FROM districts WHERE name = 'Kota Kinabalu'), 2),
+('Vivacity Megamall', 'Q112B, 93350 Kuching, Sarawak', '2025-01-19 01:00:00', '2025-01-19 06:00:00', 100, 1.8864013570027496, 110.44913508635773, 19, 11, (SELECT id FROM districts WHERE name = 'Kuching'), 1),
+('1 Utama Shopping Centre', '1, Lebuh Bandar Utama, Bandar Utama, 47800 Petaling Jaya, Selangor', '2025-01-23 03:00:00', '2025-01-23 08:00:00', 200, 3.148127466123984, 101.61646193049211, 14, 12, (SELECT id FROM districts WHERE name = 'Petaling'), 3),
+('Sunway Pyramid', '3, Jalan PJS 11/15, Bandar Sunway, 47500 Petaling Jaya, Selangor', '2025-01-28 01:00:00', '2025-01-28 09:00:00', 100, 3.0739684691784834, 101.60737446217043, 14, 12, (SELECT id FROM districts WHERE name = 'Petaling'), 5),
+('Mesra Mall', 'Mesra Mall, Lot 6490, Jalan Kemaman - Dungun, Kampung Baru, 24200 Kemasik, Terengganu', '2025-02-03 03:00:00', '2025-02-03 06:00:00', 300, 4.440697264195204, 103.44849511840275, 15, 13, (SELECT id FROM districts WHERE name = 'Dungun'), 1),
+('Pavilion Kuala Lumpur', '168, Jln Bukit Bintang, Bukit Bintang, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-02-10 03:00:00', '2025-02-10 07:00:00', 150, 3.148998022026934, 101.71340731862986, 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 2),
+('Financial Park Labuan Complex', 'Jln Merdeka, Financial Park, 87000 Labuan, Wilayah Persekutuan Labuan', '2025-02-17 02:00:00', '2025-02-17 09:00:00', 100, 5.276586556815842, 115.24945783706148, 22, 15, (SELECT id FROM districts WHERE name = 'W.P. Labuan'), 3),
+('Alamanda Shopping Centre', 'Jalan Alamanda, Presint 1, 62000 Putrajaya, Wilayah Persekutuan Putrajaya', '2025-02-25 01:00:00', '2025-02-25 08:00:00', 200, 2.939551932738423, 101.71061614346809, 22, 16, (SELECT id FROM districts WHERE name = 'W.P. Putrajaya'), 4); 
 
-('AEON Mall Tebrau City', 'No. 1, Jalan Desa Tebrau', '2024-11-02 01:00:00', '2024-11-02 06:00:00', 50),
-('Aman Central', 'Lot 1-01, Aman Central', '2024-11-05 03:00:00', '2024-11-05 08:00:00', 100),
-('Central Square', 'Jalan Lagenda 1', '2024-11-12 03:00:00', '2024-11-12 09:00:00', 200),
-('KB Mall', 'Jalan Hamzah', '2024-11-20 01:00:00', '2024-11-20 06:00:00', 'Kota Bharu', 150),
-('Dataran Pahlawan Melaka Megamall', '2024-11-26 02:00:00', '2024-11-26 09:00:00', 300),
-('Mahkota Parade', 'No. 1, Jalan Merdeka', '2024-11-29 01:00:00', '2024-11-29 07:00:00', 250), 
-('Palm Mall', 'Jalan Sungai Ujong', '2024-12-02 02:00:00', '2024-12-02 08:00:00', 100),
-('East Coast Mall', 'Jalan Tun Ismail', '2024-12-09 03:00:00', '2024-12-09 07:00:00', 150),
-('Ipoh Parade', '105, Jalan Sultan Abdul Jalil', '2024-12-15 02:00:00', '2024-12-15 07:00:00', 250), 
-('Kompleks membeli-belah Padang Besar', '2024-12-19 01:00:00', '2024-12-19 08:00:00', 100), 
-('1st Avenue Mall', '182, Jalan Magazine', '2024-12-28 02:00:00', '2024-12-28 06:00:00', 50), 
-('Queensbay Mall', '100, Persiaran Bayan Indah', '2025-01-05 02:00:00', '2025-01-05 07:00:00', 200), 
-('Imago Shopping Mall', 'KK Times Square, Off Coastal Highway', '2025-01-12 03:00:00', '2025-01-12 09:00:00', 300), 
-('Vivacity Megamall', 'Jalan Wan Alwi', '2025-01-19 01:00:00', '2025-01-19 06:00:00', 100), 
-('1 Utama Shopping Centre', '1, Lebuh Bandar Utama, Bandar Utama', '2025-01-23 03:00:00', '2025-01-23 08:00:00', 200),
-('Sunway Pyramid', '3, Jalan PJS 11/15, Bandar Sunway', '2025-01-28 01:00:00', '2025-01-28 09:00:00', 100),
-('Mesra Mall', 'Lot 645, Jalan Pantai Chendering', '2025-02-03 03:00:00', '2025-02-03 06:00:00', 300),
-('Pavilion Kuala Lumpur', '168, Jalan Bukit Bintang', '2025-02-10 03:00:00', '2025-02-10 07:00:00', 150),
-('Financial Park Labuan', 'Jalan Merdeka', '2025-02-17 02:00:00', '2025-02-17 09:00:00', 100),
-('Alamanda Shopping Centre', 'Jalan Alamanda', '2025-02-25 01:00:00', '2025-02-25 08:00:00', 200, ); 
+-- Insert data into registrations (10 added)
+INSERT INTO registrations (status, event_id, user_id, registered_at) VALUES
+('Attended', 1, 1006, '2024-10-10 03:28:38'),
+('Attended', 2, 1007, '2024-10-30 08:10:20'),
+('Attended', 3, 1008, '2024-11-02 10:56:09'),
+('Absent', 4, 1003, '2024-11-05 03:46:18'),
+('Absent', 5, 1004, '2024-11-20 12:10:34'),
+('Registered', 12, 1000, '2024-12-02 07:12:23'),
+('Registered', 13, 1001, '2024-12-12 14:14:57'),
+('Registered', 14, 1002, '2024-12-14 12:03:05'),
+('Registered', 15, 1003, '2024-12-20 13:23:12'),
+('Registered', 16, 1004, '2024-12-28 10:05:47');
 
--- Insert data into registrations
-INSERT INTO registrations (status, event_id, user_id) VALUES
-('Registered', 1, 1002),
-('Registered', 2, 1002),
-('Registered', 3, 1002);
-
--- Insert data into donation_history
-INSERT INTO donation_history (user_id, event_id) VALUES
-(1000, 1),
-(1000, 2),
-(1000, 3),
-(1000, 4),
-(1000, 5),
-(1000, 6),
-(1000, NULL),
-(1001, 2),
-(1002, 3);
-
+-- Insert data into donation_history (3 added)
 INSERT INTO donation_history (user_id, event_id, created_at) VALUES
-(1003, 1, '2024-02-15 09:30:00'),
-(1003, 1, '2024-06-22 14:45:00'),
-(1004, 1, '2024-03-10 11:20:00'),
-(1004, 1, '2024-07-05 16:15:00'),
-(1003, 1, '2024-09-22 10:00:00');
+(1006, 1, '2024-11-02 02:34:10'),
+(1007, 2, '2024-11-05 06:23:05'),
+(1008, 3, '2024-11-12 08:12:00');
 
--- Insert new blood donation events requests
+-- Insert new blood donation events requests (24 added)
 INSERT INTO new_blood_donation_events_requests (
     location, address, start_time, end_time, max_attendees,
-    latitude, longitude, status, rejection_reason, facility_id,
-    organiser_id, state_id, district_id
+    latitude, longitude, status, rejection_reason, facility_id, state_id, district_id, organiser_id
 ) VALUES
-('Location 1', 'Address for Location 1, Malaysia', '2025-01-01 01:00:00', '2025-01-01 06:00:00', 50, 3.0925, 101.6495, 'Approved', NULL, 1, 1, 1, 1),
-('Location 2', 'Address for Location 2, Malaysia', '2025-01-02 02:00:00', '2025-01-02 07:00:00', 100, 3.0927, 101.6496, 'Pending', NULL, 1, 2, 2, 2),
-('Location 3', 'Address for Location 3, Malaysia', '2025-01-03 03:00:00', '2025-01-03 08:00:00', 150, 3.0923, 101.6497, 'Rejected', 'Insufficient resources at the facility', 1, 3, 3, 3),
-('Location 4', 'Address for Location 4, Malaysia', '2025-01-04 01:00:00', '2025-01-04 06:00:00', 200, 3.0926, 101.6498, 'Approved', NULL, 1, 1, 4, 4),
-('Location 5', 'Address for Location 5, Malaysia', '2025-01-05 02:00:00', '2025-01-05 07:00:00', 250, 3.0924, 101.6499, 'Pending', NULL, 1, 2, 5, 5),
-('Location 6', 'Address for Location 6, Malaysia', '2025-01-06 03:00:00', '2025-01-06 08:00:00', 300, 3.0922, 101.6493, 'Rejected', 'Insufficient resources at the facility', 1, 3, 1, 6),
-('Location 7', 'Address for Location 7, Malaysia', '2025-01-07 01:00:00', '2025-01-07 06:00:00', 50, 3.0928, 101.6494, 'Approved', NULL, 1, 1, 2, 7),
-('Location 8', 'Address for Location 8, Malaysia', '2025-01-08 02:00:00', '2025-01-08 07:00:00', 100, 3.0921, 101.6495, 'Pending', NULL, 1, 2, 3, 8),
-('Location 9', 'Address for Location 9, Malaysia', '2025-01-09 03:00:00', '2025-01-09 08:00:00', 150, 3.0929, 101.6496, 'Rejected', 'Insufficient resources at the facility', 1, 3, 4, 9),
-('Location 10', 'Address for Location 10, Malaysia', '2025-01-10 01:00:00', '2025-01-10 06:00:00', 200, 3.0923, 101.6497, 'Approved', NULL, 1, 1, 5, 10),
-('Location 11', 'Address for Location 11, Malaysia', '2025-01-11 02:00:00', '2025-01-11 07:00:00', 250, 3.0924, 101.6498, 'Pending', NULL, 1, 2, 1, 11),
-('Location 12', 'Address for Location 12, Malaysia', '2025-01-12 03:00:00', '2025-01-12 08:00:00', 300, 3.0922, 101.6499, 'Rejected', 'Insufficient resources at the facility', 1, 3, 2, 12),
-('Location 13', 'Address for Location 13, Malaysia', '2025-01-13 01:00:00', '2025-01-13 06:00:00', 50, 3.0925, 101.6493, 'Approved', NULL, 1, 1, 3, 13),
-('Location 14', 'Address for Location 14, Malaysia', '2025-01-14 02:00:00', '2025-01-14 07:00:00', 100, 3.0927, 101.6494, 'Pending', NULL, 1, 2, 4, 14),
-('Location 15', 'Address for Location 15, Malaysia', '2025-01-15 03:00:00', '2025-01-15 08:00:00', 150, 3.0923, 101.6495, 'Rejected', 'Insufficient resources at the facility', 1, 3, 5, 15),
-('Location 16', 'Address for Location 16, Malaysia', '2025-01-16 01:00:00', '2025-01-16 06:00:00', 200, 3.0926, 101.6496, 'Approved', NULL, 1, 1, 1, 16),
-('Location 17', 'Address for Location 17, Malaysia', '2025-01-17 02:00:00', '2025-01-17 07:00:00', 250, 3.0924, 101.6497, 'Pending', NULL, 1, 2, 2, 17),
-('Location 18', 'Address for Location 18, Malaysia', '2025-01-18 03:00:00', '2025-01-18 08:00:00', 300, 3.0922, 101.6498, 'Rejected', 'Insufficient resources at the facility', 1, 3, 3, 18),
-('Location 19', 'Address for Location 19, Malaysia', '2025-01-19 01:00:00', '2025-01-19 06:00:00', 50, 3.0925, 101.6499, 'Approved', NULL, 1, 1, 4, 19),
-('Location 20', 'Address for Location 20, Malaysia', '2025-01-20 02:00:00', '2025-01-20 07:00:00', 100, 3.0927, 101.6493, 'Pending', NULL, 1, 2, 5, 20),
-('Location 21', 'Address for Location 21, Malaysia', '2025-01-21 03:00:00', '2025-01-21 08:00:00', 150, 3.0923, 101.6494, 'Rejected', 'Insufficient resources at the facility', 1, 3, 1, 21),
-('Location 22', 'Address for Location 22, Malaysia', '2025-01-22 01:00:00', '2025-01-22 06:00:00', 200, 3.0926, 101.6495, 'Approved', NULL, 1, 1, 2, 22),
-('Location 23', 'Address for Location 23, Malaysia', '2025-01-23 02:00:00', '2025-01-23 07:00:00', 250, 3.0924, 101.6496, 'Pending', NULL, 1, 2, 3, 23),
-('Location 24', 'Address for Location 24, Malaysia', '2025-01-24 03:00:00', '2025-01-24 08:00:00', 300, 3.0922, 101.6497, 'Rejected', 'Insufficient resources at the facility', 1, 3, 4, 24),
-('Location 25', 'Address for Location 25, Malaysia', '2025-01-25 01:00:00', '2025-01-25 06:00:00', 50, 3.0925, 101.6498, 'Approved', NULL, 1, 1, 5, 25),
-('Location 26', 'Address for Location 26, Malaysia', '2025-01-26 02:00:00', '2025-01-26 07:00:00', 100, 3.0927, 101.6499, 'Pending', NULL, 1, 2, 1, 26),
-('Location 27', 'Address for Location 27, Malaysia', '2025-01-27 03:00:00', '2025-01-27 08:00:00', 150, 3.0923, 101.6493, 'Rejected', 'Insufficient resources at the facility', 1, 3, 2, 27),
-('Location 28', 'Address for Location 28, Malaysia', '2025-01-28 01:00:00', '2025-01-28 06:00:00', 200, 3.0926, 101.6494, 'Approved', NULL, 1, 1, 3, 28),
-('Location 29', 'Address for Location 29, Malaysia', '2025-01-29 02:00:00', '2025-01-29 07:00:00', 250, 3.0924, 101.6495, 'Pending', NULL, 1, 2, 4, 29),
-('Location 30', 'Address for Location 30, Malaysia', '2025-01-30 03:00:00', '2025-01-30 08:00:00', 300, 3.0922, 101.6496, 'Rejected', 'Insufficient resources at the facility', 1, 3, 5, 30);
+-- Approved requests
+-- Past blood donation events
+('AEON Mall Tebrau City', '1, Jalan Desa Tebrau, Taman Desa Tebrau, 81100 Johor Bahru, Johor Darul Ta''zim', '2024-11-02 01:00:00', '2024-11-02 06:00:00', 50, 1.5504988882483934, 103.79546007121144, 'Approved', NULL, 1, 1, 2, 1),
+('Aman Central', 'Aman Central, 1, Darul Aman Hwy, Kampung Lubok Peringgi, 05100 Alor Setar, Kedah', '2024-11-05 03:00:00', '2024-11-05 08:00:00', 100, 6.126557473647973, 100.36635251644108, 'Approved', NULL,3, 2, (SELECT id FROM districts WHERE name = 'Kota Setar'), 3),
+('Central Square', '4th Floor No, 4.09.01, 23, Jalan Kampung Baru, 08000 Sungai Petani, Kedah', '2024-11-12 03:00:00', '2024-11-12 09:00:00', 200, 5.636985974957746, 100.48850811177923, 'Approved', NULL, 3, 2, (SELECT id FROM districts WHERE name = 'Kuala Muda'), 4),
+('KB Mall', '1, Jalan Hamzah, Bandar Kota Bharu, 15050 Kota Bharu, Kelantan', '2024-11-20 01:00:00', '2024-11-20 06:00:00', 150, 6.117535241114517, 102.24020087379189, 'Approved', NULL, 4, 3, (SELECT id FROM districts WHERE name = 'Kota Bharu'), 5),
+('Dataran Pahlawan Melaka Megamall', 'Jln Merdeka, Banda Hilir, 75000 Melaka', '2024-11-26 02:00:00', '2024-11-26 09:00:00', 300, 2.190001569760413, 102.25044895653002, 'Approved', NULL, 5, 4, (SELECT id FROM districts WHERE name = 'Melaka Tengah'), 2),
+('Mahkota Parade', 'Lot B-02, Mahkota Parade, 1, Jln Merdeka, Taman Costa Mahkota, 75000 Melaka', '2024-11-29 01:00:00', '2024-11-29 07:00:00', 250, 2.189337789123672, 102.24980078669556, 'Approved', NULL, 5, 4, (SELECT id FROM districts WHERE name = 'Melaka Tengah'), 3),
+('Palm Mall', 'Palm Mall, Level 4, Jalan Sungai Ujong, Kemayan Square, 70200 Seremban, Negeri Sembilan', '2024-12-02 02:00:00', '2024-12-02 08:00:00', 100, 2.7200830958712503, 101.92291014211008, 'Approved', NULL, 6, 5, (SELECT id FROM districts WHERE name = 'Seremban'), 1),
+('East Coast Mall', 'Jalan Putra Square 6, Putra Square, 25200 Kuantan, Pahang', '2024-12-09 03:00:00', '2024-12-09 07:00:00', 150, 3.8185819301644415, 103.32625816792614, 'Approved', NULL, 7, 6, (SELECT id FROM districts WHERE name = 'Kuantan'), 2),
+('Ipoh Parade', '105, Jalan Sultan Abdul Jalil, Pusat Perdagangan Greentown, 30450 Ipoh, Perak', '2024-12-15 02:00:00', '2024-12-15 07:00:00', 250, 4.595751513218196, 101.08984128465725, 'Approved', NULL, 11, 7, (SELECT id FROM districts WHERE name = 'Kinta'), 3),
+('1st Avenue Mall', '182, Jalan Magazine, 10300 George Town, Pulau Pinang', '2024-12-28 02:00:00', '2024-12-28 06:00:00', 50, 5.413053410743275, 100.33116965721827, 'Approved', NULL, 10, 9, (SELECT id FROM districts WHERE name = 'Timur Laut'), 1),
+('Queensbay Mall', 'Queensbay Mall, 100, Persiaran Bayan Indah, 11900 Bayan Lepas, Pulau Pinang', '2025-01-05 02:00:00', '2025-01-05 07:00:00', 200, 5.333183408845015, 100.3066133670719, 'Approved', NULL, 10, 9, (SELECT id FROM districts WHERE name = 'Barat Daya'), 4),
+-- Upcoming blood donation events
+('Imago Shopping Mall', 'KK Times Square, Phase 2, Off Coastal Highway, 88100 Kota Kinabalu, Sabah', '2025-01-12 03:00:00', '2025-01-12 09:00:00', 300, 5.970860788846937, 116.06635592386823, 'Approved', NULL, 16, 10, (SELECT id FROM districts WHERE name = 'Kota Kinabalu'), 2),
+('Vivacity Megamall', 'Q112B, 93350 Kuching, Sarawak', '2025-01-19 01:00:00', '2025-01-19 06:00:00', 100, 1.8864013570027496, 110.44913508635773, 'Approved', NULL, 19, 11, (SELECT id FROM districts WHERE name = 'Kuching'), 1),
+('1 Utama Shopping Centre', '1, Lebuh Bandar Utama, Bandar Utama, 47800 Petaling Jaya, Selangor', '2025-01-23 03:00:00', '2025-01-23 08:00:00', 200, 3.148127466123984, 101.61646193049211, 'Approved', NULL, 14, 12, (SELECT id FROM districts WHERE name = 'Petaling'), 3),
+('Sunway Pyramid', '3, Jalan PJS 11/15, Bandar Sunway, 47500 Petaling Jaya, Selangor', '2025-01-28 01:00:00', '2025-01-28 09:00:00', 100, 3.0739684691784834, 101.60737446217043, 'Approved', NULL, 14, 12, (SELECT id FROM districts WHERE name = 'Petaling'), 5),
+('Mesra Mall', 'Mesra Mall, Lot 6490, Jalan Kemaman - Dungun, Kampung Baru, 24200 Kemasik, Terengganu', '2025-02-03 03:00:00', '2025-02-03 06:00:00', 300, 4.440697264195204, 103.44849511840275, 'Approved', NULL, 15, 13, (SELECT id FROM districts WHERE name = 'Dungun'), 1),
+('Pavilion Kuala Lumpur', '168, Jln Bukit Bintang, Bukit Bintang, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-02-10 03:00:00', '2025-02-10 07:00:00', 150, 3.148998022026934, 101.71340731862986, 'Approved', NULL, 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 2),
+('Financial Park Labuan Complex', 'Jln Merdeka, Financial Park, 87000 Labuan, Wilayah Persekutuan Labuan', '2025-02-17 02:00:00', '2025-02-17 09:00:00', 100, 5.276586556815842, 115.24945783706148, 'Approved', NULL, 22, 15, (SELECT id FROM districts WHERE name = 'W.P. Labuan'), 3),
+('Alamanda Shopping Centre', 'Jalan Alamanda, Presint 1, 62000 Putrajaya, Wilayah Persekutuan Putrajaya', '2025-02-25 01:00:00', '2025-02-25 08:00:00', 200, 2.939551932738423, 101.71061614346809, 'Approved', NULL, 22, 16, (SELECT id FROM districts WHERE name = 'W.P. Putrajaya'), 4),
+-- Rejected requests
+('Mid Valley Megamall', 'Lingkaran Syed Putra, Mid Valley City, 59200 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-01-23 01:00:00', '2025-01-23 07:00:00', 50, 3.1177141222234273, 101.67739991060756, 'Rejected', 'Insufficient manpower to dispatch at the facility', 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 1),
+('Berjaya Times Square', 'No. 1, Jalan Imbi, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-01-26 02:00:00', '2025-01-26 09:00:00', 100, 3.1423269411587826, 101.71059408876324, 'Rejected', 'No transportation options available at the time', 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 3),
+('Suria KLCC', '241, Petronas Twin Tower, Kuala Lumpur City Centre, 50088 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-02-03 03:00:00', '2025-02-03 06:00:00', 250, 3.1582885400344383, 101.71220350175281, 'Rejected', 'Location does not meet requirements', 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 5),
+-- Pending requests
+('NU Sentral', 'Nu Sentral Shopping Mall, Jalan Tun Sambanthan, City Centre, 50470 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-02-14 01:00:00', '2025-02-14 07:00:00', 50, 3.1330861476540046, 101.68742603204397, 'Pending', NULL, 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 2),
+('Plaza Low Yat', '7, Jalan Bintang, Off Jalan Bukit Bintang, Central, Bukit Bintang, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-02-26 02:00:00', '2025-02-26 09:00:00', 100, 3.1441822028345365, 101.70996143106056, 'Pending', NULL, 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 4);
 
-INSERT INTO user_notifications (description, redirect, is_read, created_at, user_id) VALUES
-('Reminder: upcoming meeting', NULL, TRUE, '2024-12-22 14:22:00', 1000),
-('Dont miss this offer', NULL, FALSE, '2024-12-15 05:38:00', 1000),
-('Security alert', 'events', FALSE, '2024-12-11 18:50:00', 1000),
-('Special offer for you', 'events', TRUE, '2024-12-30 18:02:00', 1000),
-('Event canceled', NULL, FALSE, '2024-12-16 05:42:00', 1000),
-('New alert for you', 'events', FALSE, '2024-12-31 09:08:00', 1000),
-('Dont miss this offer', NULL, TRUE, '2024-12-31 13:03:00', 1000),
-('Important system notification', NULL, FALSE, '2024-12-15 07:20:00', 1000),
-('Reminder: upcoming meeting', NULL, TRUE, '2024-12-26 07:50:00', 1000),
-('Check your new achievements', NULL, TRUE, '2024-12-26 20:40:00', 1000),
-('Security alert', NULL, FALSE, '2024-12-17 23:38:00', 1000),
-('New message in your inbox', NULL, TRUE, '2024-12-01 12:05:00', 1000),
-('Survey for feedback', NULL, FALSE, '2024-12-18 06:54:00', 1000),
-('Survey for feedback', 'events', TRUE, '2024-12-15 21:24:00', 1000),
-('Event is happening soon', NULL, FALSE, '2024-12-02 18:17:00', 1000),
-('System update scheduled', 'events', TRUE, '2024-12-30 18:17:00', 1000),
-('New alert for you', 'events', TRUE, '2024-12-03 23:37:00', 1000),
-('Notification about event 1', 'events', TRUE, '2024-12-07 20:37:00', 1000);

@@ -71,7 +71,7 @@ impl AdminSessionModelController {
     ) -> Result<()> {
         let db = model_manager.db();
 
-        let count = sqlx::query("UPDATE admin_sessions SET refresh_token_id = $1, access_token_id = $2, admin_id = $3 WHERE refresh_token_id = $4")
+        let count = sqlx::query("UPDATE admin_sessions SET refresh_token_id = $1, access_token_id = $2 WHERE admin_id = $3 AND refresh_token_id = $4")
             .bind(admin_session_updated.refresh_token_id)
             .bind(admin_session_updated.access_token_id)
             .bind(admin_session_updated.admin_id)
@@ -172,7 +172,7 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn test_create_ok() -> Result<()> {
+    async fn test_create() -> Result<()> {
         // Setup
         let model_manager = _dev_utils::init_test().await;
 
@@ -193,7 +193,9 @@ mod tests {
         let admin_session =
             AdminSessionModelController::get(&model_manager, refresh_token_id).await?;
         assert_eq!(admin_session.admin_id, 1);
+        
         assert_eq!(admin_session.access_token_id, access_token_id);
+        assert_eq!(admin_session.refresh_token_id, refresh_token_id);
 
         // Clean
         sqlx::query("DELETE FROM admin_sessions WHERE refresh_token_id = $1")
@@ -254,7 +256,7 @@ mod tests {
         let admin_session_updated = AdminSessionForCreate {
             refresh_token_id: refresh_token_id_updated,
             access_token_id: access_token_id_updated,
-            admin_id: 2,
+            admin_id: 1,
         };
 
         AdminSessionModelController::update(
@@ -269,7 +271,7 @@ mod tests {
             AdminSessionModelController::get(&model_manager, refresh_token_id_updated)
                 .await?;
         assert_eq!(admin_session.access_token_id, access_token_id_updated);
-        assert_eq!(admin_session.admin_id, 2);
+        assert_eq!(admin_session.refresh_token_id, refresh_token_id_updated);
 
         // Clean
         sqlx::query("DELETE FROM admin_sessions WHERE refresh_token_id = $1")
@@ -305,16 +307,13 @@ mod tests {
         // Execute
         AdminSessionModelController::create(&model_manager, admin_session_created1)
             .await?;
-
         AdminSessionModelController::create(&model_manager, admin_session_created2)
             .await?;
-
         AdminSessionModelController::delete_by_admin_id(&model_manager, 1).await?;
 
         // Check
         let res =
             AdminSessionModelController::get(&model_manager, refresh_token_id1).await;
-
         assert!(
             matches!(
                 res,
@@ -328,7 +327,6 @@ mod tests {
 
         let res =
             AdminSessionModelController::get(&model_manager, refresh_token_id2).await;
-
         assert!(
             matches!(
                 res,
@@ -362,6 +360,70 @@ mod tests {
                     entity: "admin_session",
                     field: I64Error(100)
                 })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_check_ok() -> Result<()> {
+        // Setup
+        let model_manager = _dev_utils::init_test().await;
+
+        let refresh_token_id = Uuid::new_v4();
+        let access_token_id = Uuid::new_v4();
+
+        let admin_session_created = AdminSessionForCreate {
+            refresh_token_id,
+            access_token_id,
+            admin_id: 1,
+        };
+
+        // Execute
+        AdminSessionModelController::create(&model_manager, admin_session_created)
+            .await?;
+
+        let res = AdminSessionModelController::check(&model_manager, refresh_token_id, access_token_id, 1).await;
+
+        // Check
+        assert!(
+            matches!(
+                res,
+                Ok(())
+            ),
+            "Ok not matching"
+        );
+
+        // Clean
+        sqlx::query("DELETE FROM admin_sessions WHERE refresh_token_id = $1")
+            .bind(refresh_token_id)
+            .execute(model_manager.db())
+            .await?;
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_check_err_not_found() -> Result<()> {
+        // Setup
+        let model_manager = _dev_utils::init_test().await;
+        let id = Uuid::new_v4();
+
+        // Execute
+        let res = AdminSessionModelController::check(&model_manager, id, id, 1).await;
+
+        // Check
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "admin_session",
+                    field: UuidError(id),
+                }) if id == id
             ),
             "EntityNotFound not matching"
         );

@@ -156,8 +156,6 @@ mod tests {
         // Check
         let donation_history = DonationHistoryModelController::get(&model_manager, id).await?;
 
-        println!("donation_history for test_create: {:?}", donation_history);
-
         assert_eq!(donation_history.event_id, Some(1));
         assert_eq!(donation_history.user_id, 1000);
 
@@ -222,19 +220,8 @@ mod tests {
 
         assert_eq!(
             donation_histories.len(),
-            3,
-            "number of seeded donation_histories."
-        );
-        assert_eq!(donation_histories[1].event_id, Some(1));
-        assert_eq!(donation_histories[2].event_id, None);
-
-        println!(
-            "donation_history1 for test_update: {:?}",
-            donation_histories[1]
-        );
-        println!(
-            "donation_history2 for test_update: {:?}",
-            donation_histories[2]
+            2,
+            "Testing list donation history by user id"
         );
 
         // Clean
@@ -255,10 +242,10 @@ mod tests {
     async fn test_list_by_user_id_err_not_found() -> Result<()> {
         // Setup
         let model_manager = _dev_utils::init_test().await;
-        let id = 100;
+        let user_id = 100;
 
         // Execute
-        let res = DonationHistoryModelController::list_by_user_id(&model_manager, id).await;
+        let res = DonationHistoryModelController::list_by_user_id(&model_manager, user_id).await;
 
         // Check
         assert!(

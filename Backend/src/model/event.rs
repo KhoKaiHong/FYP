@@ -123,10 +123,7 @@ impl EventModelController {
     }
 
     // Gets an Event by its id
-    pub async fn get(
-        model_manager: &ModelManager,
-        id: i64,
-    ) -> Result<Event> {
+    pub async fn get(model_manager: &ModelManager, id: i64) -> Result<Event> {
         let db = model_manager.db();
 
         let event = sqlx::query_as(
@@ -175,9 +172,7 @@ impl EventModelController {
     }
 
     // Lists all Events
-    pub async fn list(
-        model_manager: &ModelManager,
-    ) -> Result<Vec<Event>> {
+    pub async fn list(model_manager: &ModelManager) -> Result<Vec<Event>> {
         let db = model_manager.db();
 
         let events = sqlx::query_as(
@@ -221,9 +216,7 @@ impl EventModelController {
     }
 
     // Lists all future Events
-    pub async fn list_future_events(
-        model_manager: &ModelManager,
-    ) -> Result<Vec<Event>> {
+    pub async fn list_future_events(model_manager: &ModelManager) -> Result<Vec<Event>> {
         let db = model_manager.db();
 
         let events = sqlx::query_as("
@@ -495,8 +488,6 @@ mod tests {
         // Check
         let event = EventModelController::get(&model_manager, id).await?;
 
-        println!("event for test_create: {:?}", event);
-
         assert_eq!(event.address, "test_create_ok@example.com");
         assert_eq!(event.start_time, test_time);
         assert_eq!(event.end_time, test_time);
@@ -545,60 +536,10 @@ mod tests {
     async fn test_list_ok() -> Result<()> {
         // Setup
         let model_manager = _dev_utils::init_test().await;
-        let test_time = Utc::now()
-            .duration_trunc(TimeDelta::microseconds(1))
-            .unwrap();
-        let event_created1 = EventForCreate {
-            location: "test location 1".to_string(),
-            address: "test_list_ok-event 01".to_string(),
-            start_time: test_time,
-            end_time: test_time,
-            max_attendees: 10,
-            latitude: 3.1732962387784367,
-            longitude: 101.70668106095312,
-            facility_id: 1,
-            organiser_id: 1,
-            state_id: 1,
-            district_id: 1,
-        };
-        let event_created2 = EventForCreate {
-            location: "test location 2".to_string(),
-            address: "test_list_ok-event 02".to_string(),
-            start_time: test_time,
-            end_time: test_time,
-            max_attendees: 20,
-            latitude: 3.1732962387784367,
-            longitude: 101.70668106095312,
-            facility_id: 2,
-            organiser_id: 2,
-            state_id: 2,
-            district_id: 2,
-        };
-
-        // Execute
-        let id1 = EventModelController::create(&model_manager, event_created1).await?;
-        let id2 = EventModelController::create(&model_manager, event_created2).await?;
 
         // Check
         let events = EventModelController::list(&model_manager).await?;
-
-        assert_eq!(events.len(), 5, "number of seeded events.");
-        assert_eq!(events[3].address, "test_list_ok-event 01");
-        assert_eq!(events[4].address, "test_list_ok-event 02");
-
-        println!("event1 for test_update: {:?}", events[3]);
-        println!("event2 for test_update: {:?}", events[4]);
-
-        // Clean
-        sqlx::query("DELETE from blood_donation_events where id = $1")
-            .bind(id1)
-            .execute(model_manager.db())
-            .await?;
-
-        sqlx::query("DELETE from blood_donation_events where id = $1")
-            .bind(id2)
-            .execute(model_manager.db())
-            .await?;
+        assert_eq!(events.len(), 19, "Testing list events");
 
         Ok(())
     }

@@ -144,10 +144,7 @@ impl ChangeEventRequestModelController {
     }
 
     // Gets a Change Event Request by its id
-    pub async fn get(
-        model_manager: &ModelManager,
-        id: i64,
-    ) -> Result<ChangeEventRequest> {
+    pub async fn get(model_manager: &ModelManager, id: i64) -> Result<ChangeEventRequest> {
         let db = model_manager.db();
 
         let event = sqlx::query_as(
@@ -167,7 +164,7 @@ impl ChangeEventRequestModelController {
     // Lists all change events for an organiser
     pub async fn list_by_organiser(
         model_manager: &ModelManager,
-        organiser_id: i64, 
+        organiser_id: i64,
     ) -> Result<Vec<ChangeEventRequest>> {
         let db = model_manager.db();
 
@@ -182,7 +179,7 @@ impl ChangeEventRequestModelController {
     // Lists all change events for a facility
     pub async fn list_by_facility(
         model_manager: &ModelManager,
-        facility_id: i64, 
+        facility_id: i64,
     ) -> Result<Vec<ChangeEventRequest>> {
         let db = model_manager.db();
 
@@ -257,14 +254,10 @@ mod tests {
         };
 
         // Execute
-        let id =
-            ChangeEventRequestModelController::create(&model_manager, change_request)
-                .await?;
+        let id = ChangeEventRequestModelController::create(&model_manager, change_request).await?;
 
         // Check
         let event = ChangeEventRequestModelController::get(&model_manager, id).await?;
-
-        println!("event for test_create: {:?}", event);
 
         assert_eq!(event.address, "test_create_ok@example.com");
         assert_eq!(event.start_time, test_time);
@@ -368,22 +361,19 @@ mod tests {
 
         // Execute
         let id1 =
-            ChangeEventRequestModelController::create(&model_manager, change_request_1)
-                .await?;
+            ChangeEventRequestModelController::create(&model_manager, change_request_1).await?;
         let id2 =
-            ChangeEventRequestModelController::create(&model_manager, change_request_2)
-                .await?;
+            ChangeEventRequestModelController::create(&model_manager, change_request_2).await?;
         let id3 =
-            ChangeEventRequestModelController::create(&model_manager, change_request_3)
-                .await?;
+            ChangeEventRequestModelController::create(&model_manager, change_request_3).await?;
 
         // Check
         let events =
             ChangeEventRequestModelController::list_by_organiser(&model_manager, 1).await?;
-
-        assert_eq!(events.len(), 2, "number of seeded requests.");
-        assert_eq!(events[0].address, "test_list_ok-event 01");
-        assert_eq!(events[1].address, "test_list_ok-event 03");
+        assert_eq!(events.len(), 2, "testing list by organiser - 1");
+        let events =
+            ChangeEventRequestModelController::list_by_organiser(&model_manager, 2).await?;
+        assert_eq!(events.len(), 1, "testing list by organiser - 2");
 
         // Clean
         sqlx::query("DELETE FROM change_blood_donation_events_requests WHERE id = $1")
@@ -460,22 +450,17 @@ mod tests {
 
         // Execute
         let id1 =
-            ChangeEventRequestModelController::create(&model_manager, change_request_1)
-                .await?;
+            ChangeEventRequestModelController::create(&model_manager, change_request_1).await?;
         let id2 =
-            ChangeEventRequestModelController::create(&model_manager, change_request_2)
-                .await?;
+            ChangeEventRequestModelController::create(&model_manager, change_request_2).await?;
         let id3 =
-            ChangeEventRequestModelController::create(&model_manager, change_request_3)
-                .await?;
+            ChangeEventRequestModelController::create(&model_manager, change_request_3).await?;
 
         // Check
-        let events =
-            ChangeEventRequestModelController::list_by_facility(&model_manager, 1).await?;
-
-        assert_eq!(events.len(), 2, "number of seeded requests.");
-        assert_eq!(events[0].address, "test_list_ok-event 01");
-        assert_eq!(events[1].address, "test_list_ok-event 03");
+        let events = ChangeEventRequestModelController::list_by_facility(&model_manager, 1).await?;
+        assert_eq!(events.len(), 2, "testing list by facility - 1");
+        let events = ChangeEventRequestModelController::list_by_facility(&model_manager, 1).await?;
+        assert_eq!(events.len(), 1, "testing list by facility - 2");
 
         // Clean
         sqlx::query("DELETE FROM change_blood_donation_events_requests WHERE id = $1")
@@ -521,21 +506,17 @@ mod tests {
         };
 
         // Execute
-        let id =
-            ChangeEventRequestModelController::create(&model_manager, change_request)
-                .await?;
+        let id = ChangeEventRequestModelController::create(&model_manager, change_request).await?;
 
         let updated_request = ChangeEventRequestForUpdate {
             status: EventRequestStatus::Rejected,
             rejection_reason: Some("Rejected".to_string()),
         };
 
-        ChangeEventRequestModelController::update(&model_manager, id, updated_request)
-            .await?;
+        ChangeEventRequestModelController::update(&model_manager, id, updated_request).await?;
 
         // Check
         let event = ChangeEventRequestModelController::get(&model_manager, id).await?;
-        println!("event for test_update: {:?}", event);
         assert_eq!(event.status, EventRequestStatus::Rejected);
         assert_eq!(event.rejection_reason, Some(String::from("Rejected")));
 

@@ -20,24 +20,31 @@ pub enum EntityErrorField {
 #[serde_as]
 #[derive(Debug, Serialize)]
 pub enum Error {
+    // Error when an entity is not found
     EntityNotFound {
         entity: &'static str,
         field: EntityErrorField,
     },
 
+    // Error when there is a duplicate key conflict
     DuplicateKey {
         table: &'static str,
         column: &'static str,
     },
 
+    // Event registration error to propagate to client
     EventRegistration(RegistrationError),
 
+    // Existing new event request error to propagate to client
     ExistingNewEventRequest,
 
+    // Existing change event request error to propagate to client
     ExistingChangeEventRequest,
 
+    // Store errors
     Store(store::Error),
 
+    // Sqlx errors
     Sqlx(#[serde_as(as = "DisplayFromStr")] sqlx::Error),
 }
 

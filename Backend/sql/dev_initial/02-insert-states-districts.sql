@@ -1,4 +1,4 @@
--- Insert states (total 16)
+-- Insert states (16 added)
 INSERT INTO "states" (name) VALUES
 ('Johor'),
 ('Kedah'),
@@ -17,7 +17,7 @@ INSERT INTO "states" (name) VALUES
 ('W.P. Labuan'),
 ('W.P. Putrajaya');
 
--- Insert districts (total 160)
+-- Insert districts (160 added)
 INSERT INTO "districts" (name, state_id) VALUES
 -- Johor
 ('Batu Pahat', 1),

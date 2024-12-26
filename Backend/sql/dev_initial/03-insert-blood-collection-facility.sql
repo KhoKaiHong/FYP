@@ -1,4 +1,4 @@
--- Insert blood collection facilities (total 22)
+-- Insert blood collection facilities (22 added)
 INSERT INTO "blood_collection_facilities" (name, email, password, address, phone_number, state_id) VALUES
 ('Hospital Sultanah Aminah', 'hospital.sultanah.aminah@example.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Jalan, Persiaran Abu Bakar Sultan, 80100 Johor Bahru, Johor Darul Ta''zim', '+6012-8621009', (SELECT id FROM states WHERE name = 'Johor')),
 ('Hospital Sultanah Nora Ismail', 'hospital.sultanah.nora.ismail@example.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Jalan Korma, Taman Soga, 83000 Batu Pahat, Johor Darul Ta''zim', '+6012-9048686', (SELECT id FROM states WHERE name = 'Johor')),
