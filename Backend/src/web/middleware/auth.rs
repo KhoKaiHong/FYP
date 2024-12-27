@@ -1,6 +1,8 @@
+// Modules
 use crate::auth::Role;
 use crate::context::Context;
 use crate::web::{Error, Result};
+
 use axum::body::Body;
 use axum::http::Request;
 use axum::middleware::Next;

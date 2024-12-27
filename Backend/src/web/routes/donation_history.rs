@@ -1,13 +1,16 @@
+// Modules
 use crate::context::Context;
 use crate::model::donation_history::DonationHistoryModelController;
 use crate::state::AppState;
 use crate::web::Result;
+
 use axum::extract::State;
 use axum::routing::get;
 use axum::{Json, Router};
 use serde_json::{json, Value};
 use tracing::debug;
 
+// Route that list donation history by user id
 pub fn list_by_user_id(app_state: AppState) -> Router {
     Router::new()
         .route(
@@ -17,6 +20,7 @@ pub fn list_by_user_id(app_state: AppState) -> Router {
         .with_state(app_state)
 }
 
+// Handler that lists all donation history for a user
 async fn list_history_by_user_id_handler(
     context: Context,
     State(app_state): State<AppState>,

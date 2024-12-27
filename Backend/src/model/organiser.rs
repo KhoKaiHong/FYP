@@ -209,8 +209,8 @@ mod tests {
         // Setup
         let model_manager = _dev_utils::init_test().await;
         let organiser_created = OrganiserForCreate {
-            email: "test_create_ok@example.com".to_string(),
-            password: "welcome".to_string(),
+            email: "test@example.com".to_string(),
+            password: "hello".to_string(),
             name: "Test Organiser".to_string(),
             phone_number: "1234567890".to_string(),
         };
@@ -220,18 +220,44 @@ mod tests {
 
         // Check
         let organiser = OrganiserModelController::get(&model_manager, id).await?;
-        assert_eq!(organiser.email, "test_create_ok@example.com");
-        assert_eq!(organiser.password, "welcome");
+        assert_eq!(organiser.email, "test@example.com");
+        assert_eq!(organiser.password, "hello");
         assert_eq!(organiser.name, "Test Organiser");
         assert_eq!(organiser.phone_number, "1234567890");
-
-        println!("\n\norganiser: {:?}", organiser);
 
         // Clean
         sqlx::query("DELETE FROM event_organisers WHERE id = $1")
             .bind(id)
             .execute(model_manager.db())
             .await?;
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_create_err() -> Result<()> {
+        // Setup
+        let model_manager = _dev_utils::init_test().await;
+        let organiser_created = OrganiserForCreate {
+            email: "st.john.ambulans@example.com".to_string(),
+            password: "welcome".to_string(),
+            name: "Test Organiser".to_string(),
+            phone_number: "1234567890".to_string(),
+        };
+
+        // Execute
+        let res = OrganiserModelController::create(&model_manager, organiser_created).await;
+
+        // Check
+        assert!(
+            matches!(res, Err(Error::DuplicateKey {
+                table: "event_organisers",
+                column: "email",
+            })),
+            "Expected DuplicateKey error, got: {:?}",
+            res
+        );
 
         Ok(())
     }
@@ -267,8 +293,8 @@ mod tests {
         // Setup
         let model_manager = _dev_utils::init_test().await;
         let organiser_created = OrganiserForCreate {
-            email: "test_list_ok@example.com".to_string(),
-            password: "welcome".to_string(),
+            email: "test@example.com".to_string(),
+            password: "hello".to_string(),
             name: "Test Organiser 01".to_string(),
             phone_number: "1234567890".to_string(),
         };
@@ -287,11 +313,9 @@ mod tests {
         // Check
         let organiser = OrganiserModelController::get(&model_manager, id).await?;
         assert_eq!(organiser.email, "new_email@gmail.com");
-        assert_eq!(organiser.password, "welcome");
+        assert_eq!(organiser.password, "hello");
         assert_eq!(organiser.name, "New name");
         assert_eq!(organiser.phone_number, "1234567890");
-
-        println!("\n\norganiser: {:?}", organiser);
 
         // Clean
         sqlx::query("DELETE FROM event_organisers WHERE id = $1")
@@ -308,8 +332,8 @@ mod tests {
         // Setup
         let model_manager = _dev_utils::init_test().await;
         let organiser_created = OrganiserForCreate {
-            email: "test_create_ok@example.com".to_string(),
-            password: "welcome".to_string(),
+            email: "test@example.com".to_string(),
+            password: "hello".to_string(),
             name: "Test Organiser".to_string(),
             phone_number: "1234567890".to_string(),
         };
@@ -318,16 +342,13 @@ mod tests {
 
         // Execute
         let organiser =
-            OrganiserModelController::get_by_email(&model_manager, "test_create_ok@example.com")
+            OrganiserModelController::get_by_email(&model_manager, "test@example.com")
                 .await?;
 
         // Check
-        assert_eq!(organiser.email, "test_create_ok@example.com");
-        assert_eq!(organiser.password, "welcome");
+        assert_eq!(organiser.password, "hello");
         assert_eq!(organiser.name, "Test Organiser");
         assert_eq!(organiser.phone_number, "1234567890");
-
-        println!("\n\norganiser: {:?}", organiser);
 
         // Clean
         sqlx::query("DELETE FROM event_organisers WHERE id = $1")

@@ -22,6 +22,12 @@ pub struct UserSessionForCreate {
     pub user_id: i64,
 }
 
+// Fields used to update a user session.
+pub struct UserSessionForUpdate {
+    pub refresh_token_id: Uuid,
+    pub access_token_id: Uuid,
+}
+
 // User Session Model Controller
 pub struct UserSessionModelController;
 
@@ -65,15 +71,14 @@ impl UserSessionModelController {
     // Updates a user session.
     pub async fn update(
         model_manager: &ModelManager,
-        user_session_updated: UserSessionForCreate,
+        user_session_updated: UserSessionForUpdate,
         refresh_token_id: Uuid,
     ) -> Result<()> {
         let db = model_manager.db();
 
-        let count = sqlx::query("UPDATE user_sessions SET refresh_token_id = $1, access_token_id = $2, user_id = $3 WHERE refresh_token_id = $4")
+        let count = sqlx::query("UPDATE user_sessions SET refresh_token_id = $1, access_token_id = $2 WHERE refresh_token_id = $3")
             .bind(user_session_updated.refresh_token_id)
             .bind(user_session_updated.access_token_id)
-            .bind(user_session_updated.user_id)
             .bind(refresh_token_id)
             .execute(db)
             .await?
@@ -186,7 +191,6 @@ mod tests {
         // Check
         let user_session =
             UserSessionModelController::get(&model_manager, refresh_token_id).await?;
-        println!("\n\nuser_session: {:?}", user_session);
         assert_eq!(user_session.user_id, 1000);
 
         // Clean
@@ -244,10 +248,9 @@ mod tests {
         let refresh_token_id_updated = Uuid::new_v4();
         let access_token_id_updated = Uuid::new_v4();
 
-        let user_session_updated = UserSessionForCreate {
+        let user_session_updated = UserSessionForUpdate {
             refresh_token_id: refresh_token_id_updated,
             access_token_id: access_token_id_updated,
-            user_id: 1001,
         };
 
         UserSessionModelController::update(&model_manager, user_session_updated, refresh_token_id)
@@ -257,7 +260,6 @@ mod tests {
         let user_session =
             UserSessionModelController::get(&model_manager, refresh_token_id_updated).await?;
         assert_eq!(user_session.access_token_id, access_token_id_updated);
-        assert_eq!(user_session.user_id, 1001);
 
         // Clean
         sqlx::query("DELETE FROM user_sessions WHERE refresh_token_id = $1")

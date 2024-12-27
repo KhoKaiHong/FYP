@@ -22,6 +22,12 @@ pub struct OrganiserSessionForCreate {
     pub organiser_id: i64,
 }
 
+// Fields used to update an Organiser Session.
+pub struct OrganiserSessionForUpdate {
+    pub refresh_token_id: Uuid,
+    pub access_token_id: Uuid,
+}
+
 // Organiser Session Model Controller
 pub struct OrganiserSessionModelController;
 
@@ -68,15 +74,14 @@ impl OrganiserSessionModelController {
     // Updates an organiser session.
     pub async fn update(
         model_manager: &ModelManager,
-        organiser_session_updated: OrganiserSessionForCreate,
+        organiser_session_updated: OrganiserSessionForUpdate,
         refresh_token_id: Uuid,
     ) -> Result<()> {
         let db = model_manager.db();
 
-        let count = sqlx::query("UPDATE organiser_sessions SET refresh_token_id = $1, access_token_id = $2, organiser_id = $3 WHERE refresh_token_id = $4")
+        let count = sqlx::query("UPDATE organiser_sessions SET refresh_token_id = $1, access_token_id = $2 WHERE refresh_token_id = $3")
             .bind(organiser_session_updated.refresh_token_id)
             .bind(organiser_session_updated.access_token_id)
-            .bind(organiser_session_updated.organiser_id)
             .bind(refresh_token_id)
             .execute(db)
             .await?
@@ -258,10 +263,9 @@ mod tests {
         let refresh_token_id_updated = Uuid::new_v4();
         let access_token_id_updated = Uuid::new_v4();
 
-        let organiser_session_updated = OrganiserSessionForCreate {
+        let organiser_session_updated = OrganiserSessionForUpdate {
             refresh_token_id: refresh_token_id_updated,
             access_token_id: access_token_id_updated,
-            organiser_id: 2,
         };
 
         OrganiserSessionModelController::update(
@@ -278,7 +282,6 @@ mod tests {
         )
         .await?;
         assert_eq!(organiser_session.access_token_id, access_token_id_updated);
-        assert_eq!(organiser_session.organiser_id, 2);
         
         // Clean
         sqlx::query("DELETE FROM organiser_sessions WHERE refresh_token_id = $1")

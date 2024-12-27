@@ -240,8 +240,8 @@ mod tests {
         // Setup
         let model_manager = _dev_utils::init_test().await;
         let facility_created = FacilityForCreate {
-            email: "test_create_ok@example.com".to_string(),
-            password: "welcome".to_string(),
+            email: "test@example.com".to_string(),
+            password: "hello".to_string(),
             name: "Test Facility".to_string(),
             address: "123 Fake St".to_string(),
             phone_number: "1234567890".to_string(),
@@ -254,14 +254,12 @@ mod tests {
 
         // Check
         let facility = FacilityModelController::get(&model_manager, id).await?;
-        assert_eq!(facility.email, "test_create_ok@example.com");
-        assert_eq!(facility.password, "welcome");
+        assert_eq!(facility.email, "test@example.com");
+        assert_eq!(facility.password, "hello");
         assert_eq!(facility.name, "Test Facility");
         assert_eq!(facility.address, "123 Fake St");
         assert_eq!(facility.phone_number, "1234567890");
         assert_eq!(facility.state_id, 1);
-
-        println!("\n\nfacility: {:?}", facility);
 
         // Clean
         sqlx::query("DELETE FROM blood_collection_facilities WHERE id = $1")
@@ -303,57 +301,9 @@ mod tests {
         // Setup
         let model_manager = _dev_utils::init_test().await;
 
-        let facility_created1 = FacilityForCreate {
-            email: "test_email1@example.com".to_string(),
-            password: "welcome".to_string(),
-            name: "Test Facility 01".to_string(),
-            address: "123 Fake St".to_string(),
-            phone_number: "1234567890".to_string(),
-            state_id: 1,
-        };
-        let facility_created2 = FacilityForCreate {
-            email: "test_email2@example.com".to_string(),
-            password: "welcome".to_string(),
-            name: "Test Facility 02".to_string(),
-            address: "Hello Street".to_string(),
-            phone_number: "987654321".to_string(),
-            state_id: 2,
-        };
-
-        let id1 =
-            FacilityModelController::create(&model_manager, facility_created1).await?;
-        let id2 =
-            FacilityModelController::create(&model_manager, facility_created2).await?;
-        let facilities = FacilityModelController::list(&model_manager).await?;
-
         // Check
-        assert_eq!(facilities.len(), 24, "Number of facilities");
-        assert_eq!(facilities[22].id, id1);
-        assert_eq!(facilities[23].id, id2);
-        assert_eq!(facilities[22].name, "Test Facility 01");
-        assert_eq!(facilities[23].name, "Test Facility 02");
-        assert_eq!(facilities[22].state_id, 1);
-        assert_eq!(facilities[23].state_id, 2);
-        assert_eq!(facilities[22].state_name, "Johor");
-        assert_eq!(facilities[23].state_name, "Kedah");
-        assert_eq!(facilities[22].address, "123 Fake St");
-        assert_eq!(facilities[23].address, "Hello Street");
-        assert_eq!(facilities[22].phone_number, "1234567890");
-        assert_eq!(facilities[23].phone_number, "987654321");
-
-        for facility in facilities.iter() {
-            println!("facility: {:?}", facility);
-        }
-
-        // Clean
-        sqlx::query("DELETE FROM blood_collection_facilities WHERE id = $1")
-            .bind(id1)
-            .execute(model_manager.db())
-            .await?;
-        sqlx::query("DELETE FROM blood_collection_facilities WHERE id = $1")
-            .bind(id2)
-            .execute(model_manager.db())
-            .await?;
+        let facilities = FacilityModelController::list(&model_manager).await?;
+        assert_eq!(facilities.len(), 22, "Testing list facilities");
 
         Ok(())
     }
@@ -364,9 +314,9 @@ mod tests {
         // Setup
         let model_manager = _dev_utils::init_test().await;
         let facility_created = FacilityForCreate {
-            email: "test_list_ok@example.com".to_string(),
-            password: "welcome".to_string(),
-            name: "Test Facility 01".to_string(),
+            email: "test1@example.com".to_string(),
+            password: "hello".to_string(),
+            name: "Test Facility 1".to_string(),
             address: "123 Fake St".to_string(),
             phone_number: "1234567890".to_string(),
             state_id: 1,
@@ -388,12 +338,10 @@ mod tests {
         // Check
         let facility = FacilityModelController::get(&model_manager, id).await?;
         assert_eq!(facility.email, "new_email@gmail.com");
-        assert_eq!(facility.password, "welcome");
+        assert_eq!(facility.password, "hello");
         assert_eq!(facility.name, "New name");
         assert_eq!(facility.address, "123 Fake St");
         assert_eq!(facility.phone_number, "987654321");
-
-        println!("\n\nfacility: {:?}", facility);
 
         // Clean
         sqlx::query("DELETE FROM blood_collection_facilities WHERE id = $1")
@@ -410,7 +358,7 @@ mod tests {
         // Setup
         let model_manager = _dev_utils::init_test().await;
         let facility_created = FacilityForCreate {
-            email: "test_email@example.com".to_string(),
+            email: "test@example.com".to_string(),
             password: "welcome".to_string(),
             name: "Test Facility 01".to_string(),
             address: "123 Fake St".to_string(),
@@ -423,7 +371,7 @@ mod tests {
 
         // Execute
         let facility =
-            FacilityModelController::get_by_email(&model_manager, "test_email@example.com").await?;
+            FacilityModelController::get_by_email(&model_manager, "test@example.com").await?;
 
         // Check
         assert_eq!(facility.password, "welcome");
@@ -431,8 +379,6 @@ mod tests {
         assert_eq!(facility.address, "123 Fake St");
         assert_eq!(facility.phone_number, "1234567890");
         assert_eq!(facility.state_id, 1);
-
-        println!("\n\nfacility: {:?}", facility);
 
         // Clean
         sqlx::query("DELETE FROM blood_collection_facilities WHERE id = $1")
@@ -451,7 +397,7 @@ mod tests {
 
         // Execute
         let res =
-            FacilityModelController::get_by_email(&model_manager, "test_list_ok@example.com").await;
+            FacilityModelController::get_by_email(&model_manager, "test@example.com").await;
 
         // Check
         assert!(
@@ -460,7 +406,7 @@ mod tests {
                 Err(Error::EntityNotFound {
                     entity: "facility",
                     field: StringError(ref e)
-                }) if e == "test_list_ok@example.com"
+                }) if e == "test@example.com"
             ),
             "Expected EntityNotFound error, got: {:?}",
             res

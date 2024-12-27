@@ -78,7 +78,7 @@ INSERT INTO new_blood_donation_events_requests (
 -- Approved requests
 -- Past blood donation events
 ('AEON Mall Tebrau City', '1, Jalan Desa Tebrau, Taman Desa Tebrau, 81100 Johor Bahru, Johor Darul Ta''zim', '2024-11-02 01:00:00', '2024-11-02 06:00:00', 50, 1.5504988882483934, 103.79546007121144, 'Approved', NULL, 1, 1, 2, 1),
-('Aman Central', 'Aman Central, 1, Darul Aman Hwy, Kampung Lubok Peringgi, 05100 Alor Setar, Kedah', '2024-11-05 03:00:00', '2024-11-05 08:00:00', 100, 6.126557473647973, 100.36635251644108, 'Approved', NULL,3, 2, (SELECT id FROM districts WHERE name = 'Kota Setar'), 3),
+('Aman Central', 'Aman Central, 1, Darul Aman Hwy, Kampung Lubok Peringgi, 05100 Alor Setar, Kedah', '2024-11-05 03:00:00', '2024-11-05 08:00:00', 100, 6.126557473647973, 100.36635251644108, 'Approved', NULL, 3, 2, (SELECT id FROM districts WHERE name = 'Kota Setar'), 3),
 ('Central Square', '4th Floor No, 4.09.01, 23, Jalan Kampung Baru, 08000 Sungai Petani, Kedah', '2024-11-12 03:00:00', '2024-11-12 09:00:00', 200, 5.636985974957746, 100.48850811177923, 'Approved', NULL, 3, 2, (SELECT id FROM districts WHERE name = 'Kuala Muda'), 4),
 ('KB Mall', '1, Jalan Hamzah, Bandar Kota Bharu, 15050 Kota Bharu, Kelantan', '2024-11-20 01:00:00', '2024-11-20 06:00:00', 150, 6.117535241114517, 102.24020087379189, 'Approved', NULL, 4, 3, (SELECT id FROM districts WHERE name = 'Kota Bharu'), 5),
 ('Dataran Pahlawan Melaka Megamall', 'Jln Merdeka, Banda Hilir, 75000 Melaka', '2024-11-26 02:00:00', '2024-11-26 09:00:00', 300, 2.190001569760413, 102.25044895653002, 'Approved', NULL, 5, 4, (SELECT id FROM districts WHERE name = 'Melaka Tengah'), 2),

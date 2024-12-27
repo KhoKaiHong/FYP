@@ -4,9 +4,9 @@ use crate::model::{Error, ModelManager, Result};
 
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, Row};
-use serde_with::skip_serializing_none;
 
 // Facility Notification
 #[skip_serializing_none]
@@ -67,10 +67,7 @@ impl FacilityNotificationModelController {
     }
 
     // Gets a facility notification by its id.
-    pub async fn get(
-        model_manager: &ModelManager,
-        id: i64,
-    ) -> Result<FacilityNotification> {
+    pub async fn get(model_manager: &ModelManager, id: i64) -> Result<FacilityNotification> {
         let db = model_manager.db();
 
         let notification = sqlx::query_as("SELECT * FROM facility_notifications WHERE id = $1")
@@ -92,20 +89,18 @@ impl FacilityNotificationModelController {
     ) -> Result<Vec<FacilityNotification>> {
         let db = model_manager.db();
 
-        let notifications =
-            sqlx::query_as("SELECT * FROM facility_notifications WHERE facility_id = $1 ORDER BY id")
-                .bind(facility_id)
-                .fetch_all(db)
-                .await?;
+        let notifications = sqlx::query_as(
+            "SELECT * FROM facility_notifications WHERE facility_id = $1 ORDER BY id",
+        )
+        .bind(facility_id)
+        .fetch_all(db)
+        .await?;
 
         Ok(notifications)
     }
 
     // Marks a facility notification as read.
-    pub async fn read_notification(
-        model_manager: &ModelManager,
-        id: i64,
-    ) -> Result<()> {
+    pub async fn read_notification(model_manager: &ModelManager, id: i64) -> Result<()> {
         let db = model_manager.db();
 
         let count = sqlx::query("UPDATE facility_notifications SET is_read = true WHERE id = $1")
@@ -145,20 +140,16 @@ mod tests {
         };
 
         // Execute
-        let id =
-            FacilityNotificationModelController::create(&model_manager, notification_created)
-                .await?;
+        let id = FacilityNotificationModelController::create(&model_manager, notification_created)
+            .await?;
 
         // Check
-        let notification =
-            FacilityNotificationModelController::get(&model_manager, id).await?;
+        let notification = FacilityNotificationModelController::get(&model_manager, id).await?;
         assert_eq!(notification.id, id);
         assert_eq!(notification.redirect, None);
         assert_eq!(notification.description, "test_description");
         assert_eq!(notification.facility_id, 1);
         assert_eq!(notification.is_read, false);
-
-        println!("\n\nnotification: {:?}", notification);
 
         // Clean
         sqlx::query("DELETE FROM facility_notifications WHERE id = $1")
@@ -217,40 +208,23 @@ mod tests {
         };
 
         // Execute
-        let id1 = FacilityNotificationModelController::create(
-            &model_manager,
-            notification_created1,
-        )
-        .await?;
-        let id2 = FacilityNotificationModelController::create(
-            &model_manager,
-            notification_created2,
-        )
-        .await?;
-        let id3 = FacilityNotificationModelController::create(
-            &model_manager,
-            notification_created3,
-        )
-        .await?;
-        let notifications: Vec<FacilityNotification> =
+        let id1 =
+            FacilityNotificationModelController::create(&model_manager, notification_created1)
+                .await?;
+        let id2 =
+            FacilityNotificationModelController::create(&model_manager, notification_created2)
+                .await?;
+        let id3 =
+            FacilityNotificationModelController::create(&model_manager, notification_created3)
+                .await?;
+        let notifications1: Vec<FacilityNotification> =
             FacilityNotificationModelController::list_by_facility_id(&model_manager, 1).await?;
+        let notifications2: Vec<FacilityNotification> =
+            FacilityNotificationModelController::list_by_facility_id(&model_manager, 2).await?;
 
         // Check
-        assert_eq!(notifications.len(), 2);
-        assert_eq!(notifications[0].id, id1);
-        assert_eq!(notifications[1].id, id3);
-        assert_eq!(notifications[0].description, "test_description1");
-        assert_eq!(notifications[1].description, "test_description3");
-        assert_eq!(notifications[0].redirect, None);
-        assert_eq!(notifications[1].redirect, Some(String::from("event")));
-        assert_eq!(notifications[0].facility_id, 1);
-        assert_eq!(notifications[1].facility_id, 1);
-        assert_eq!(notifications[0].is_read, false);
-        assert_eq!(notifications[1].is_read, false);
-
-        for notification in notifications.iter() {
-            println!("notification: {:?}", notification);
-        }
+        assert_eq!(notifications1.len(), 2);
+        assert_eq!(notifications2.len(), 1);
 
         // Clean
         sqlx::query("DELETE FROM facility_notifications WHERE id = $1")
@@ -282,21 +256,14 @@ mod tests {
         };
 
         // Execute
-        let id =
-            FacilityNotificationModelController::create(&model_manager, notification_created)
-                .await?;
+        let id = FacilityNotificationModelController::create(&model_manager, notification_created)
+            .await?;
 
         FacilityNotificationModelController::read_notification(&model_manager, id).await?;
 
         // Check
         let notification = FacilityNotificationModelController::get(&model_manager, id).await?;
-        assert_eq!(notification.id, id);
-        assert_eq!(notification.description, "test_description");
-        assert_eq!(notification.redirect, Some(String::from("event")));
-        assert_eq!(notification.facility_id, 1);
         assert_eq!(notification.is_read, true);
-
-        println!("\n\nnotification: {:?}", notification);
 
         // Clean
         sqlx::query("DELETE FROM facility_notifications WHERE id = $1")

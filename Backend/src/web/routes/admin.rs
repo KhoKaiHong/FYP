@@ -1,9 +1,11 @@
+// Modules
 use crate::auth;
 use crate::auth::password::{encrypt_password, validate_password};
 use crate::context::Context;
 use crate::model::admin::{AdminForUpdate, AdminModelController};
 use crate::state::AppState;
 use crate::web::{Error, Result};
+
 use axum::extract::State;
 use axum::routing::patch;
 use axum::{Json, Router};
@@ -11,12 +13,14 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 use tracing::debug;
 
+// Routes
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
         .route("/admin", patch(admin_update_handler))
         .with_state(app_state)
 }
 
+// Handler that updates an admin
 async fn admin_update_handler(
     context: Context,
     State(app_state): State<AppState>,
@@ -47,7 +51,7 @@ async fn admin_update_handler(
             email: payload.email,
         };
 
-        // Update user with new details
+        // Update admin with new details
         AdminModelController::update(
             model_manager,
             context.user_id(),
@@ -62,7 +66,7 @@ async fn admin_update_handler(
             email: payload.email,
         };
 
-        // Update user with new details
+        // Update admin with new details
         AdminModelController::update(
             model_manager,
             context.user_id(),
@@ -80,6 +84,7 @@ async fn admin_update_handler(
     Ok(body)
 }
 
+// Request payload for updating an admin
 #[derive(Deserialize)]
 #[serde(rename_all(deserialize = "camelCase"))]
 struct AdminUpdatePayload {

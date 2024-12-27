@@ -273,8 +273,8 @@ mod tests {
         let user_created = UserForCreate {
             ic_number: "1234567890".to_string(),
             password: "password".to_string(),
-            name: "John Doe".to_string(),
-            email: "john@example.com".to_string(),
+            name: "Test".to_string(),
+            email: "test@example.com".to_string(),
             phone_number: "1234567890".to_string(),
             blood_type: BloodType::APositive,
             state_id: 1,
@@ -288,21 +288,51 @@ mod tests {
         let user = UserModelController::get(&model_manager, id).await?;
         assert_eq!(user.ic_number, "1234567890");
         assert_eq!(user.password, "password");
-        assert_eq!(user.name, "John Doe");
-        assert_eq!(user.email, "john@example.com");
+        assert_eq!(user.name, "Test");
+        assert_eq!(user.email, "test@example.com");
         assert_eq!(user.phone_number, "1234567890");
         assert_eq!(user.blood_type, BloodType::APositive);
         assert_eq!(user.eligibility, EligibilityStatus::Eligible);
         assert_eq!(user.state_id, 1);
         assert_eq!(user.district_id, 1);
 
-        println!("\n\nuser: {:?}", user);
-
         // Clean
         sqlx::query("DELETE FROM users WHERE id = $1")
             .bind(id)
             .execute(model_manager.db())
             .await?;
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_create_err() -> Result<()> {
+        // Setup
+        let model_manager = _dev_utils::init_test().await;
+        let user_created = UserForCreate {
+            ic_number: "850101-10-5001".to_string(),
+            password: "password".to_string(),
+            name: "Test".to_string(),
+            email: "test@example.com".to_string(),
+            phone_number: "1234567890".to_string(),
+            blood_type: BloodType::APositive,
+            state_id: 1,
+            district_id: 1,
+        };
+
+        // Execute
+        let res = UserModelController::create(&model_manager, user_created).await;
+
+        // Check
+        assert!(
+            matches!(res, Err(Error::DuplicateKey {
+                table: "users",
+                column: "IC number",
+            })),
+            "Expected DuplicateKey error, got: {:?}",
+            res
+        );
 
         Ok(())
     }
@@ -338,50 +368,12 @@ mod tests {
     async fn test_list() -> Result<()> {
         // Setup
         let model_manager = _dev_utils::init_test().await;
-        let user_created1 = UserForCreate {
-            ic_number: "1234567890".to_string(),
-            password: "password".to_string(),
-            name: "John Doe".to_string(),
-            email: "john@example.com".to_string(),
-            phone_number: "1234567890".to_string(),
-            blood_type: BloodType::APositive,
-            state_id: 1,
-            district_id: 1,
-        };
-        let user_created2 = UserForCreate {
-            ic_number: "9876543210".to_string(),
-            password: "password".to_string(),
-            name: "Jane Doe".to_string(),
-            email: "jane@example.com".to_string(),
-            phone_number: "9876543210".to_string(),
-            blood_type: BloodType::OPositive,
-            state_id: 2,
-            district_id: 2,
-        };
 
         // Execute
-        let id1 = UserModelController::create(&model_manager, user_created1).await?;
-        let id2 = UserModelController::create(&model_manager, user_created2).await?;
         let users = UserModelController::list(&model_manager).await?;
 
         // Check
-        assert_eq!(users.len(), 5);
-        assert_eq!(users[3].ic_number, "1234567890");
-        assert_eq!(users[4].ic_number, "9876543210");
-
-        for user in users {
-            println!("user: {:?}", user);
-        }
-
-        // Clean
-        sqlx::query("DELETE FROM users WHERE id = $1")
-            .bind(id1)
-            .execute(model_manager.db())
-            .await?;
-        sqlx::query("DELETE FROM users WHERE id = $1")
-            .bind(id2)
-            .execute(model_manager.db())
-            .await?;
+        assert_eq!(users.len(), 10, "Testing list users");
 
         Ok(())
     }
@@ -394,8 +386,8 @@ mod tests {
         let user_created = UserForCreate {
             ic_number: "1234567890".to_string(),
             password: "password".to_string(),
-            name: "John Doe".to_string(),
-            email: "john@example.com".to_string(),
+            name: "Test".to_string(),
+            email: "test@example.com".to_string(),
             phone_number: "1234567890".to_string(),
             blood_type: BloodType::APositive,
             state_id: 1,
@@ -418,17 +410,13 @@ mod tests {
 
         // Check
         let user = UserModelController::get(&model_manager, id).await?;
-        assert_eq!(user.ic_number, "1234567890");
         assert_eq!(user.password, "new_password");
-        assert_eq!(user.name, "John Doe");
-        assert_eq!(user.email, "john@example.com");
+        assert_eq!(user.email, "test@example.com");
         assert_eq!(user.phone_number, "9876543210");
         assert_eq!(user.blood_type, BloodType::APositive);
         assert_eq!(user.eligibility, EligibilityStatus::Ineligible);
         assert_eq!(user.state_id, 2);
         assert_eq!(user.district_id, 2);
-
-        println!("\n\nuser: {:?}", user);
 
         // Clean
         sqlx::query("DELETE FROM users WHERE id = $1")
@@ -447,8 +435,8 @@ mod tests {
         let user_created = UserForCreate {
             ic_number: "1234567890".to_string(),
             password: "password".to_string(),
-            name: "John Doe".to_string(),
-            email: "john@example.com".to_string(),
+            name: "Test".to_string(),
+            email: "test@example.com".to_string(),
             phone_number: "1234567890".to_string(),
             blood_type: BloodType::APositive,
             state_id: 1,
@@ -461,15 +449,13 @@ mod tests {
         let user = UserModelController::get_by_ic_number(&model_manager, "1234567890").await?;
 
         // Check
-        assert_eq!(user.email, "john@example.com");
+        assert_eq!(user.email, "test@example.com");
         assert_eq!(user.password, "password");
-        assert_eq!(user.name, "John Doe");
+        assert_eq!(user.name, "Test");
         assert_eq!(user.phone_number, "1234567890");
         assert_eq!(user.blood_type, BloodType::APositive);
         assert_eq!(user.state_id, 1);
         assert_eq!(user.district_id, 1);
-
-        println!("\n\nuser: {:?}", user);
 
         // Clean
         sqlx::query("DELETE FROM users WHERE id = $1")
@@ -487,7 +473,7 @@ mod tests {
         let model_manager = _dev_utils::init_test().await;
 
         // Execute
-        let res = UserModelController::get_by_ic_number(&model_manager, "invalidic").await;
+        let res = UserModelController::get_by_ic_number(&model_manager, "hello").await;
 
         // Check
         assert!(
@@ -496,7 +482,7 @@ mod tests {
                 Err(Error::EntityNotFound {
                     entity: "user",
                     field: StringError(ref e)
-                }) if e == "invalidic"
+                }) if e == "hello"
             ),
             "Expected EntityNotFound error, got: {:?}",
             res

@@ -1,7 +1,9 @@
+// Modules
 use crate::context::Context;
 use crate::model::admin_notification::AdminNotificationModelController;
 use crate::state::AppState;
 use crate::web::Result;
+
 use axum::extract::State;
 use axum::routing::{get, patch};
 use axum::{Json, Router};
@@ -9,6 +11,7 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 use tracing::debug;
 
+// Routes
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
         .route("/admin-notifications", get(list_admin_notifications))
@@ -16,6 +19,7 @@ pub fn routes(app_state: AppState) -> Router {
         .with_state(app_state)
 }
 
+// Handler that lists all admin notifications for the admin
 async fn list_admin_notifications(
     context: Context,
     State(app_state): State<AppState>,
@@ -37,6 +41,7 @@ async fn list_admin_notifications(
     Ok(body)
 }
 
+// Handler that marks an admin notification as read
 async fn read_admin_notification(
     _context: Context,
     State(app_state): State<AppState>,
@@ -61,6 +66,7 @@ async fn read_admin_notification(
     Ok(body)
 }
 
+// Request payload for reading an admin notification
 #[derive(Deserialize)]
 #[serde(rename_all(deserialize = "camelCase"))]
 struct ReadAdminNotificationPayload {

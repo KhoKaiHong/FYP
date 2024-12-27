@@ -1,7 +1,9 @@
+// Modules
 use crate::context::Context;
 use crate::model::event::EventModelController;
 use crate::state::AppState;
 use crate::web::Result;
+
 use axum::extract::State;
 use axum::routing::get;
 use axum::{Json, Router};

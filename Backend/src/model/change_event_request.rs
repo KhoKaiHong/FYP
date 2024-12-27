@@ -237,9 +237,9 @@ mod tests {
         let test_time = Utc::now()
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
-        let change_request = ChangeEventRequestForCreate {
-            location: "test location 1".to_string(),
-            address: "test_create_ok@example.com".to_string(),
+        let change_request: ChangeEventRequestForCreate = ChangeEventRequestForCreate {
+            location: "test".to_string(),
+            address: "test@example.com".to_string(),
             start_time: test_time,
             end_time: test_time,
             max_attendees: 10,
@@ -259,7 +259,8 @@ mod tests {
         // Check
         let event = ChangeEventRequestModelController::get(&model_manager, id).await?;
 
-        assert_eq!(event.address, "test_create_ok@example.com");
+        assert_eq!(event.location, "test");
+        assert_eq!(event.address, "test@example.com");
         assert_eq!(event.start_time, test_time);
         assert_eq!(event.end_time, test_time);
         assert_eq!(event.max_attendees, 10);
@@ -270,6 +271,68 @@ mod tests {
         assert_eq!(event.organiser_id, 1);
         assert_eq!(event.state_id, 1);
         assert_eq!(event.district_id, 1);
+
+        // Clean
+        sqlx::query("DELETE FROM change_blood_donation_events_requests WHERE id = $1")
+            .bind(id)
+            .execute(model_manager.db())
+            .await?;
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_create_err() -> Result<()> {
+        // Setup
+        let model_manager = _dev_utils::init_test().await;
+        let test_time = Utc::now()
+            .duration_trunc(TimeDelta::microseconds(1))
+            .unwrap();
+        let change_request1: ChangeEventRequestForCreate = ChangeEventRequestForCreate {
+            location: "test1".to_string(),
+            address: "test1@example.com".to_string(),
+            start_time: test_time,
+            end_time: test_time,
+            max_attendees: 10,
+            latitude: 3.1732962387784367,
+            longitude: 101.70668106095312,
+            change_reason: "test_change_reason1".to_string(),
+            event_id: 1,
+            facility_id: 1,
+            organiser_id: 1,
+            state_id: 1,
+            district_id: 1,
+        };
+
+        let change_request2: ChangeEventRequestForCreate = ChangeEventRequestForCreate {
+            location: "test2".to_string(),
+            address: "test2@example.com".to_string(),
+            start_time: test_time,
+            end_time: test_time,
+            max_attendees: 10,
+            latitude: 3.1732962387784367,
+            longitude: 101.70668106095312,
+            change_reason: "test_change_reason2".to_string(),
+            event_id: 1,
+            facility_id: 1,
+            organiser_id: 1,
+            state_id: 1,
+            district_id: 1,
+        };
+
+        // Execute
+        let id = ChangeEventRequestModelController::create(&model_manager, change_request1).await?;
+
+        let err_req =
+            ChangeEventRequestModelController::create(&model_manager, change_request2).await;
+
+        // Check
+        assert!(
+            matches!(err_req, Err(Error::ExistingChangeEventRequest)),
+            "Expected ExistingChangeEventRequest error, got: {:?}",
+            err_req
+        );
 
         // Clean
         sqlx::query("DELETE FROM change_blood_donation_events_requests WHERE id = $1")
@@ -343,37 +406,23 @@ mod tests {
             state_id: 2,
             district_id: 2,
         };
-        let change_request_3 = ChangeEventRequestForCreate {
-            location: "test location 3".to_string(),
-            address: "test_list_ok-event 03".to_string(),
-            start_time: test_time,
-            end_time: test_time,
-            max_attendees: 20,
-            latitude: 3.1732962387784367,
-            longitude: 101.70668106095312,
-            change_reason: "test_change_reason_3".to_string(),
-            event_id: 2,
-            facility_id: 1,
-            organiser_id: 1,
-            state_id: 2,
-            district_id: 2,
-        };
 
         // Execute
         let id1 =
             ChangeEventRequestModelController::create(&model_manager, change_request_1).await?;
         let id2 =
             ChangeEventRequestModelController::create(&model_manager, change_request_2).await?;
-        let id3 =
-            ChangeEventRequestModelController::create(&model_manager, change_request_3).await?;
+
+        // Execute
+        let events1 =
+            ChangeEventRequestModelController::list_by_organiser(&model_manager, 1).await?;
+
+        let events2 =
+            ChangeEventRequestModelController::list_by_organiser(&model_manager, 2).await?;
 
         // Check
-        let events =
-            ChangeEventRequestModelController::list_by_organiser(&model_manager, 1).await?;
-        assert_eq!(events.len(), 2, "testing list by organiser - 1");
-        let events =
-            ChangeEventRequestModelController::list_by_organiser(&model_manager, 2).await?;
-        assert_eq!(events.len(), 1, "testing list by organiser - 2");
+        assert_eq!(events1.len(), 1, "testing list change event requests by organiser - 1");
+        assert_eq!(events2.len(), 1, "testing list change event requests by organiser - 2");
 
         // Clean
         sqlx::query("DELETE FROM change_blood_donation_events_requests WHERE id = $1")
@@ -383,11 +432,6 @@ mod tests {
 
         sqlx::query("DELETE FROM change_blood_donation_events_requests WHERE id = $1")
             .bind(id2)
-            .execute(model_manager.db())
-            .await?;
-
-        sqlx::query("DELETE FROM change_blood_donation_events_requests WHERE id = $1")
-            .bind(id3)
             .execute(model_manager.db())
             .await?;
 
@@ -427,8 +471,8 @@ mod tests {
             longitude: 101.70668106095312,
             change_reason: "test_change_reason_2".to_string(),
             event_id: 2,
-            facility_id: 2,
-            organiser_id: 1,
+            facility_id: 1,
+            organiser_id: 2,
             state_id: 2,
             district_id: 2,
         };
@@ -442,8 +486,8 @@ mod tests {
             longitude: 101.70668106095312,
             change_reason: "test_change_reason_3".to_string(),
             event_id: 2,
-            facility_id: 1,
-            organiser_id: 1,
+            facility_id: 2,
+            organiser_id: 3,
             state_id: 2,
             district_id: 2,
         };
@@ -456,11 +500,12 @@ mod tests {
         let id3 =
             ChangeEventRequestModelController::create(&model_manager, change_request_3).await?;
 
+        let events1 = ChangeEventRequestModelController::list_by_facility(&model_manager, 1).await?;
+        let events2 = ChangeEventRequestModelController::list_by_facility(&model_manager, 2).await?;
+
         // Check
-        let events = ChangeEventRequestModelController::list_by_facility(&model_manager, 1).await?;
-        assert_eq!(events.len(), 2, "testing list by facility - 1");
-        let events = ChangeEventRequestModelController::list_by_facility(&model_manager, 1).await?;
-        assert_eq!(events.len(), 1, "testing list by facility - 2");
+        assert_eq!(events1.len(), 2, "testing list change event requests by facility - 1");
+        assert_eq!(events2.len(), 1, "testing list change event requests by facility - 2");
 
         // Clean
         sqlx::query("DELETE FROM change_blood_donation_events_requests WHERE id = $1")

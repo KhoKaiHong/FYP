@@ -135,10 +135,7 @@ impl NewEventRequestModelController {
     }
 
     // Gets a new event request by id.
-    pub async fn get(
-        model_manager: &ModelManager,
-        id: i64,
-    ) -> Result<NewEventRequest> {
+    pub async fn get(model_manager: &ModelManager, id: i64) -> Result<NewEventRequest> {
         let db = model_manager.db();
 
         let event = sqlx::query_as(
@@ -158,7 +155,7 @@ impl NewEventRequestModelController {
     // Lists all new event requests for a given organiser.
     pub async fn list_by_organiser(
         model_manager: &ModelManager,
-        organiser_id: i64, 
+        organiser_id: i64,
     ) -> Result<Vec<NewEventRequest>> {
         let db = model_manager.db();
 
@@ -246,13 +243,10 @@ mod tests {
         };
 
         // Execute
-        let id =
-            NewEventRequestModelController::create(&model_manager, event_created).await?;
+        let id = NewEventRequestModelController::create(&model_manager, event_created).await?;
 
         // Check
         let event = NewEventRequestModelController::get(&model_manager, id).await?;
-
-        println!("event for test_create: {:?}", event);
 
         assert_eq!(event.address, "test_create_ok@example.com");
         assert_eq!(event.start_time, test_time);
@@ -270,6 +264,41 @@ mod tests {
             .bind(id)
             .execute(model_manager.db())
             .await?;
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_create_err() -> Result<()> {
+        // Setup
+        let model_manager = _dev_utils::init_test().await;
+        let test_time = Utc::now()
+            .duration_trunc(TimeDelta::microseconds(1))
+            .unwrap();
+        let event_created = NewEventRequestForCreate {
+            location: "test location 1".to_string(),
+            address: "test_create_err@example.com".to_string(),
+            start_time: test_time,
+            end_time: test_time,
+            max_attendees: 10,
+            latitude: 3.1732962387784367,
+            longitude: 101.70668106095312,
+            facility_id: 1,
+            organiser_id: 2,
+            state_id: 1,
+            district_id: 1,
+        };
+
+        // Execute
+        let res = NewEventRequestModelController::create(&model_manager, event_created).await;
+
+        // Check
+        assert!(
+            matches!(res, Err(Error::ExistingNewEventRequest)),
+            "Expected ExistingNewEventRequest error, got: {:?}",
+            res
+        );
 
         Ok(())
     }
@@ -304,78 +333,14 @@ mod tests {
     async fn test_list_by_organiser_ok() -> Result<()> {
         // Setup
         let model_manager = _dev_utils::init_test().await;
-        let test_time = Utc::now()
-            .duration_trunc(TimeDelta::microseconds(1))
-            .unwrap();
-        let event_created1 = NewEventRequestForCreate {
-            location: "test location 1".to_string(),
-            address: "test_list_ok-event 01".to_string(),
-            start_time: test_time,
-            end_time: test_time,
-            max_attendees: 10,
-            latitude: 3.1732962387784367,
-            longitude: 101.70668106095312,
-            facility_id: 1,
-            organiser_id: 1,
-            state_id: 1,
-            district_id: 1,
-        };
-        let event_created2 = NewEventRequestForCreate {
-            location: "test location 2".to_string(),
-            address: "test_list_ok-event 02".to_string(),
-            start_time: test_time,
-            end_time: test_time,
-            max_attendees: 20,
-            latitude: 3.1732962387784367,
-            longitude: 101.70668106095312,
-            facility_id: 1,
-            organiser_id: 2,
-            state_id: 2,
-            district_id: 2,
-        };
-        let event_created3 = NewEventRequestForCreate {
-            location: "test location 3".to_string(),
-            address: "test_list_ok-event 03".to_string(),
-            start_time: test_time,
-            end_time: test_time,
-            max_attendees: 20,
-            latitude: 3.1732962387784367,
-            longitude: 101.70668106095312,
-            facility_id: 1,
-            organiser_id: 1,
-            state_id: 2,
-            district_id: 2,
-        };
 
         // Execute
-        let id1 = NewEventRequestModelController::create(&model_manager, event_created1)
-            .await?;
-        let id2 = NewEventRequestModelController::create(&model_manager, event_created2)
-            .await?;
-        let id3 = NewEventRequestModelController::create(&model_manager, event_created3)
-            .await?;
-        let events =
-            NewEventRequestModelController::list_by_organiser(&model_manager, 1).await?;
+        let events1 = NewEventRequestModelController::list_by_organiser(&model_manager, 1).await?;
+        let events2 = NewEventRequestModelController::list_by_organiser(&model_manager, 2).await?;
 
-        assert_eq!(events.len(), 2, "number of seeded requests.");
-        assert_eq!(events[0].address, "test_list_ok-event 01");
-        assert_eq!(events[1].address, "test_list_ok-event 03");
-
-        // Clean
-        sqlx::query("DELETE FROM new_blood_donation_events_requests WHERE id = $1")
-            .bind(id1)
-            .execute(model_manager.db())
-            .await?;
-
-        sqlx::query("DELETE FROM new_blood_donation_events_requests WHERE id = $1")
-            .bind(id2)
-            .execute(model_manager.db())
-            .await?;
-
-        sqlx::query("DELETE FROM new_blood_donation_events_requests WHERE id = $1")
-            .bind(id3)
-            .execute(model_manager.db())
-            .await?;
+        // Check
+        assert_eq!(events1.len(), 6, "Testing list new event requests by organiser - 1");
+        assert_eq!(events2.len(), 5, "Testing list new event requests by organiser - 2");
 
         Ok(())
     }
@@ -385,78 +350,13 @@ mod tests {
     async fn test_list_by_facility_ok() -> Result<()> {
         // Setup
         let model_manager = _dev_utils::init_test().await;
-        let test_time = Utc::now()
-            .duration_trunc(TimeDelta::microseconds(1))
-            .unwrap();
-        let event_created1 = NewEventRequestForCreate {
-            location: "test location 1".to_string(),
-            address: "test_list_ok-event 01".to_string(),
-            start_time: test_time,
-            end_time: test_time,
-            max_attendees: 10,
-            latitude: 3.1732962387784367,
-            longitude: 101.70668106095312,
-            facility_id: 1,
-            organiser_id: 1,
-            state_id: 1,
-            district_id: 1,
-        };
-        let event_created2 = NewEventRequestForCreate {
-            location: "test location 2".to_string(),
-            address: "test_list_ok-event 02".to_string(),
-            start_time: test_time,
-            end_time: test_time,
-            max_attendees: 20,
-            latitude: 3.1732962387784367,
-            longitude: 101.70668106095312,
-            facility_id: 2,
-            organiser_id: 1,
-            state_id: 2,
-            district_id: 2,
-        };
-        let event_created3 = NewEventRequestForCreate {
-            location: "test location 3".to_string(),
-            address: "test_list_ok-event 03".to_string(),
-            start_time: test_time,
-            end_time: test_time,
-            max_attendees: 20,
-            latitude: 3.1732962387784367,
-            longitude: 101.70668106095312,
-            facility_id: 1,
-            organiser_id: 1,
-            state_id: 2,
-            district_id: 2,
-        };
 
         // Execute
-        let id1 = NewEventRequestModelController::create(&model_manager, event_created1)
-            .await?;
-        let id2 = NewEventRequestModelController::create(&model_manager, event_created2)
-            .await?;
-        let id3 = NewEventRequestModelController::create(&model_manager, event_created3)
-            .await?;
-        let events =
-            NewEventRequestModelController::list_by_facility(&model_manager, 1).await?;
+        let events1 = NewEventRequestModelController::list_by_facility(&model_manager, 1).await?;
+        let events2 = NewEventRequestModelController::list_by_facility(&model_manager, 2).await?;
 
-        assert_eq!(events.len(), 2, "number of seeded requests.");
-        assert_eq!(events[0].address, "test_list_ok-event 01");
-        assert_eq!(events[1].address, "test_list_ok-event 03");
-
-        // Clean
-        sqlx::query("DELETE FROM new_blood_donation_events_requests WHERE id = $1")
-            .bind(id1)
-            .execute(model_manager.db())
-            .await?;
-
-        sqlx::query("DELETE FROM new_blood_donation_events_requests WHERE id = $1")
-            .bind(id2)
-            .execute(model_manager.db())
-            .await?;
-
-        sqlx::query("DELETE FROM new_blood_donation_events_requests WHERE id = $1")
-            .bind(id3)
-            .execute(model_manager.db())
-            .await?;
+        assert_eq!(events1.len(), 1, "Testing list new event requests by facility - 1");
+        assert_eq!(events2.len(), 0, "Testing list new event requests by facility - 2");
 
         Ok(())
     }
@@ -470,8 +370,8 @@ mod tests {
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
         let event_created = NewEventRequestForCreate {
-            location: "test location 1".to_string(),
-            address: "test_update_ok@example.com".to_string(),
+            location: "test".to_string(),
+            address: "test@example.com".to_string(),
             start_time: non_updated_time,
             end_time: non_updated_time,
             max_attendees: 10,
@@ -484,20 +384,17 @@ mod tests {
         };
 
         // Execute
-        let id =
-            NewEventRequestModelController::create(&model_manager, event_created).await?;
+        let id = NewEventRequestModelController::create(&model_manager, event_created).await?;
 
         let updated_request = NewEventRequestForUpdate {
             status: EventRequestStatus::Rejected,
             rejection_reason: Some("Rejected".to_string()),
         };
 
-        NewEventRequestModelController::update(&model_manager, id, updated_request)
-            .await?;
+        NewEventRequestModelController::update(&model_manager, id, updated_request).await?;
 
         // Check
         let event = NewEventRequestModelController::get(&model_manager, id).await?;
-        println!("event for test_update: {:?}", event);
         assert_eq!(event.status, EventRequestStatus::Rejected);
         assert_eq!(event.rejection_reason, Some(String::from("Rejected")));
 

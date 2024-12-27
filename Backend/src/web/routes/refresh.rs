@@ -3,10 +3,12 @@ use crate::auth::token::{
 };
 use crate::auth::{self, token::generate_access_token, Role};
 use crate::context::Context;
-use crate::model::admin_session::{AdminSessionForCreate, AdminSessionModelController};
-use crate::model::facility_session::{FacilitySessionForCreate, FacilitySessionModelController};
-use crate::model::organiser_session::{OrganiserSessionForCreate, OrganiserSessionModelController};
-use crate::model::user_session::{UserSessionForCreate, UserSessionModelController};
+use crate::model::admin_session::{
+    AdminSessionForCreate, AdminSessionForUpdate, AdminSessionModelController,
+};
+use crate::model::facility_session::{FacilitySessionForCreate, FacilitySessionForUpdate, FacilitySessionModelController};
+use crate::model::organiser_session::{OrganiserSessionForCreate, OrganiserSessionForUpdate, OrganiserSessionModelController};
+use crate::model::user_session::{UserSessionForCreate, UserSessionForUpdate, UserSessionModelController};
 use crate::model::EntityErrorField::UuidError;
 use crate::model::{self, ModelManager};
 use crate::state::AppState;
@@ -137,10 +139,9 @@ async fn refresh_user_token(
             refresh_token_claims.exp(),
         )?;
 
-        let updated_user_session = UserSessionForCreate {
+        let updated_user_session = UserSessionForUpdate {
             refresh_token_id: new_refresh_token_id,
             access_token_id: new_access_token_id,
-            user_id: access_token_claims.id(),
         };
 
         UserSessionModelController::update(&model_manager, updated_user_session, refresh_token_jti)
@@ -195,10 +196,9 @@ async fn refresh_facility_token(
             refresh_token_claims.exp(),
         )?;
 
-        let updated_facility_session = FacilitySessionForCreate {
+        let updated_facility_session = FacilitySessionForUpdate {
             refresh_token_id: new_refresh_token_id,
             access_token_id: new_access_token_id,
-            facility_id: access_token_claims.id(),
         };
 
         FacilitySessionModelController::update(
@@ -257,10 +257,9 @@ async fn refresh_organiser_token(
             refresh_token_claims.exp(),
         )?;
 
-        let updated_organiser_session = OrganiserSessionForCreate {
+        let updated_organiser_session = OrganiserSessionForUpdate {
             refresh_token_id: new_refresh_token_id,
             access_token_id: new_access_token_id,
-            organiser_id: access_token_claims.id(),
         };
 
         OrganiserSessionModelController::update(
@@ -319,10 +318,9 @@ async fn refresh_admin_token(
             refresh_token_claims.exp(),
         )?;
 
-        let updated_admin_session = AdminSessionForCreate {
+        let updated_admin_session = AdminSessionForUpdate {
             refresh_token_id: new_refresh_token_id,
             access_token_id: new_access_token_id,
-            admin_id: access_token_claims.id(),
         };
 
         AdminSessionModelController::update(

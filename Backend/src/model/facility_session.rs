@@ -20,6 +20,12 @@ pub struct FacilitySessionForCreate {
     pub facility_id: i64,
 }
 
+// Fields used to update a Facility Session.
+pub struct FacilitySessionForUpdate {
+    pub refresh_token_id: Uuid,
+    pub access_token_id: Uuid,
+}
+
 // Facility Session Model Controller
 pub struct FacilitySessionModelController;
 
@@ -66,15 +72,14 @@ impl FacilitySessionModelController {
     // Update a facility session
     pub async fn update(
         model_manager: &ModelManager,
-        facility_session_updated: FacilitySessionForCreate,
+        facility_session_updated: FacilitySessionForUpdate,
         refresh_token_id: Uuid,
     ) -> Result<()> {
         let db = model_manager.db();
 
-        let count = sqlx::query("UPDATE facility_sessions SET refresh_token_id = $1, access_token_id = $2, facility_id = $3 WHERE refresh_token_id = $4")
+        let count = sqlx::query("UPDATE facility_sessions SET refresh_token_id = $1, access_token_id = $2 WHERE refresh_token_id = $3")
             .bind(facility_session_updated.refresh_token_id)
             .bind(facility_session_updated.access_token_id)
-            .bind(facility_session_updated.facility_id)
             .bind(refresh_token_id)
             .execute(db)
             .await?
@@ -252,10 +257,9 @@ mod tests {
         let refresh_token_id_updated = Uuid::new_v4();
         let access_token_id_updated = Uuid::new_v4();
 
-        let facility_session_updated = FacilitySessionForCreate {
+        let facility_session_updated = FacilitySessionForUpdate {
             refresh_token_id: refresh_token_id_updated,
             access_token_id: access_token_id_updated,
-            facility_id: 2,
         };
 
         FacilitySessionModelController::update(
@@ -270,7 +274,6 @@ mod tests {
             FacilitySessionModelController::get(&model_manager, refresh_token_id_updated)
                 .await?;
         assert_eq!(facility_session.access_token_id, access_token_id_updated);
-        assert_eq!(facility_session.facility_id, 2);
 
         // Clean
         sqlx::query("DELETE FROM facility_sessions WHERE refresh_token_id = $1")
@@ -367,6 +370,70 @@ mod tests {
                     entity: "facility_session",
                     field: I64Error(100),
                 })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_check_ok() -> Result<()> {
+        // Setup
+        let model_manager = _dev_utils::init_test().await;
+
+        let refresh_token_id = Uuid::new_v4();
+        let access_token_id = Uuid::new_v4();
+
+        let facility_session_created = FacilitySessionForCreate {
+            refresh_token_id,
+            access_token_id,
+            facility_id: 1,
+        };
+
+        // Execute
+        FacilitySessionModelController::create(&model_manager, facility_session_created)
+            .await?;
+
+        let res = FacilitySessionModelController::check(&model_manager, refresh_token_id, access_token_id, 1).await;
+
+        // Check
+        assert!(
+            matches!(
+                res,
+                Ok(())
+            ),
+            "Ok not matching"
+        );
+
+        // Clean
+        sqlx::query("DELETE FROM facility_sessions WHERE refresh_token_id = $1")
+            .bind(refresh_token_id)
+            .execute(model_manager.db())
+            .await?;
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_check_err_not_found() -> Result<()> {
+        // Setup
+        let model_manager = _dev_utils::init_test().await;
+        let id = Uuid::new_v4();
+
+        // Execute
+        let res = FacilitySessionModelController::check(&model_manager, id, id, 1).await;
+
+        // Check
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "facility_session",
+                    field: UuidError(id),
+                }) if id == id
             ),
             "EntityNotFound not matching"
         );

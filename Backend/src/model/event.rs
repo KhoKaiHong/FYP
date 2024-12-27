@@ -533,7 +533,7 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn test_list_ok() -> Result<()> {
+    async fn test_list() -> Result<()> {
         // Setup
         let model_manager = _dev_utils::init_test().await;
 
@@ -553,8 +553,8 @@ mod tests {
             .duration_trunc(TimeDelta::microseconds(1))
             .unwrap();
         let event_created = EventForCreate {
-            location: "test location 1".to_string(),
-            address: "test_update_ok@example.com".to_string(),
+            location: "test 1".to_string(),
+            address: "test@example.com".to_string(),
             start_time: non_updated_time,
             end_time: non_updated_time,
             max_attendees: 10,
@@ -574,7 +574,7 @@ mod tests {
             .unwrap();
 
         let event_updated = EventForUpdate {
-            location: Some("test location 2".to_string()),
+            location: Some("test 2".to_string()),
             address: Some("new_address@example.com".to_string()),
             start_time: None,
             end_time: Some(updated_time),
@@ -587,7 +587,7 @@ mod tests {
 
         // Check
         let event = EventModelController::get(&model_manager, id).await?;
-        println!("event for test_update: {:?}", event);
+        assert_eq!(event.location, "test 2");
         assert_eq!(event.address, "new_address@example.com");
         assert_eq!(event.start_time, non_updated_time);
         assert_eq!(event.end_time, updated_time);

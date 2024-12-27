@@ -1,6 +1,8 @@
+// Modules
 use crate::context::Context;
 use crate::log::log_request;
 use crate::web;
+
 use axum::http::{Method, Uri};
 use axum::response::{IntoResponse, Response};
 use axum::Json;
@@ -10,6 +12,7 @@ use std::sync::Arc;
 use tracing::debug;
 use uuid::Uuid;
 
+// Error data to be sent to the client if error occurs
 #[derive(Serialize)]
 struct ErrorData<'a> {
     req_uuid: String,
@@ -17,6 +20,7 @@ struct ErrorData<'a> {
     detail: Option<&'a Value>,
 }
 
+// Function that maps server response to client response
 pub async fn response_mapper(
     ctx: Option<Context>,
     uri: Uri,
@@ -26,14 +30,14 @@ pub async fn response_mapper(
     debug!("{:<12} - response_mapper", "RES_MAPPER");
     let uuid = Uuid::new_v4();
 
-    // -- Get the eventual response error.
+    // Get the client error.
     let web_error = response
         .extensions()
         .get::<Arc<web::Error>>()
         .map(Arc::as_ref);
     let client_status_error = web_error.map(|err| err.client_status_and_error());
 
-    // -- If client error, build the new reponse.
+    // Build the error response if there is a client error
     let error_response = client_status_error
         .as_ref()
         .map(|(status_code, client_error)| {
@@ -47,6 +51,7 @@ pub async fn response_mapper(
                 detail: detail,
             };
 
+            // Build the client error JSON
             let client_error_body = json!({
                 "error": {
                     "message": message,
@@ -56,15 +61,14 @@ pub async fn response_mapper(
 
             debug!("CLIENT ERROR BODY: {client_error_body}");
 
-            // Build the new response from the client_error_body
             (*status_code, Json(client_error_body)).into_response()
         });
 
-    // Build and log the server log line.
+    // Log the client error
     let client_error = client_status_error.unzip().1;
-    // TODO: Need to hander if log_request fail (but should not fail request)
-    let _ = log_request(uuid, req_method, uri, ctx, web_error, client_error).await;
+    log_request(uuid, req_method, uri, ctx, web_error, client_error).await.expect("Logging should not fail");
 
     debug!("\n");
+    // If no error response, return the normalresponse
     error_response.unwrap_or(response)
 }

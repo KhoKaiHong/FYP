@@ -1,5 +1,4 @@
-use std::str::FromStr;
-
+// Modules
 use crate::context::Context;
 use crate::model;
 use crate::model::change_event_request::{
@@ -19,14 +18,17 @@ use crate::model::user_notification::{
 };
 use crate::state::AppState;
 use crate::web::{Error, Result};
+
 use axum::extract::State;
 use axum::routing::{get, patch, post};
 use axum::{Json, Router};
 use chrono::{prelude::*, DurationRound, TimeDelta};
 use serde::Deserialize;
 use serde_json::{json, Value};
+use std::str::FromStr;
 use tracing::debug;
 
+// Post routes
 pub fn post_route(app_state: AppState) -> Router {
     Router::new()
         .route(
@@ -36,6 +38,7 @@ pub fn post_route(app_state: AppState) -> Router {
         .with_state(app_state)
 }
 
+// List by facility routes
 pub fn list_by_facility_route(app_state: AppState) -> Router {
     Router::new()
         .route(
@@ -45,6 +48,7 @@ pub fn list_by_facility_route(app_state: AppState) -> Router {
         .with_state(app_state)
 }
 
+// List by organiser routes
 pub fn list_by_organiser_route(app_state: AppState) -> Router {
     Router::new()
         .route(
@@ -54,6 +58,7 @@ pub fn list_by_organiser_route(app_state: AppState) -> Router {
         .with_state(app_state)
 }
 
+// Update by facility routes
 pub fn update_by_facility_route(app_state: AppState) -> Router {
     Router::new()
         .route(
@@ -63,6 +68,7 @@ pub fn update_by_facility_route(app_state: AppState) -> Router {
         .with_state(app_state)
 }
 
+// Handler that creates a new change event request
 async fn post_change_event_request_handler(
     context: Context,
     State(app_state): State<AppState>,
@@ -112,8 +118,8 @@ async fn post_change_event_request_handler(
         district_id: event.district_id,
     };
 
-    ChangeEventRequestModelController::create(model_manager, change_event_request)
-        .await?;
+    // Create the change event request
+    ChangeEventRequestModelController::create(model_manager, change_event_request).await?;
 
     let notification = FacilityNotificationForCreate {
         description: "You have a pending event change request.".to_string(),
@@ -121,6 +127,7 @@ async fn post_change_event_request_handler(
         facility_id: event.facility_id,
     };
 
+    // Notifies the facility of the pending change event request
     FacilityNotificationModelController::create(model_manager, notification).await?;
 
     let body = Json(json!({
@@ -132,6 +139,7 @@ async fn post_change_event_request_handler(
     Ok(body)
 }
 
+// Request payload for creating a new change event request
 #[derive(Deserialize)]
 #[serde(rename_all(deserialize = "camelCase"))]
 pub struct ChangeEventRequestCreatePayload {
@@ -146,6 +154,7 @@ pub struct ChangeEventRequestCreatePayload {
     pub event_id: i64,
 }
 
+// Handler that lists all change event requests for a facility
 async fn list_change_event_requests_facility_handler(
     context: Context,
     State(app_state): State<AppState>,
@@ -170,6 +179,7 @@ async fn list_change_event_requests_facility_handler(
     Ok(body)
 }
 
+// Handler that lists all change event requests for an organiser
 async fn list_change_event_requests_organiser_handler(
     context: Context,
     State(app_state): State<AppState>,
@@ -194,8 +204,9 @@ async fn list_change_event_requests_organiser_handler(
     Ok(body)
 }
 
+// Handler that updates a change event request by the facility
 async fn update_change_event_request_facility_handler(
-    context: Context,
+    _context: Context,
     State(app_state): State<AppState>,
     Json(payload): Json<ChangeEventRequestUpdatePayload>,
 ) -> Result<Json<Value>> {
@@ -214,13 +225,13 @@ async fn update_change_event_request_facility_handler(
         rejection_reason: payload.rejection_reason,
     };
 
-    ChangeEventRequestModelController::update(model_manager, payload.id, updated_request)
-        .await?;
+    ChangeEventRequestModelController::update(model_manager, payload.id, updated_request).await?;
 
     let updated_event_details =
         ChangeEventRequestModelController::get(model_manager, payload.id).await?;
 
     match status {
+        // If the status is approved
         EventRequestStatus::Approved => {
             let event_updated = EventForUpdate {
                 location: Some(updated_event_details.location),
@@ -232,6 +243,7 @@ async fn update_change_event_request_facility_handler(
                 longitude: Some(updated_event_details.longitude),
             };
 
+            // Update the event details
             EventModelController::update(
                 model_manager,
                 updated_event_details.event_id,
@@ -239,18 +251,17 @@ async fn update_change_event_request_facility_handler(
             )
             .await?;
 
+            // Notify the organiser of the change event request
             let organiser_notification = OrganiserNotificationForCreate {
                 description: "Your change event request has been accepted.".to_string(),
                 redirect: Some("organiser-change-requests".to_string()),
                 organiser_id: updated_event_details.organiser_id,
             };
 
-            OrganiserNotificationModelController::create(
-                model_manager,
-                organiser_notification,
-            )
-            .await?;
+            OrganiserNotificationModelController::create(model_manager, organiser_notification)
+                .await?;
 
+            // Get all users registered to the event
             let attendees_ids: Vec<i64> = RegistrationModelController::list_by_event_id(
                 model_manager,
                 updated_event_details.event_id,
@@ -260,6 +271,7 @@ async fn update_change_event_request_facility_handler(
             .map(|attendee| attendee.user_id)
             .collect();
 
+            // Send notifications to affected users
             let user_notifications = UserNotificationForCreateBulk {
                 description: "There is a change in a blood donation event you are registered in."
                     .to_string(),
@@ -267,24 +279,19 @@ async fn update_change_event_request_facility_handler(
                 user_ids: attendees_ids,
             };
 
-            UserNotificationModelController::create_bulk(
-                model_manager,
-                user_notifications,
-            )
-            .await?;
+            UserNotificationModelController::create_bulk(model_manager, user_notifications).await?;
         }
+        // If the status is rejected
         EventRequestStatus::Rejected => {
+            // Notify the organiser of the rejected change event request
             let organiser_notification = OrganiserNotificationForCreate {
                 description: "Your change event request has been rejected.".to_string(),
                 redirect: Some("organiser-change-requests".to_string()),
                 organiser_id: updated_event_details.organiser_id,
             };
 
-            OrganiserNotificationModelController::create(
-                model_manager,
-                organiser_notification,
-            )
-            .await?;
+            OrganiserNotificationModelController::create(model_manager, organiser_notification)
+                .await?;
         }
         _ => {}
     }
@@ -298,6 +305,7 @@ async fn update_change_event_request_facility_handler(
     Ok(body)
 }
 
+// Request payload for updating a change event request
 #[derive(Deserialize)]
 #[serde(rename_all(deserialize = "camelCase"))]
 pub struct ChangeEventRequestUpdatePayload {

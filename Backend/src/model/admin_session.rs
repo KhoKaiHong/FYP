@@ -20,6 +20,12 @@ pub struct AdminSessionForCreate {
     pub admin_id: i64,
 }
 
+// Fields used to update an Admin Session.
+pub struct AdminSessionForUpdate {
+    pub refresh_token_id: Uuid,
+    pub access_token_id: Uuid,
+}
+
 // Admin Session Model Controller
 pub struct AdminSessionModelController;
 
@@ -66,15 +72,14 @@ impl AdminSessionModelController {
     // Updates an admin session
     pub async fn update(
         model_manager: &ModelManager,
-        admin_session_updated: AdminSessionForCreate,
+        admin_session_updated: AdminSessionForUpdate,
         refresh_token_id: Uuid,
     ) -> Result<()> {
         let db = model_manager.db();
 
-        let count = sqlx::query("UPDATE admin_sessions SET refresh_token_id = $1, access_token_id = $2 WHERE admin_id = $3 AND refresh_token_id = $4")
+        let count = sqlx::query("UPDATE admin_sessions SET refresh_token_id = $1, access_token_id = $2 WHERE refresh_token_id = $3")
             .bind(admin_session_updated.refresh_token_id)
             .bind(admin_session_updated.access_token_id)
-            .bind(admin_session_updated.admin_id)
             .bind(refresh_token_id)
             .execute(db)
             .await?
@@ -253,10 +258,9 @@ mod tests {
         let refresh_token_id_updated = Uuid::new_v4();
         let access_token_id_updated = Uuid::new_v4();
 
-        let admin_session_updated = AdminSessionForCreate {
+        let admin_session_updated = AdminSessionForUpdate {
             refresh_token_id: refresh_token_id_updated,
             access_token_id: access_token_id_updated,
-            admin_id: 1,
         };
 
         AdminSessionModelController::update(

@@ -288,7 +288,7 @@ mod tests {
         let model_manager = _dev_utils::init_test().await;
         let registration_created = RegistrationForCreate {
             event_id: 1,
-            user_id: 1000,
+            user_id: 1005,
         };
 
         // Execute
@@ -297,10 +297,8 @@ mod tests {
         // Check
         let registration = RegistrationModelController::get(&model_manager, id).await?;
 
-        println!("registration for test_create: {:?}", registration);
-
         assert_eq!(registration.event_id, 1);
-        assert_eq!(registration.user_id, 1000);
+        assert_eq!(registration.user_id, 1005);
         assert_eq!(registration.status, RegistrationStatus::Registered);
 
         // Clean
@@ -308,6 +306,34 @@ mod tests {
             .bind(id)
             .execute(model_manager.db())
             .await?;
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_create_err_existing_registration() -> Result<()> {
+        // Setup
+        let model_manager = _dev_utils::init_test().await;
+        let registration_created = RegistrationForCreate {
+            event_id: 1,
+            user_id: 1001,
+        };
+
+        // Execute
+        let res = RegistrationModelController::create(&model_manager, registration_created).await;
+
+        // Check
+        assert!(
+            matches!(
+                res,
+                Err(Error::EventRegistration(
+                    RegistrationError::ExistingEventRegistration
+                ))
+            ),
+            "Expected ExistingEventRegistration error, got: {:?}",
+            res
+        );
 
         Ok(())
     }
@@ -342,64 +368,50 @@ mod tests {
     async fn test_list_by_event_id() -> Result<()> {
         // Setup
         let model_manager = _dev_utils::init_test().await;
-        let registration_created1 = RegistrationForCreate {
-            event_id: 1,
-            user_id: 1000,
-        };
-        let registration_created2 = RegistrationForCreate {
-            event_id: 1,
-            user_id: 1001,
-        };
 
         // Execute
-        let id1 =
-            RegistrationModelController::create(&model_manager, registration_created1).await?;
-        let id2 =
-            RegistrationModelController::create(&model_manager, registration_created2).await?;
-        let registrations =
+        let registrations1 =
             RegistrationModelController::list_by_event_id(&model_manager, 1).await?;
 
-        assert_eq!(registrations.len(), 3, "number of seeded registrations.");
-        assert_eq!(registrations[1].event_id, 1);
-        assert_eq!(registrations[2].event_id, 1);
+        let registrations2 =
+            RegistrationModelController::list_by_event_id(&model_manager, 6).await?;
 
-        println!("registration1 for test_update: {:?}", registrations[1]);
-        println!("registration2 for test_update: {:?}", registrations[2]);
-
-        // Clean
-        sqlx::query("DELETE from registrations where id = $1")
-            .bind(id1)
-            .execute(model_manager.db())
-            .await?;
-        sqlx::query("DELETE from registrations where id = $1")
-            .bind(id2)
-            .execute(model_manager.db())
-            .await?;
+        assert_eq!(
+            registrations1.len(),
+            1,
+            "Testing list registrations by event - 1"
+        );
+        assert_eq!(
+            registrations2.len(),
+            0,
+            "Testing list registrations by event - 2"
+        );
 
         Ok(())
     }
 
     #[tokio::test]
     #[serial]
-    async fn test_list_by_event_id_err_not_found() -> Result<()> {
+    async fn test_list_by_user_id() -> Result<()> {
         // Setup
         let model_manager = _dev_utils::init_test().await;
-        let id = 100;
 
         // Execute
-        let res = RegistrationModelController::list_by_event_id(&model_manager, id).await;
+        let registrations1 =
+            RegistrationModelController::list_by_user_id(&model_manager, 1003).await?;
+        let registrations2 =
+            RegistrationModelController::list_by_user_id(&model_manager, 1005).await?;
 
         // Check
-        assert!(
-            matches!(
-                res,
-                Err(Error::EntityNotFound {
-                    entity: "event",
-                    field: I64Error(100),
-                })
-            ),
-            "Expected EntityNotFound error, got: {:?}",
-            res
+        assert_eq!(
+            registrations1.len(),
+            2,
+            "Testing list registrations by user - 1"
+        );
+        assert_eq!(
+            registrations2.len(),
+            0,
+            "Testing list registrations by user - 2"
         );
 
         Ok(())
@@ -412,7 +424,7 @@ mod tests {
         let model_manager = _dev_utils::init_test().await;
         let registration_created = RegistrationForCreate {
             event_id: 1,
-            user_id: 1000,
+            user_id: 1005,
         };
 
         // Execute
@@ -426,9 +438,8 @@ mod tests {
 
         // Check
         let registration = RegistrationModelController::get(&model_manager, id).await?;
-        println!("registration for test_update: {:?}", registration);
         assert_eq!(registration.event_id, 1);
-        assert_eq!(registration.user_id, 1000);
+        assert_eq!(registration.user_id, 1005);
         assert_eq!(registration.status, RegistrationStatus::Attended);
 
         // Clean
@@ -445,35 +456,16 @@ mod tests {
     async fn test_get_num_of_registrations() -> Result<()> {
         // Setup
         let model_manager = _dev_utils::init_test().await;
-        let registration_created1 = RegistrationForCreate {
-            event_id: 1,
-            user_id: 1000,
-        };
-        let registration_created2 = RegistrationForCreate {
-            event_id: 1,
-            user_id: 1001,
-        };
 
         // Execute
-        let id1 =
-            RegistrationModelController::create(&model_manager, registration_created1).await?;
-        let id2 =
-            RegistrationModelController::create(&model_manager, registration_created2).await?;
-        let num_of_registrations =
+        let num_of_registrations1 =
             RegistrationModelController::get_num_of_registrations(&model_manager, 1).await?;
+        let num_of_registrations2 =
+            RegistrationModelController::get_num_of_registrations(&model_manager, 2).await?;
 
         // Check
-        assert_eq!(num_of_registrations, 3);
-
-        // Clean
-        sqlx::query("DELETE from registrations where id = $1")
-            .bind(id1)
-            .execute(model_manager.db())
-            .await?;
-        sqlx::query("DELETE from registrations where id = $1")
-            .bind(id2)
-            .execute(model_manager.db())
-            .await?;
+        assert_eq!(num_of_registrations1, 1);
+        assert_eq!(num_of_registrations2, 1);
 
         Ok(())
     }

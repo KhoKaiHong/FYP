@@ -1,8 +1,10 @@
+// Modules
 use crate::auth;
 use crate::auth::token::validate_access_token;
 use crate::context::Context;
 use crate::state::AppState;
 use crate::web::{Error, Result};
+
 use async_trait::async_trait;
 use axum::body::Body;
 use axum::extract::{FromRequestParts, State};
@@ -55,7 +57,7 @@ async fn context_from_token(header: Option<TypedHeader<Authorization<Bearer>>>) 
     Ok(context)
 }
 
-// region:    --- Context Extractor
+// Context extractor from a request
 #[async_trait]
 impl<S: Send + Sync> FromRequestParts<S> for Context {
     type Rejection = Error;
@@ -77,9 +79,7 @@ impl<S: Send + Sync> FromRequestParts<S> for Context {
     }
 }
 
-// endregion: --- Context Extractor
-
-// region:    --- Context Extractor Result/Error
+// Context Extractor Result and Errors
 pub type ContextExtractorResult = core::result::Result<Context, ContextExtractorError>;
 
 #[derive(Clone, Serialize, Debug)]
@@ -88,4 +88,3 @@ pub enum ContextExtractorError {
     InvalidAccessToken,
     ContextNotInRequestExtractor,
 }
-// endregion: --- Context Extractor Result/Error

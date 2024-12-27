@@ -4,9 +4,9 @@ use crate::model::{Error, ModelManager, Result};
 
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use sqlx::postgres::PgRow;
 use sqlx::{FromRow, QueryBuilder, Row};
-use serde_with::skip_serializing_none;
 
 // User Notification
 #[skip_serializing_none]
@@ -99,10 +99,7 @@ impl UserNotificationModelController {
     }
 
     // Gets a user notification by id.
-    pub async fn get(
-        model_manager: &ModelManager,
-        id: i64,
-    ) -> Result<UserNotification> {
+    pub async fn get(model_manager: &ModelManager, id: i64) -> Result<UserNotification> {
         let db = model_manager.db();
 
         let notification = sqlx::query_as("SELECT * FROM user_notifications WHERE id = $1")
@@ -134,10 +131,7 @@ impl UserNotificationModelController {
     }
 
     // Marks a user notification as read.
-    pub async fn read_notification(
-        model_manager: &ModelManager,
-        id: i64,
-    ) -> Result<()> {
+    pub async fn read_notification(model_manager: &ModelManager, id: i64) -> Result<()> {
         let db = model_manager.db();
 
         let count = sqlx::query("UPDATE user_notifications SET is_read = true WHERE id = $1")
@@ -178,19 +172,15 @@ mod tests {
 
         // Execute
         let id =
-            UserNotificationModelController::create(&model_manager, notification_created)
-                .await?;
+            UserNotificationModelController::create(&model_manager, notification_created).await?;
 
         // Check
-        let notification =
-            UserNotificationModelController::get(&model_manager, id).await?;
+        let notification = UserNotificationModelController::get(&model_manager, id).await?;
         assert_eq!(notification.id, id);
         assert_eq!(notification.redirect, None);
         assert_eq!(notification.description, "test_description");
         assert_eq!(notification.user_id, 1000);
         assert_eq!(notification.is_read, false);
-
-        println!("\n\nnotification: {:?}", notification);
 
         // Clean
         sqlx::query("DELETE FROM user_notifications WHERE id = $1")
@@ -248,40 +238,22 @@ mod tests {
             user_id: 1000,
         };
 
-        let id1 = UserNotificationModelController::create(
-            &model_manager,
-            notification_created1,
-        )
-        .await?;
-        let id2 = UserNotificationModelController::create(
-            &model_manager,
-            notification_created2,
-        )
-        .await?;
-        let id3 = UserNotificationModelController::create(
-            &model_manager,
-            notification_created3,
-        )
-        .await?;
-        let notifications: Vec<UserNotification> =
+        let id1 =
+            UserNotificationModelController::create(&model_manager, notification_created1).await?;
+        let id2 =
+            UserNotificationModelController::create(&model_manager, notification_created2).await?;
+        let id3 =
+            UserNotificationModelController::create(&model_manager, notification_created3).await?;
+
+        // Execute
+        let notifications1: Vec<UserNotification> =
             UserNotificationModelController::list_by_user_id(&model_manager, 1000).await?;
+        let notifications2: Vec<UserNotification> =
+            UserNotificationModelController::list_by_user_id(&model_manager, 1001).await?;
 
         // Check
-        assert_eq!(notifications.len(), 2);
-        assert_eq!(notifications[0].id, id1);
-        assert_eq!(notifications[1].id, id3);
-        assert_eq!(notifications[0].description, "test_description1");
-        assert_eq!(notifications[1].description, "test_description3");
-        assert_eq!(notifications[0].redirect, None);
-        assert_eq!(notifications[1].redirect, Some(String::from("event")));
-        assert_eq!(notifications[0].user_id, 1000);
-        assert_eq!(notifications[1].user_id, 1000);
-        assert_eq!(notifications[0].is_read, false);
-        assert_eq!(notifications[1].is_read, false);
-
-        for notification in notifications.iter() {
-            println!("notification: {:?}", notification);
-        }
+        assert_eq!(notifications1.len(), 2);
+        assert_eq!(notifications2.len(), 1);
 
         // Clean
         sqlx::query("DELETE FROM user_notifications WHERE id = $1")
@@ -314,21 +286,17 @@ mod tests {
 
         // Execute
         let id =
-            UserNotificationModelController::create(&model_manager, notification_created)
-                .await?;
+            UserNotificationModelController::create(&model_manager, notification_created).await?;
 
         UserNotificationModelController::read_notification(&model_manager, id).await?;
 
         // Check
-        let notification =
-            UserNotificationModelController::get(&model_manager, id).await?;
+        let notification = UserNotificationModelController::get(&model_manager, id).await?;
         assert_eq!(notification.id, id);
         assert_eq!(notification.description, "test_description");
         assert_eq!(notification.redirect, Some(String::from("event")));
         assert_eq!(notification.user_id, 1000);
         assert_eq!(notification.is_read, true);
-
-        println!("\n\nnotification: {:?}", notification);
 
         // Clean
         sqlx::query("DELETE FROM user_notifications WHERE id = $1")

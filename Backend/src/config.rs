@@ -1,9 +1,12 @@
+// Modules
 use crate::{Error, Result};
+
 use serde::Deserialize;
 use serde_with::{base64::Base64, base64::UrlSafe, serde_as};
 use sqlx::postgres::{PgConnectOptions, PgSslMode};
 use std::{str::FromStr, sync::OnceLock};
 
+// Database config
 #[derive(Deserialize, Clone, Debug)]
 pub struct DatabaseConfig {
     pub host: String,
@@ -15,6 +18,7 @@ pub struct DatabaseConfig {
 }
 
 impl DatabaseConfig {
+    // Return Postgres connect options for database config
     pub fn connect_options(&self) -> PgConnectOptions {
         let ssl_mode = if self.require_ssl {
             PgSslMode::Require
@@ -31,6 +35,7 @@ impl DatabaseConfig {
     }
 }
 
+// Application config
 #[serde_as]
 #[derive(Deserialize, Clone, Debug)]
 pub struct ApplicationConfig {
@@ -43,16 +48,19 @@ pub struct ApplicationConfig {
     pub refresh_token_key: Vec<u8>,
 }
 
+// File serving config
 #[derive(Deserialize, Clone, Debug)]
 pub struct FileConfig {
     pub web_folder: String,
 }
 
+// Frontend config
 #[derive(Deserialize, Clone, Debug)]
 pub struct FrontendConfig {
     pub frontend_url: String,
 }
 
+// All configs
 #[derive(Deserialize, Clone, Debug)]
 pub struct Config {
     pub application: ApplicationConfig,
@@ -61,9 +69,11 @@ pub struct Config {
     pub frontend: FrontendConfig,
 }
 
+// Function that returns the config
 pub fn config() -> &'static Config {
     static INSTANCE: OnceLock<Config> = OnceLock::new();
 
+    // If no config is loaded, load it
     INSTANCE.get_or_init(|| {
         Config::load_configuration()
             .unwrap_or_else(|ex| panic!("FATAL- WHILE LOADING CONFIG - Cause: {ex:?}"))
@@ -75,7 +85,7 @@ impl Config {
         let base_path = std::env::current_dir().expect("Failed to determine the current directory");
         let configuration_directory = base_path.join("configuration");
 
-        // Detect the running environment. Default to `local` if unspecified.
+        // Detect the running environment. Default to development config if unspecified
         let environment = std::env::var("APP_ENVIRONMENT").unwrap_or_else(|_| String::from("development"));
 
         let environment =
@@ -95,6 +105,7 @@ impl Config {
     }
 }
 
+// Environments
 #[derive(strum_macros::Display, strum_macros::EnumString)]
 pub enum Environment {
     #[strum(serialize = "development")]

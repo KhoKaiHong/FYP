@@ -38,7 +38,7 @@ mod tests {
 
     #[tokio::test]
     #[serial]
-    async fn test_list_ok() -> Result<()> {
+    async fn test_list() -> Result<()> {
         // Setup
         let model_manager = _dev_utils::init_test().await;
 
@@ -46,7 +46,7 @@ mod tests {
         let states = StateModelController::list(&model_manager).await?;
 
         // Check
-        assert_eq!(states.len(), 3);
+        assert_eq!(states.len(), 16);
 
         Ok(())
     }
