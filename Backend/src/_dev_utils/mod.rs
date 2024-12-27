@@ -2,10 +2,11 @@
 mod dev_db;
 
 use crate::model::ModelManager;
+
 use tokio::sync::OnceCell;
 use tracing::info;
 
-// Initialise development environment.
+// Initialise development environment
 pub async fn init_dev() {
     static INIT: OnceCell<()> = OnceCell::const_new();
 
@@ -17,7 +18,7 @@ pub async fn init_dev() {
     .await;
 }
 
-// Initialise test environment.
+// Initialise test environment
 pub async fn init_test() -> ModelManager {
     static INIT: OnceCell<ModelManager> = OnceCell::const_new();
 

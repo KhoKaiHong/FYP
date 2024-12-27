@@ -10,6 +10,7 @@ use axum::{Json, Router};
 use serde_json::{json, Value};
 use tracing::debug;
 
+// Routes that list events
 pub fn list_routes(app_state: AppState) -> Router {
     Router::new()
         .route("/events", get(list_events_handler))
@@ -17,18 +18,21 @@ pub fn list_routes(app_state: AppState) -> Router {
         .with_state(app_state)
 }
 
+// Route that list events by organiser
 pub fn list_routes_organiser(app_state: AppState) -> Router {
     Router::new()
         .route("/events/organiser", get(list_events_by_organiser_handler))
         .with_state(app_state)
 }
 
+// Route that list events by facility
 pub fn list_routes_facility(app_state: AppState) -> Router {
     Router::new()
         .route("/events/facility", get(list_events_by_facility_handler))
         .with_state(app_state)
 }
 
+// Handler that lists all events
 async fn list_events_handler(
     State(app_state): State<AppState>,
 ) -> Result<Json<Value>> {
@@ -47,6 +51,7 @@ async fn list_events_handler(
     Ok(body)
 }
 
+// Handler that lists all future events
 async fn list_future_events_handler(
     State(app_state): State<AppState>,
 ) -> Result<Json<Value>> {
@@ -65,6 +70,7 @@ async fn list_future_events_handler(
     Ok(body)
 }
 
+// Handler that lists all events by organiser
 async fn list_events_by_organiser_handler(
     context: Context,
     State(app_state): State<AppState>,
@@ -84,6 +90,7 @@ async fn list_events_by_organiser_handler(
     Ok(body)
 }
 
+// Handler that lists all events by facility
 async fn list_events_by_facility_handler(
     context: Context,
     State(app_state): State<AppState>,

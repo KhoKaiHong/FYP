@@ -1,3 +1,4 @@
+// Modules
 use crate::auth::{token::parse_refresh_token, Role};
 use crate::context::Context;
 use crate::model::admin_session::AdminSessionModelController;
@@ -8,6 +9,7 @@ use crate::model::EntityErrorField::UuidError;
 use crate::model::{self, ModelManager};
 use crate::state::AppState;
 use crate::web::{Error, Result};
+
 use axum::extract::State;
 use axum::routing::post;
 use axum::{Json, Router};
@@ -16,12 +18,14 @@ use serde_json::{json, Value};
 use tracing::debug;
 use uuid::Uuid;
 
+// Routes
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
         .route("/logout", post(logout_handler))
         .with_state(app_state)
 }
 
+// Handler that logs out a user
 async fn logout_handler(
     context: Context,
     State(app_state): State<AppState>,
@@ -35,6 +39,7 @@ async fn logout_handler(
     let refresh_token_jti = Uuid::try_parse(refresh_token_claims.jti())
         .map_err(|_| Error::LogoutFailInvalidRefreshToken)?;
 
+    // Depending on the user performing the request, logout all sessions for that user
     match context.role() {
         Role::User => {
             logout_user(&context, refresh_token_jti, model_manager).await?;
@@ -151,6 +156,7 @@ async fn logout_admin(
     Ok(())
 }
 
+// Request payload for logging out a user
 #[derive(Debug, Deserialize)]
 #[serde(rename_all(deserialize = "camelCase"))]
 struct LogoutRequestPayload {

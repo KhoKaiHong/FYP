@@ -3,6 +3,7 @@
 
 # Environments variables set for all `cargo ...` commands.
 [env]
+ENVIRONMENT="development"
 
 # Scope down tracing, to filter out external lib tracing.
 RUST_LOG="Backend=debug"

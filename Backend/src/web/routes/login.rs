@@ -1,3 +1,4 @@
+// Modules
 use crate::auth::{
     self, password::validate_password, token::generate_access_token, token::generate_refresh_token,
     Role,
@@ -14,6 +15,7 @@ use crate::model::user_session::{UserSessionForCreate, UserSessionModelControlle
 use crate::model::EntityErrorField::StringError;
 use crate::state::AppState;
 use crate::web::{Error, Result};
+
 use axum::extract::State;
 use axum::routing::post;
 use axum::{Json, Router};
@@ -22,6 +24,7 @@ use serde_json::{json, Value};
 use tracing::debug;
 use uuid::Uuid;
 
+// Routes
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
         .route("/user-login", post(user_login_handler))
@@ -31,12 +34,14 @@ pub fn routes(app_state: AppState) -> Router {
         .with_state(app_state)
 }
 
+// Handler that logs in a user
 async fn user_login_handler(
     State(app_state): State<AppState>,
     Json(payload): Json<UserLoginPayload>,
 ) -> Result<Json<Value>> {
     debug!("{:<12} - user_login_api", "HANDLER");
 
+    // Gets the user by IC number
     let user = UserModelController::get_by_ic_number(&app_state.model_manager, &payload.ic_number)
         .await
         .map_err(|err| match err {
@@ -47,6 +52,7 @@ async fn user_login_handler(
             _ => Error::ModelError(err),
         })?;
 
+    // Validates the password
     validate_password(&payload.password, &user.password)
         .await
         .map_err(|err| match err {
@@ -54,6 +60,7 @@ async fn user_login_handler(
             _ => Error::AuthError(err),
         })?;
 
+    // Generates access token and refresh token pair to create a session
     let access_token_id = Uuid::new_v4();
     let access_token = generate_access_token(&access_token_id.to_string(), user.id, &Role::User)?;
 
@@ -79,6 +86,7 @@ async fn user_login_handler(
     Ok(body)
 }
 
+// Request payload for logging in a user
 #[derive(Debug, Deserialize)]
 #[serde(rename_all(deserialize = "camelCase"))]
 struct UserLoginPayload {
@@ -86,12 +94,14 @@ struct UserLoginPayload {
     password: String,
 }
 
+// Handler that logs in a facility
 async fn facility_login_handler(
     State(app_state): State<AppState>,
     Json(payload): Json<FacilityLoginPayload>,
 ) -> Result<Json<Value>> {
     debug!("{:<12} - facility_login_api", "HANDLER");
 
+    // Gets the facility by email
     let facility = FacilityModelController::get_by_email(&app_state.model_manager, &payload.email)
         .await
         .map_err(|err| match err {
@@ -102,6 +112,7 @@ async fn facility_login_handler(
             _ => Error::ModelError(err),
         })?;
 
+    // Validates the password
     validate_password(&payload.password, &facility.password)
         .await
         .map_err(|err| match err {
@@ -109,6 +120,7 @@ async fn facility_login_handler(
             _ => Error::AuthError(err),
         })?;
 
+    // Generates access token and refresh token pair to create a session
     let access_token_id = Uuid::new_v4();
     let access_token = generate_access_token(
         &access_token_id.to_string(),
@@ -128,8 +140,7 @@ async fn facility_login_handler(
         facility_id: facility.id,
     };
 
-    FacilitySessionModelController::create(&app_state.model_manager, facility_session)
-        .await?;
+    FacilitySessionModelController::create(&app_state.model_manager, facility_session).await?;
 
     let body = Json(json!({
         "data": {
@@ -142,6 +153,7 @@ async fn facility_login_handler(
     Ok(body)
 }
 
+// Request payload for logging in a facility
 #[derive(Debug, Deserialize)]
 #[serde(rename_all(deserialize = "camelCase"))]
 struct FacilityLoginPayload {
@@ -149,12 +161,14 @@ struct FacilityLoginPayload {
     password: String,
 }
 
+// Handler that logs in an organiser
 async fn organiser_login_handler(
     State(app_state): State<AppState>,
     Json(payload): Json<OrganiserLoginPayload>,
 ) -> Result<Json<Value>> {
     debug!("{:<12} - organiser_login_api", "HANDLER");
 
+    // Gets the organiser by email
     let organiser =
         OrganiserModelController::get_by_email(&app_state.model_manager, &payload.email)
             .await
@@ -166,6 +180,7 @@ async fn organiser_login_handler(
                 _ => Error::ModelError(err),
             })?;
 
+    // Validates the password
     validate_password(&payload.password, &organiser.password)
         .await
         .map_err(|err| match err {
@@ -173,6 +188,7 @@ async fn organiser_login_handler(
             _ => Error::AuthError(err),
         })?;
 
+    // Generates access token and refresh token pair to create a session
     let access_token_id = Uuid::new_v4();
     let access_token =
         generate_access_token(&access_token_id.to_string(), organiser.id, &Role::Organiser)?;
@@ -186,8 +202,7 @@ async fn organiser_login_handler(
         organiser_id: organiser.id,
     };
 
-    OrganiserSessionModelController::create(&app_state.model_manager, organiser_session)
-        .await?;
+    OrganiserSessionModelController::create(&app_state.model_manager, organiser_session).await?;
 
     let body = Json(json!({
         "data": {
@@ -200,6 +215,7 @@ async fn organiser_login_handler(
     Ok(body)
 }
 
+// Request payload for logging in an organiser
 #[derive(Debug, Deserialize)]
 #[serde(rename_all(deserialize = "camelCase"))]
 struct OrganiserLoginPayload {
@@ -207,23 +223,25 @@ struct OrganiserLoginPayload {
     password: String,
 }
 
+// Handler that logs in an admin
 async fn admin_login_handler(
     State(app_state): State<AppState>,
     Json(payload): Json<AdminLoginPayload>,
 ) -> Result<Json<Value>> {
     debug!("{:<12} - admin_login_api", "HANDLER");
 
-    let admin =
-        AdminModelController::get_by_email(&app_state.model_manager, &payload.email)
-            .await
-            .map_err(|err| match err {
-                model::Error::EntityNotFound {
-                    entity: "admin",
-                    field: StringError(ref email),
-                } if email == &payload.email => Error::LoginFailEmailNotFound,
-                _ => Error::ModelError(err),
-            })?;
+    // Gets the admin by email
+    let admin = AdminModelController::get_by_email(&app_state.model_manager, &payload.email)
+        .await
+        .map_err(|err| match err {
+            model::Error::EntityNotFound {
+                entity: "admin",
+                field: StringError(ref email),
+            } if email == &payload.email => Error::LoginFailEmailNotFound,
+            _ => Error::ModelError(err),
+        })?;
 
+    // Validates the password
     validate_password(&payload.password, &admin.password)
         .await
         .map_err(|err| match err {
@@ -231,6 +249,7 @@ async fn admin_login_handler(
             _ => Error::AuthError(err),
         })?;
 
+    // Generates access token and refresh token pair to create a session
     let access_token_id = Uuid::new_v4();
     let access_token = generate_access_token(&access_token_id.to_string(), admin.id, &Role::Admin)?;
 
@@ -256,6 +275,7 @@ async fn admin_login_handler(
     Ok(body)
 }
 
+// Request payload for logging in an admin
 #[derive(Debug, Deserialize)]
 #[serde(rename_all(deserialize = "camelCase"))]
 struct AdminLoginPayload {

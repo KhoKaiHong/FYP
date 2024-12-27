@@ -1,9 +1,11 @@
+// Modules
 use crate::auth;
 use crate::auth::password::{encrypt_password, validate_password};
 use crate::context::Context;
 use crate::model::organiser::{OrganiserForUpdate, OrganiserModelController};
 use crate::state::AppState;
 use crate::web::{Error, Result};
+
 use axum::extract::State;
 use axum::routing::patch;
 use axum::{Json, Router};
@@ -11,12 +13,14 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 use tracing::debug;
 
+// Routes
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
         .route("/organiser", patch(organiser_update_handler))
         .with_state(app_state)
 }
 
+// Handler that updates organiser information
 async fn organiser_update_handler(
     context: Context,
     State(app_state): State<AppState>,
@@ -26,11 +30,13 @@ async fn organiser_update_handler(
 
     let model_manager = &app_state.model_manager;
 
+    // If password is going to be updated
     if let (Some(password), Some(current_password)) = (payload.password, payload.current_password) {
         let organiser =
             OrganiserModelController::get(&app_state.model_manager, context.user_id())
                 .await?;
 
+        // Perform password validation
         validate_password(&current_password, &organiser.password)
             .await
             .map_err(|err| match err {
@@ -48,7 +54,7 @@ async fn organiser_update_handler(
             phone_number: payload.phone_number,
         };
 
-        // Update user with new details
+        // Update organiser with new details
         OrganiserModelController::update(
             model_manager,
             context.user_id(),
@@ -64,7 +70,7 @@ async fn organiser_update_handler(
             phone_number: payload.phone_number,
         };
 
-        // Update user with new details
+        // Update organiser with new details
         OrganiserModelController::update(
             model_manager,
             context.user_id(),
@@ -82,6 +88,7 @@ async fn organiser_update_handler(
     Ok(body)
 }
 
+// Request payload for updating organiser information
 #[derive(Deserialize)]
 #[serde(rename_all(deserialize = "camelCase"))]
 struct OrganiserUpdatePayload {

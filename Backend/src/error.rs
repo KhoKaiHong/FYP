@@ -1,41 +1,39 @@
+// Modules
 use crate::model;
 
 pub type Result<T> = core::result::Result<T, Error>;
 
+// Top level Errors
 #[derive(Debug)]
 pub enum Error {
-    // -- Config
-	FailToBuildConfig,
-    
-	// -- Modules
-	Model(model::Error),
+    // Config Error
+    FailToBuildConfig,
 
-	// -- Scheduler Error
-	SchedulerError,
+    // Model Error
+    Model(model::Error),
 
-	// -- Application Error
-	ApplicationError,
+    // Scheduler Error
+    SchedulerError,
 
-	LoggingError,
+    // Application Error
+    ApplicationError,
+
+    // Logging Error
+    LoggingError,
 }
 
-// region:    --- Froms
+// Conversion from model errors to top level Errors
 impl From<model::Error> for Error {
-	fn from(val: model::Error) -> Self {
-		Self::Model(val)
-	}
+    fn from(val: model::Error) -> Self {
+        Self::Model(val)
+    }
 }
-// endregion: --- Froms
 
-// region:    --- Error Boilerplate
+// Error Boilerplate
 impl core::fmt::Display for Error {
-	fn fmt(
-		&self,
-		fmt: &mut core::fmt::Formatter,
-	) -> core::result::Result<(), core::fmt::Error> {
-		write!(fmt, "{self:?}")
-	}
+    fn fmt(&self, fmt: &mut core::fmt::Formatter) -> core::result::Result<(), core::fmt::Error> {
+        write!(fmt, "{self:?}")
+    }
 }
 
 impl std::error::Error for Error {}
-// endregion: --- Error Boilerplate

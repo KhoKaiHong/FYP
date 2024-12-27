@@ -81,17 +81,20 @@ pub fn config() -> &'static Config {
 }
 
 impl Config {
+    // Loads the configuration from the /configuration directory
     pub fn load_configuration() -> Result<Config> {
         let base_path = std::env::current_dir().expect("Failed to determine the current directory");
         let configuration_directory = base_path.join("configuration");
 
-        // Detect the running environment. Default to development config if unspecified
-        let environment = std::env::var("APP_ENVIRONMENT").unwrap_or_else(|_| String::from("development"));
+        // Detect the running environment. Default to development if unspecified
+        let environment = std::env::var("ENVIRONMENT").unwrap_or_else(|_| String::from("development"));
 
         let environment =
-            Environment::from_str(&environment).expect("Failed to parse APP_ENVIRONMENT.");
+            Environment::from_str(&environment).expect("Failed to parse ENVIRONMENT.");
+        // Load the configuration file
         let environment_filename = format!("{}.yaml", environment.to_string());
-
+        
+        // Builds the configuration from the configuration file
         let config = config::Config::builder()
             .add_source(config::File::from(
                 configuration_directory.join(environment_filename),

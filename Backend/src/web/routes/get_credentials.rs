@@ -1,3 +1,4 @@
+// Modules
 use crate::auth::Role;
 use crate::context::Context;
 use crate::model::admin::AdminModelController;
@@ -8,18 +9,21 @@ use crate::model::EntityErrorField::I64Error;
 use crate::model::{self, ModelManager};
 use crate::state::AppState;
 use crate::web::{Error, Result};
+
 use axum::extract::State;
 use axum::routing::get;
 use axum::{Json, Router};
 use serde_json::{json, Value};
 use tracing::debug;
 
+// Routes
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
         .route("/get-credentials", get(get_credentials_handler))
         .with_state(app_state)
 }
 
+// Handler that returns the credentials for the user
 async fn get_credentials_handler(
     context: Context,
     State(app_state): State<AppState>,

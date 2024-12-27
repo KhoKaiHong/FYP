@@ -12,7 +12,7 @@ pub struct Context {
 
 impl Context {
     // Generate a context for root user
-    pub fn root_ctx() -> Self {
+    pub fn root_context() -> Self {
         Context {
             user_id: 0,
             role: Role::User,

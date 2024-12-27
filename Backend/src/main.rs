@@ -1,3 +1,4 @@
+// Module declarations
 mod application;
 mod auth;
 mod config;
@@ -13,13 +14,15 @@ mod web;
 
 pub mod _dev_utils;
 
-pub use self::error::{Error, Result};
-pub use config::config;
-
+// Modules
 use application::Application;
 use scheduler::CronJobScheduler;
 use state::AppState;
 use tracing_subscriber::{self, EnvFilter};
+
+// Re-exports
+pub use self::error::{Error, Result};
+pub use config::config;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -30,14 +33,16 @@ async fn main() -> Result<()> {
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
-    // -- FOR DEV ONLY
+    // Initialise development environment
     _dev_utils::init_dev().await;
 
-    // Initialize AppState.
+    // Initialize AppState
     let app_state = AppState::new().await?;
 
+    // Initialise CRON job scheduler
     CronJobScheduler::run(app_state.clone()).await?;
 
+    // Build the application and run it
     let application = Application::build_router(&app_state);
     application.run().await?;
     

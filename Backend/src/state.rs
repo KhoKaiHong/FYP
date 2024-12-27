@@ -6,7 +6,7 @@ use crate::Result;
 
 #[derive(Clone)]
 pub struct AppState {
-    // Cloning the ModelManager is cheap as the internal DB pool is not cloned.
+    // Cloning the ModelManager is cheap as the internal DB pool is not cloned
     pub model_manager: ModelManager,
 }
 
@@ -20,7 +20,7 @@ impl AppState {
     }
 }
 
-// Converts AppState to ModelManager for handlers to access substate for model.
+// Converts AppState to ModelManager for handlers to access substate for model
 impl FromRef<AppState> for ModelManager {
     fn from_ref(app_state: &AppState) -> ModelManager {
         app_state.model_manager.clone()

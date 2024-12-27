@@ -139,12 +139,14 @@ impl Application {
 
         // Initialize routes
         let router = Router::new()
+            // Nest all routes with an /api prefix
             .nest(
                 "/api",
                 Router::new()
                     .merge(routes_public)
                     .merge(routes_require_auth),
             )
+            // Middlewares
             .layer(middleware::map_response(web::middleware::response_mapper))
             .layer(middleware::from_fn_with_state(
                 app_state.clone(),
@@ -152,6 +154,7 @@ impl Application {
             ))
             .layer(CookieManagerLayer::new())
             .layer(cors_layer)
+            // Fallback
             .fallback_service(web::routes::fallback::serve_dir());
 
         Self { router }

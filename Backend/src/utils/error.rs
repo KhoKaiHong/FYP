@@ -2,15 +2,11 @@ pub type Result<T> = core::result::Result<T, Error>;
 
 #[derive(Debug)]
 pub enum Error {
-	// -- Time
+	// Datetime Errors
 	DateFailParse(String),
-	InvalidSecondFormat(String),
-
-	// -- Base64
-	FailToB64uDecode,
 }
 
-// region:    --- Error Boilerplate
+// Error Boilerplate
 impl core::fmt::Display for Error {
 	fn fmt(
 		&self,
@@ -21,4 +17,3 @@ impl core::fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
-// endregion: --- Error Boilerplate

@@ -1,5 +1,4 @@
-use std::str::FromStr;
-
+// Modules
 use crate::context::Context;
 use crate::model::enums::EventRequestStatus;
 use crate::model::event::{EventForCreate, EventModelController};
@@ -9,25 +8,33 @@ use crate::model::facility_notification::{
 use crate::model::new_event_request::{
     NewEventRequestForCreate, NewEventRequestForUpdate, NewEventRequestModelController,
 };
-use crate::model::organiser_notification::{OrganiserNotificationForCreate, OrganiserNotificationModelController};
+use crate::model::organiser_notification::{
+    OrganiserNotificationForCreate, OrganiserNotificationModelController,
+};
 use crate::model::user::UserModelController;
-use crate::model::user_notification::{UserNotificationForCreateBulk, UserNotificationModelController};
+use crate::model::user_notification::{
+    UserNotificationForCreateBulk, UserNotificationModelController,
+};
 use crate::state::AppState;
 use crate::web::{Error, Result};
+
 use axum::extract::State;
 use axum::routing::{get, patch, post};
 use axum::{Json, Router};
 use chrono::{prelude::*, DurationRound, TimeDelta};
 use serde::Deserialize;
 use serde_json::{json, Value};
+use std::str::FromStr;
 use tracing::debug;
 
+// Route to post a new event request
 pub fn post_route(app_state: AppState) -> Router {
     Router::new()
         .route("/new-event-request", post(post_new_event_request_handler))
         .with_state(app_state)
 }
 
+// Route to list new event requests by facility
 pub fn list_by_facility_route(app_state: AppState) -> Router {
     Router::new()
         .route(
@@ -37,6 +44,7 @@ pub fn list_by_facility_route(app_state: AppState) -> Router {
         .with_state(app_state)
 }
 
+// Route to list new event requests by organiser
 pub fn list_by_organiser_route(app_state: AppState) -> Router {
     Router::new()
         .route(
@@ -46,6 +54,7 @@ pub fn list_by_organiser_route(app_state: AppState) -> Router {
         .with_state(app_state)
 }
 
+// Route to update a new event request by facility
 pub fn update_by_facility_route(app_state: AppState) -> Router {
     Router::new()
         .route(
@@ -55,6 +64,7 @@ pub fn update_by_facility_route(app_state: AppState) -> Router {
         .with_state(app_state)
 }
 
+// Handler that posts a new event request
 async fn post_new_event_request_handler(
     context: Context,
     State(app_state): State<AppState>,
@@ -94,6 +104,7 @@ async fn post_new_event_request_handler(
 
     NewEventRequestModelController::create(model_manager, new_event_request).await?;
 
+    // Notify the facility of the pending new event request
     let notification = FacilityNotificationForCreate {
         description: "You have a pending new event proposal.".to_string(),
         redirect: Some("manage-event-proposals".to_string()),
@@ -111,6 +122,7 @@ async fn post_new_event_request_handler(
     Ok(body)
 }
 
+// Request payload for posting a new event request
 #[derive(Deserialize)]
 #[serde(rename_all(deserialize = "camelCase"))]
 pub struct NewEventRequestCreatePayload {
@@ -126,6 +138,7 @@ pub struct NewEventRequestCreatePayload {
     pub district_id: i32,
 }
 
+// Handler that lists all new event requests for a facility
 async fn list_new_event_requests_facility_handler(
     context: Context,
     State(app_state): State<AppState>,
@@ -146,6 +159,7 @@ async fn list_new_event_requests_facility_handler(
     Ok(body)
 }
 
+// Handler that lists all new event requests for an organiser
 async fn list_new_event_requests_organiser_handler(
     context: Context,
     State(app_state): State<AppState>,
@@ -166,8 +180,9 @@ async fn list_new_event_requests_organiser_handler(
     Ok(body)
 }
 
+// Handler that updates a new event request by the facility
 async fn update_new_event_request_facility_handler(
-    context: Context,
+    _context: Context,
     State(app_state): State<AppState>,
     Json(payload): Json<NewEventRequestUpdatePayload>,
 ) -> Result<Json<Value>> {
@@ -183,14 +198,14 @@ async fn update_new_event_request_facility_handler(
         rejection_reason: payload.rejection_reason,
     };
 
-    NewEventRequestModelController::update(model_manager, payload.id, updated_request)
-        .await?;
+    NewEventRequestModelController::update(model_manager, payload.id, updated_request).await?;
 
-    let new_event_details =
-        NewEventRequestModelController::get(model_manager, payload.id).await?;
+    let new_event_details = NewEventRequestModelController::get(model_manager, payload.id).await?;
 
     match status {
+        // If the status is changed to approved
         EventRequestStatus::Approved => {
+            // Create and add the event
             let event_created = EventForCreate {
                 location: new_event_details.location,
                 address: new_event_details.address,
@@ -207,18 +222,17 @@ async fn update_new_event_request_facility_handler(
 
             EventModelController::create(model_manager, event_created).await?;
 
+            // Notify the organiser of the new event request
             let organiser_notification = OrganiserNotificationForCreate {
                 description: "Your new event proposal has been accepted.".to_string(),
                 redirect: Some("organiser-event-proposals".to_string()),
                 organiser_id: new_event_details.organiser_id,
             };
 
-            OrganiserNotificationModelController::create(
-                model_manager,
-                organiser_notification,
-            )
-            .await?;
+            OrganiserNotificationModelController::create(model_manager, organiser_notification)
+                .await?;
 
+            // Notifiy all eligible uses in the same district of the event
             let users_ids: Vec<i64> = UserModelController::list_eligible_by_district(
                 model_manager,
                 new_event_details.district_id,
@@ -229,30 +243,24 @@ async fn update_new_event_request_facility_handler(
             .collect();
 
             let user_notifications = UserNotificationForCreateBulk {
-                description: "There is a new blood donation event near you."
-                    .to_string(),
+                description: "There is a new blood donation event near you.".to_string(),
                 redirect: Some("events".to_string()),
                 user_ids: users_ids,
             };
 
-            UserNotificationModelController::create_bulk(
-                model_manager,
-                user_notifications,
-            )
-            .await?;
+            UserNotificationModelController::create_bulk(model_manager, user_notifications).await?;
         }
+        // If the status is changed to rejected
         EventRequestStatus::Rejected => {
+            // Notify the organiser of the rejected event request
             let organiser_notification = OrganiserNotificationForCreate {
                 description: "Your new event proposal has been rejected.".to_string(),
                 redirect: Some("organiser-event-proposals".to_string()),
                 organiser_id: new_event_details.organiser_id,
             };
 
-            OrganiserNotificationModelController::create(
-                model_manager,
-                organiser_notification,
-            )
-            .await?;
+            OrganiserNotificationModelController::create(model_manager, organiser_notification)
+                .await?;
         }
         _ => {}
     }
@@ -266,6 +274,7 @@ async fn update_new_event_request_facility_handler(
     Ok(body)
 }
 
+// Request payload for updating a new event request
 #[derive(Deserialize)]
 #[serde(rename_all(deserialize = "camelCase"))]
 pub struct NewEventRequestUpdatePayload {

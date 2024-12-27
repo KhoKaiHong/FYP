@@ -1,7 +1,9 @@
+// Modules
 use crate::context::Context;
 use crate::model::user_notification::UserNotificationModelController;
 use crate::state::AppState;
 use crate::web::Result;
+
 use axum::extract::State;
 use axum::routing::{get, patch};
 use axum::{Json, Router};
@@ -9,6 +11,7 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 use tracing::debug;
 
+// Routes
 pub fn routes(app_state: AppState) -> Router {
     Router::new()
         .route(
@@ -19,6 +22,7 @@ pub fn routes(app_state: AppState) -> Router {
         .with_state(app_state)
 }
 
+// Handler that lists all user notifications for the user
 async fn list_user_notifications(
     context: Context,
     State(app_state): State<AppState>,
@@ -40,8 +44,9 @@ async fn list_user_notifications(
     Ok(body)
 }
 
+// Handler that marks a user notification as read
 async fn read_user_notification(
-    context: Context,
+    _context: Context,
     State(app_state): State<AppState>,
     Json(payload): Json<ReadUserNotificationPayload>,
 ) -> Result<Json<Value>> {
@@ -61,6 +66,7 @@ async fn read_user_notification(
     Ok(body)
 }
 
+// Request payload for reading a user notification
 #[derive(Deserialize)]
 #[serde(rename_all(deserialize = "camelCase"))]
 struct ReadUserNotificationPayload {
