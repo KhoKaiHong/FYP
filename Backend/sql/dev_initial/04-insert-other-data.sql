@@ -1,37 +1,37 @@
 -- Insert data into users (10 users added)
 INSERT INTO users (ic_number, password, name, email, phone_number, blood_type, eligibility, state_id, district_id) VALUES
-('850101-10-5001', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Ahmad bin Ali', 'ahmad.ali@example.com', '+6016-1234567', 'O+', 'Eligible', 1, 1),
-('921120-05-5203', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Suresh Kumar', 'suresh.kumar@example.com', '+6016-5551212', 'A+', 'Eligible', 12, 4),
-('800722-03-5305', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'David Wong', 'david.wong@example.com', '+6016-4455667', 'O-', 'Eligible', 10, 7), 
-('900605-07-5607', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Ramesh Rao', 'ramesh.rao@example.com', '+6016-3344556', 'B+', 'Eligible', 7, 8),
-('880402-09-5809', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Tan Ah Kau', 'ah.kau@example.com', '+6016-2233445', 'O+', 'Eligible', 2, 3), 
-('961015-06-5910', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Joseph ak Luyoh', 'joseph.luyoh@example.com', '+6016-8899001', 'A+', 'Eligible', 6, 4), 
-('030310-12-5104', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Dayang Nurul', 'dayang.nurul@example.com', '+6016-1122334', 'AB+', 'Ineligible', 11, 14), 
-('750918-02-5406', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Siti Aminah', 'siti.aminah@example.com', '+6016-7788990', 'A-', 'Ineligible', 3, 5), 
-('721228-11-5708', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Noraini binti Omar', 'noraini.omar@example.com', '+6016-6677889', 'AB-', 'Ineligible', 5, 2),
-('780515-08-5502', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Lim Mei Ling', 'mei.ling@example.com', '+6016-9876543', 'B-', 'Ineligible - Condition', 9, 5);
+('850101-10-5001', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Ahmad bin Ali', 'ahmad.ali@example.com', '+6016-1234567', 'O+', 'Eligible', 1, 1),
+('921120-05-5203', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Suresh Kumar', 'suresh.kumar@example.com', '+6016-5551212', 'A+', 'Eligible', 12, 4),
+('800722-03-5305', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'David Wong', 'david.wong@example.com', '+6016-4455667', 'O-', 'Eligible', 10, 7), 
+('900605-07-5607', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Ramesh Rao', 'ramesh.rao@example.com', '+6016-3344556', 'B+', 'Eligible', 7, 8),
+('880402-09-5809', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Tan Ah Kau', 'ah.kau@example.com', '+6016-2233445', 'O+', 'Eligible', 2, 3), 
+('961015-06-5910', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Joseph ak Luyoh', 'joseph.luyoh@example.com', '+6016-8899001', 'A+', 'Eligible', 6, 4), 
+('030310-12-5104', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Dayang Nurul', 'dayang.nurul@example.com', '+6016-1122334', 'AB+', 'Ineligible', 11, 14), 
+('750918-02-5406', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Siti Aminah', 'siti.aminah@example.com', '+6016-7788990', 'A-', 'Ineligible', 3, 5), 
+('721228-11-5708', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Noraini binti Omar', 'noraini.omar@example.com', '+6016-6677889', 'AB-', 'Ineligible', 5, 2),
+('780515-08-5502', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Lim Mei Ling', 'mei.ling@example.com', '+6016-9876543', 'B-', 'Ineligible - Condition', 9, 5);
 
 -- Insert data into event_organisers (5 organisers added)
 INSERT INTO event_organisers (email, password, name, phone_number) VALUES
-('st.john.ambulans@example.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'St. John Ambulans Malaysia', '+6018-1112223'),
-('malaysian.red.crescent@example.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Malaysian Red Crescent Society (MRCS)', '+6018-3334445'),
-('mercy.malaysia@example.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Mercy Malaysia', '+6018-5556667'),
-('world.vision.malaysia@example.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'World Vision Malaysia', '+6018-7778889'),
-('unicef.malaysia@example.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'UNICEF Malaysia', '+6018-9990001');
+('st.john.ambulans@example.com', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'St. John Ambulans Malaysia', '+6018-1112223'),
+('malaysian.red.crescent@example.com', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Malaysian Red Crescent Society (MRCS)', '+6018-3334445'),
+('mercy.malaysia@example.com', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Mercy Malaysia', '+6018-5556667'),
+('world.vision.malaysia@example.com', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'World Vision Malaysia', '+6018-7778889'),
+('unicef.malaysia@example.com', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'UNICEF Malaysia', '+6018-9990001');
 
 -- Insert data into admins (5 admins added)
 INSERT INTO admins (email, password, name) VALUES
-('farid@admin.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Farid bin Rahman'),
-('siew.ling@admin.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Siew Ling Tan'),
-('arun@admin.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Arun Kumar Subramaniam'),
-('noraidah@admin.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Noraidah bt. Abdullah'),
-('vincent@admin.com', '$argon2id$v=19$m=16,t=2,p=1$a1hTTzVvYXFaajBEemV6bA$1UwkkC3BQXNZmBTBgzVo0A', 'Vincent Raj');
+('farid@admin.com', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Farid bin Rahman'),
+('siew.ling@admin.com', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Siew Ling Tan'),
+('arun@admin.com', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Arun Kumar Subramaniam'),
+('noraidah@admin.com', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Noraidah bt. Abdullah'),
+('vincent@admin.com', '$argon2id$v=19$m=16,t=2,p=1$Y0w5cWV2SkcwVHpPNGtTbg$yI+vnORL77GEy6TRrHmZDg', 'Vincent Raj');
 
 -- Insert data into blood_donation_events (19 added)
 INSERT INTO blood_donation_events (location, address, start_time, end_time, max_attendees, latitude, longitude, facility_id, state_id, district_id, organiser_id) VALUES
 -- Past blood donation events
 ('AEON Mall Tebrau City', '1, Jalan Desa Tebrau, Taman Desa Tebrau, 81100 Johor Bahru, Johor Darul Ta''zim', '2024-11-02 01:00:00', '2024-11-02 06:00:00', 50, 1.5504988882483934, 103.79546007121144, 1, 1, 2, 1),
-('Aman Central', 'Aman Central, 1, Darul Aman Hwy, Kampung Lubok Peringgi, 05100 Alor Setar, Kedah', '2024-11-05 03:00:00', '2024-11-05 08:00:00', 100, 6.126557473647973, 100.36635251644108, 3, 2, (SELECT id FROM districts WHERE name = 'Kota Setar'), 3),
+('Aman Central', 'Aman Central, 1, Darul Aman Hwy, Kampung Lubok Peringgi, 05100 Alor Setar, Kedah', '2024-11-05 03:00:00', '2024-11-05 08:00:00', 100, 6.1251197160110635, 100.36693297095691, 3, 2, (SELECT id FROM districts WHERE name = 'Kota Setar'), 3),
 ('Central Square', '4th Floor No, 4.09.01, 23, Jalan Kampung Baru, 08000 Sungai Petani, Kedah', '2024-11-12 03:00:00', '2024-11-12 09:00:00', 200, 5.636985974957746, 100.48850811177923, 3, 2, (SELECT id FROM districts WHERE name = 'Kuala Muda'), 4),
 ('KB Mall', '1, Jalan Hamzah, Bandar Kota Bharu, 15050 Kota Bharu, Kelantan', '2024-11-20 01:00:00', '2024-11-20 06:00:00', 150, 6.117535241114517, 102.24020087379189, 4, 3, (SELECT id FROM districts WHERE name = 'Kota Bharu'), 5),
 ('Dataran Pahlawan Melaka Megamall', 'Jln Merdeka, Banda Hilir, 75000 Melaka', '2024-11-26 02:00:00', '2024-11-26 09:00:00', 300, 2.190001569760413, 102.25044895653002, 5, 4, (SELECT id FROM districts WHERE name = 'Melaka Tengah'), 2),
@@ -43,9 +43,9 @@ INSERT INTO blood_donation_events (location, address, start_time, end_time, max_
 ('Queensbay Mall', 'Queensbay Mall, 100, Persiaran Bayan Indah, 11900 Bayan Lepas, Pulau Pinang', '2025-01-05 02:00:00', '2025-01-05 07:00:00', 200, 5.333183408845015, 100.3066133670719, 10, 9, (SELECT id FROM districts WHERE name = 'Barat Daya'), 4),
 -- Upcoming blood donation events
 ('Imago Shopping Mall', 'KK Times Square, Phase 2, Off Coastal Highway, 88100 Kota Kinabalu, Sabah', '2025-01-12 03:00:00', '2025-01-12 09:00:00', 300, 5.970860788846937, 116.06635592386823, 16, 10, (SELECT id FROM districts WHERE name = 'Kota Kinabalu'), 2),
-('Vivacity Megamall', 'Q112B, 93350 Kuching, Sarawak', '2025-01-19 01:00:00', '2025-01-19 06:00:00', 100, 1.8864013570027496, 110.44913508635773, 19, 11, (SELECT id FROM districts WHERE name = 'Kuching'), 1),
+('Vivacity Megamall', 'Q112B, 93350 Kuching, Sarawak', '2025-01-19 01:00:00', '2025-01-19 06:00:00', 100, 1.527042186415022, 110.3695937600573, 19, 11, (SELECT id FROM districts WHERE name = 'Kuching'), 1),
 ('1 Utama Shopping Centre', '1, Lebuh Bandar Utama, Bandar Utama, 47800 Petaling Jaya, Selangor', '2025-01-23 03:00:00', '2025-01-23 08:00:00', 200, 3.148127466123984, 101.61646193049211, 14, 12, (SELECT id FROM districts WHERE name = 'Petaling'), 3),
-('Sunway Pyramid', '3, Jalan PJS 11/15, Bandar Sunway, 47500 Petaling Jaya, Selangor', '2025-01-28 01:00:00', '2025-01-28 09:00:00', 100, 3.0739684691784834, 101.60737446217043, 14, 12, (SELECT id FROM districts WHERE name = 'Petaling'), 5),
+('Sunway Pyramid', '3, Jalan PJS 11/15, Bandar Sunway, 47500 Petaling Jaya, Selangor', '2025-01-28 01:00:00', '2025-01-28 09:00:00', 100, 3.0722551036387156, 101.60638838905393, 14, 12, (SELECT id FROM districts WHERE name = 'Petaling'), 5),
 ('Mesra Mall', 'Mesra Mall, Lot 6490, Jalan Kemaman - Dungun, Kampung Baru, 24200 Kemasik, Terengganu', '2025-02-03 03:00:00', '2025-02-03 06:00:00', 300, 4.440697264195204, 103.44849511840275, 15, 13, (SELECT id FROM districts WHERE name = 'Dungun'), 1),
 ('Pavilion Kuala Lumpur', '168, Jln Bukit Bintang, Bukit Bintang, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-02-10 03:00:00', '2025-02-10 07:00:00', 150, 3.148998022026934, 101.71340731862986, 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 2),
 ('Financial Park Labuan Complex', 'Jln Merdeka, Financial Park, 87000 Labuan, Wilayah Persekutuan Labuan', '2025-02-17 02:00:00', '2025-02-17 09:00:00', 100, 5.276586556815842, 115.24945783706148, 22, 15, (SELECT id FROM districts WHERE name = 'W.P. Labuan'), 3),
@@ -78,7 +78,7 @@ INSERT INTO new_blood_donation_events_requests (
 -- Approved requests
 -- Past blood donation events
 ('AEON Mall Tebrau City', '1, Jalan Desa Tebrau, Taman Desa Tebrau, 81100 Johor Bahru, Johor Darul Ta''zim', '2024-11-02 01:00:00', '2024-11-02 06:00:00', 50, 1.5504988882483934, 103.79546007121144, 'Approved', NULL, 1, 1, 2, 1),
-('Aman Central', 'Aman Central, 1, Darul Aman Hwy, Kampung Lubok Peringgi, 05100 Alor Setar, Kedah', '2024-11-05 03:00:00', '2024-11-05 08:00:00', 100, 6.126557473647973, 100.36635251644108, 'Approved', NULL, 3, 2, (SELECT id FROM districts WHERE name = 'Kota Setar'), 3),
+('Aman Central', 'Aman Central, 1, Darul Aman Hwy, Kampung Lubok Peringgi, 05100 Alor Setar, Kedah', '2024-11-05 03:00:00', '2024-11-05 08:00:00', 100, 6.1251197160110635, 100.36693297095691, 'Approved', NULL, 3, 2, (SELECT id FROM districts WHERE name = 'Kota Setar'), 3),
 ('Central Square', '4th Floor No, 4.09.01, 23, Jalan Kampung Baru, 08000 Sungai Petani, Kedah', '2024-11-12 03:00:00', '2024-11-12 09:00:00', 200, 5.636985974957746, 100.48850811177923, 'Approved', NULL, 3, 2, (SELECT id FROM districts WHERE name = 'Kuala Muda'), 4),
 ('KB Mall', '1, Jalan Hamzah, Bandar Kota Bharu, 15050 Kota Bharu, Kelantan', '2024-11-20 01:00:00', '2024-11-20 06:00:00', 150, 6.117535241114517, 102.24020087379189, 'Approved', NULL, 4, 3, (SELECT id FROM districts WHERE name = 'Kota Bharu'), 5),
 ('Dataran Pahlawan Melaka Megamall', 'Jln Merdeka, Banda Hilir, 75000 Melaka', '2024-11-26 02:00:00', '2024-11-26 09:00:00', 300, 2.190001569760413, 102.25044895653002, 'Approved', NULL, 5, 4, (SELECT id FROM districts WHERE name = 'Melaka Tengah'), 2),
@@ -90,9 +90,9 @@ INSERT INTO new_blood_donation_events_requests (
 ('Queensbay Mall', 'Queensbay Mall, 100, Persiaran Bayan Indah, 11900 Bayan Lepas, Pulau Pinang', '2025-01-05 02:00:00', '2025-01-05 07:00:00', 200, 5.333183408845015, 100.3066133670719, 'Approved', NULL, 10, 9, (SELECT id FROM districts WHERE name = 'Barat Daya'), 4),
 -- Upcoming blood donation events
 ('Imago Shopping Mall', 'KK Times Square, Phase 2, Off Coastal Highway, 88100 Kota Kinabalu, Sabah', '2025-01-12 03:00:00', '2025-01-12 09:00:00', 300, 5.970860788846937, 116.06635592386823, 'Approved', NULL, 16, 10, (SELECT id FROM districts WHERE name = 'Kota Kinabalu'), 2),
-('Vivacity Megamall', 'Q112B, 93350 Kuching, Sarawak', '2025-01-19 01:00:00', '2025-01-19 06:00:00', 100, 1.8864013570027496, 110.44913508635773, 'Approved', NULL, 19, 11, (SELECT id FROM districts WHERE name = 'Kuching'), 1),
+('Vivacity Megamall', 'Q112B, 93350 Kuching, Sarawak', '2025-01-19 01:00:00', '2025-01-19 06:00:00', 100, 1.527042186415022, 110.3695937600573, 'Approved', NULL, 19, 11, (SELECT id FROM districts WHERE name = 'Kuching'), 1),
 ('1 Utama Shopping Centre', '1, Lebuh Bandar Utama, Bandar Utama, 47800 Petaling Jaya, Selangor', '2025-01-23 03:00:00', '2025-01-23 08:00:00', 200, 3.148127466123984, 101.61646193049211, 'Approved', NULL, 14, 12, (SELECT id FROM districts WHERE name = 'Petaling'), 3),
-('Sunway Pyramid', '3, Jalan PJS 11/15, Bandar Sunway, 47500 Petaling Jaya, Selangor', '2025-01-28 01:00:00', '2025-01-28 09:00:00', 100, 3.0739684691784834, 101.60737446217043, 'Approved', NULL, 14, 12, (SELECT id FROM districts WHERE name = 'Petaling'), 5),
+('Sunway Pyramid', '3, Jalan PJS 11/15, Bandar Sunway, 47500 Petaling Jaya, Selangor', '2025-01-28 01:00:00', '2025-01-28 09:00:00', 100, 3.0722551036387156, 101.60638838905393, 'Approved', NULL, 14, 12, (SELECT id FROM districts WHERE name = 'Petaling'), 5),
 ('Mesra Mall', 'Mesra Mall, Lot 6490, Jalan Kemaman - Dungun, Kampung Baru, 24200 Kemasik, Terengganu', '2025-02-03 03:00:00', '2025-02-03 06:00:00', 300, 4.440697264195204, 103.44849511840275, 'Approved', NULL, 15, 13, (SELECT id FROM districts WHERE name = 'Dungun'), 1),
 ('Pavilion Kuala Lumpur', '168, Jln Bukit Bintang, Bukit Bintang, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-02-10 03:00:00', '2025-02-10 07:00:00', 150, 3.148998022026934, 101.71340731862986, 'Approved', NULL, 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 2),
 ('Financial Park Labuan Complex', 'Jln Merdeka, Financial Park, 87000 Labuan, Wilayah Persekutuan Labuan', '2025-02-17 02:00:00', '2025-02-17 09:00:00', 100, 5.276586556815842, 115.24945783706148, 'Approved', NULL, 22, 15, (SELECT id FROM districts WHERE name = 'W.P. Labuan'), 3),

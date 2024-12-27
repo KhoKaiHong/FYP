@@ -73,19 +73,19 @@ export const pastEventRegistrationsColumns: ColumnDef<EventRegistration>[] = [
                 </PopoverTitle>
                 <PopoverDescription class="space-y-2">
                   <div class="flex items-center gap-x-2">
-                    <IdCard size={18} />
+                    <IdCard size={18} class="shrink-0" />
                     <p class="text-sm">{userId}</p>
                   </div>
                   <div class="flex items-center gap-x-2">
-                    <Mail size={18} />
+                    <Mail size={18} class="shrink-0" />
                     <p class="text-sm">{userEmail}</p>
                   </div>
                   <div class="flex items-center gap-x-2">
-                    <Phone size={18} />
+                    <Phone size={18} class="shrink-0" />
                     <p class="text-sm">{userPhoneNumber}</p>
                   </div>
                   <div class="flex items-center gap-x-2">
-                    <Droplet size={18} />
+                    <Droplet size={18} class="shrink-0" />
                     <p class="text-sm">{userBloodType}</p>
                   </div>
                 </PopoverDescription>

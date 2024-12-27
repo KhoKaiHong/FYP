@@ -231,15 +231,15 @@ export const pastEventsColumns: ColumnDef<Event>[] = [
                 </PopoverTitle>
                 <PopoverDescription class="space-y-2">
                   <div class="flex items-center gap-x-2">
-                    <Mail size={18} />
+                    <Mail size={18} class="shrink-0" />
                     <p class="text-sm">{facilityEmail}</p>
                   </div>
                   <div class="flex items-center gap-x-2">
-                    <Phone size={18} />
+                    <Phone size={18} class="shrink-0" />
                     <p class="text-sm">{facilityPhoneNumber}</p>
                   </div>
                   <div class="flex items-center gap-x-2">
-                    <MapPin size={18} />
+                    <MapPin size={18} class="shrink-0" />
                     <p class="text-sm">{facilityAddress}</p>
                   </div>
                 </PopoverDescription>

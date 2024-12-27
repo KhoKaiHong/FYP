@@ -251,11 +251,11 @@ export const pendingColumns: ColumnDef<ChangeEventRequest>[] = [
                 </PopoverTitle>
                 <PopoverDescription class="space-y-2">
                   <div class="flex items-center gap-x-2">
-                    <Mail size={18} />
+                    <Mail size={18} class="shrink-0" />
                     <p class="text-sm">{organiserEmail}</p>
                   </div>
                   <div class="flex items-center gap-x-2">
-                    <Phone size={18} />
+                    <Phone size={18} class="shrink-0" />
                     <p class="text-sm">{organiserPhoneNumber}</p>
                   </div>
                 </PopoverDescription>

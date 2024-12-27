@@ -1,5 +1,6 @@
 import Navbar from "@/components/navigation-bar";
 import { useUser } from "@/context/user-context";
+import { BloodLevelIndicator } from "./blood-level-indicator";
 
 function Home() {
   const { user, isAuthenticated } = useUser();
@@ -8,7 +9,7 @@ function Home() {
     <div>
       <Navbar />
       <div class="p-8">
-        <h1 class="text-3xl font-bold mb-4 text-foreground">Welcome Home</h1>
+        <BloodLevelIndicator />
       </div>
     </div>
   );
