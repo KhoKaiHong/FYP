@@ -57,7 +57,7 @@ const BloodTypeCard = ({ type, level }: BloodTypeLevel) => {
 
   return (
     <Card class={`w-full ${config().color} ${config().border} border-2`}>
-      <CardHeader class="pb-2">
+      <CardHeader>
         <CardTitle class="text-xl font-semibold tracking-wide text-center flex gap-2 items-center justify-center">
           <Droplet size={22} class="fill-foreground" />
           {type}
@@ -97,7 +97,7 @@ export function BloodLevelIndicator() {
   return (
     <Card class="w-full border-2 border-brand">
       <CardHeader>
-        <CardTitle class="text-3xl font-semibold tracking-wide text-center flex items-center justify-center">
+        <CardTitle class="text-2xl font-semibold tracking-wide text-center ">
           Blood Type Levels
         </CardTitle>
       </CardHeader>
