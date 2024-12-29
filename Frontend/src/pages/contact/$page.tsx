@@ -43,30 +43,32 @@ function Contact() {
                         {facility.name}
                       </CardTitle>
                     </CardHeader>
-                    <CardContent class="pt-6 space-y-3">
-                      <div class="flex gap-x-2 items-center">
-                        <Map class="shrink-0" />
-                        <p>{facility.stateName}</p>
-                      </div>
-                      <div class="flex gap-x-2 items-center">
-                        <MapPin class="shrink-0" />
-                        <p>{facility.address}</p>
-                      </div>
-                      <div class="flex gap-x-2 items-center">
-                        <Mail class="shrink-0" />
-                        <p>{facility.email}</p>
-                      </div>
-                      <div class="flex gap-x-2 items-center">
-                        <Phone class="shrink-0" />
-                        <p>{facility.phoneNumber}</p>
-                      </div>
-                      <div>
-                        <A
-                          href={`https://www.google.com/maps/dir/?api=1&destination=Blood Bank ${facility.name}&travelmode=driving`}
-                          target="_blank"
-                        >
-                          <Button>Show Directions</Button>
-                        </A>
+                    <CardContent class="pt-6">
+                      <div class="overflow-x-auto space-y-3">
+                        <div class="flex gap-x-2 items-center">
+                          <Map class="shrink-0" />
+                          <p>{facility.stateName}</p>
+                        </div>
+                        <div class="flex gap-x-2 items-center">
+                          <MapPin class="shrink-0" />
+                          <p>{facility.address}</p>
+                        </div>
+                        <div class="flex gap-x-2 items-center">
+                          <Mail class="shrink-0" />
+                          <p>{facility.email}</p>
+                        </div>
+                        <div class="flex gap-x-2 items-center">
+                          <Phone class="shrink-0" />
+                          <p>{facility.phoneNumber}</p>
+                        </div>
+                        <div>
+                          <A
+                            href={`https://www.google.com/maps/dir/?api=1&destination=Blood Bank ${facility.name}&travelmode=driving`}
+                            target="_blank"
+                          >
+                            <Button>Show Directions</Button>
+                          </A>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
