@@ -13,9 +13,18 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { createEffect, createSignal, For } from "solid-js";
+import {
+  Accessor,
+  createEffect,
+  createMemo,
+  createSignal,
+  For,
+} from "solid-js";
 import Autoplay from "embla-carousel-autoplay";
 import { SuiteImage } from "./suite-image";
+import { Hospital, MapPin, Clock } from "lucide-solid";
+import { A } from "@solidjs/router";
+import { Button } from "@/components/ui/button";
 
 type BloodDonationSuite = {
   name: string;
@@ -37,7 +46,7 @@ const bloodDonationSuites: BloodDonationSuite[] = [
     address:
       "Lot 6 & 7, Basement 3, IOI City Mall, Lebuh IRC, IOI Resort, 62502 Putrajaya, Selangor",
     hours:
-      "Mondays - Fridays: 11:00 am - 4:00 pm\nSaturdays, Sundays and Public Holidays: 11:00 am - 6:00 pm",
+      "Mondays - Fridays: 11:00 am - 4:00 pm|Saturdays, Sundays and Public Holidays: 11:00 am - 6:00 pm",
     image: "img/blood-donation-suite-ioi-city-mall.png",
   },
   {
@@ -49,10 +58,26 @@ const bloodDonationSuites: BloodDonationSuite[] = [
   },
 ];
 
+function DotIndicator({
+  index,
+  selectedIndex,
+}: {
+  index: number;
+  selectedIndex: Accessor<number>;
+}) {
+  const isActive = createMemo(() => index === selectedIndex());
+  return (
+    <div
+      class={`h-2 w-2 rounded-full transition-all duration-300 mx-1 ${
+        isActive() ? "bg-primary" : "bg-muted"
+      }`}
+    />
+  );
+}
+
 export function BloodDonationSuites() {
   const [api, setApi] = createSignal<ReturnType<CarouselApi>>();
   const [current, setCurrent] = createSignal(0);
-  const [count, setCount] = createSignal(0);
 
   createEffect(() => {
     const _api = api();
@@ -60,7 +85,6 @@ export function BloodDonationSuites() {
       return;
     }
 
-    setCount(_api.scrollSnapList().length);
     setCurrent(_api.selectedScrollSnap() + 1);
 
     _api.on("select", () => {
@@ -88,33 +112,57 @@ export function BloodDonationSuites() {
           >
             <CarouselContent>
               <For each={bloodDonationSuites}>
-                {(suite) => (
+                {(suite, index) => (
                   <CarouselItem>
                     <SuiteImage
                       src={suite.image}
                       alt={suite.name}
                       expandedContent={
-                        <div>
-                          {suite.name}
-                          <br></br>
-                          {suite.address}
-                          <br></br>
-                          {suite.hours}
+                        <div class="space-y-3 px-4 overflow-y-auto h-full overscroll-none">
+                          <div class="flex items-center gap-x-2">
+                            <Hospital size={18} class="shrink-0" />
+                            <p class="text-sm">{suite.name}</p>
+                          </div>
+                          <div class="flex items-center gap-x-2">
+                            <MapPin size={18} class="shrink-0" />
+                            <p class="text-sm">{suite.address}</p>
+                          </div>
+                          <div class="flex items-center gap-x-2">
+                            <Clock size={18} class="shrink-0" />
+                            <div class="grid grid-cols-1">
+                              {suite.hours.split("|").map((hour) => (
+                                <p class="text-sm">{hour}</p>
+                              ))}
+                            </div>
+                          </div>
+                          <div class="pt-2">
+                            <A
+                              href={`https://www.google.com/maps/dir/?api=1&destination=${suite.name}&travelmode=driving`}
+                              target="_blank"
+                            >
+                              <Button>Directions</Button>
+                            </A>
+                          </div>
                         </div>
                       }
+                      index={index() + 1}
+                      selectedIndex={current}
                     />
-                    {/* <img src={suite.image} alt={suite.name} /> */}
                   </CarouselItem>
                 )}
               </For>
             </CarouselContent>
-            <CarouselPrevious />
-            <CarouselNext />
+            <CarouselPrevious class="hidden lg:inline-flex" />
+            <CarouselNext class="hidden lg:inline-flex" />
           </Carousel>
         </div>
       </CardContent>
       <CardFooter class="justify-center text-sm text-muted-foreground">
-        Slide {current()} of {count()}
+        <For each={bloodDonationSuites}>
+          {(_, index) => (
+            <DotIndicator index={index() + 1} selectedIndex={current} />
+          )}
+        </For>
       </CardFooter>
     </Card>
   );

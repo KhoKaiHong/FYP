@@ -2,7 +2,7 @@ import { Accessor, createEffect, createSignal, JSX } from "solid-js";
 import { Button } from "@/components/ui/button";
 import { ChevronUp, ChevronDown } from "lucide-solid";
 
-type SuiteImageProps = {
+type SeminarImageProps = {
   src: string;
   alt: string;
   expandedContent: JSX.Element;
@@ -10,7 +10,7 @@ type SuiteImageProps = {
   selectedIndex: Accessor<number>;
 };
 
-export function SuiteImage({ src, alt, expandedContent, index, selectedIndex }: SuiteImageProps) {
+export function SeminarImage({ src, alt, expandedContent, index, selectedIndex }: SeminarImageProps) {
   const [isExpanded, setIsExpanded] = createSignal(false);
 
   function toggleExpand() {
@@ -30,7 +30,7 @@ export function SuiteImage({ src, alt, expandedContent, index, selectedIndex }: 
       <div
         class={`absolute left-0 right-0 bg-background transition-all duration-300 ease-in-out ${
           isExpanded()
-            ? "bottom-0 md:h-2/5 h-5/6 border-t-brand border-t-2"
+            ? "bottom-0 h-3/5 border-t-brand border-t-2"
             : "bottom-6 h-0"
         }`}
       >
