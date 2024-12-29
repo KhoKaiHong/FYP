@@ -9,6 +9,8 @@ import Login from "@/pages/login/$page";
 import SuperLogin from "./pages/superlogin/$page";
 import Register from "@/pages/register/$page";
 import NotFound from "@/pages/not-found/$page";
+import BloodDonationGuide from "@/pages/blood-donation-guide/$page";
+import CommonMisconceptions from "@/pages/common-misconceptions/$page";
 import DonorPrivileges from "@/pages/donor-privileges/$page";
 import BloodDonationStatistics from "@/pages/blood-donation-statistics/$page";
 import Events from "@/pages/events/$page";
@@ -48,6 +50,8 @@ const App: Component = () => {
       <Route path={["/login", "/login/user", "/login/organiser"]} component={Login} />
       <Route path={["/superlogin", "/superlogin/facility", "/superlogin/admin"]} component={SuperLogin} />
       <Route path={["/register", "/register/user", "/register/organiser"]} component={Register} />
+      <Route path="/blood-donation-guide" component={BloodDonationGuide} />
+      <Route path="/common-misconceptions" component={CommonMisconceptions} />
       <Route path="/donor-privileges" component={DonorPrivileges} />
       <Route path="/blood-donation-statistics" component={BloodDonationStatistics} />
       <Route path="/events" component={Events} />

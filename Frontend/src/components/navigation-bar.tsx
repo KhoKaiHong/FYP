@@ -68,8 +68,8 @@ function Navbar() {
       name: "Resources",
       href: null,
       subpages: [
-        { name: "Blood Donation Guide", href: "#" },
-        { name: "Myths & Facts", href: "#" },
+        { name: "Blood Donation Guide", href: "/blood-donation-guide" },
+        { name: "Common Misconceptions", href: "/common-misconceptions" },
         { name: "Donor Privileges", href: "/donor-privileges" },
         { name: "Event Organisation", href: "#" },
         {
