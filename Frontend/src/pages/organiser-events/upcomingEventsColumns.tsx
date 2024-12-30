@@ -681,7 +681,7 @@ export const upcomingEventsColumns: ColumnDef<Event>[] = [
                                 locale="en-GB"
                                 min={
                                   today("Asia/Kuala_Lumpur").add({
-                                    weeks: 2,
+                                    months: 1,
                                   }) as unknown as DateValue
                                 }
                                 max={

@@ -12,6 +12,7 @@ import NotFound from "@/pages/not-found/$page";
 import BloodDonationGuide from "@/pages/blood-donation-guide/$page";
 import CommonMisconceptions from "@/pages/common-misconceptions/$page";
 import DonorPrivileges from "@/pages/donor-privileges/$page";
+import EventOrganisation from "@/pages/event-organisation/$page";
 import BloodDonationStatistics from "@/pages/blood-donation-statistics/$page";
 import Events from "@/pages/events/$page";
 import UserDashboard from "@/pages/dashboard-user/$page";
@@ -53,6 +54,7 @@ const App: Component = () => {
       <Route path="/blood-donation-guide" component={BloodDonationGuide} />
       <Route path="/common-misconceptions" component={CommonMisconceptions} />
       <Route path="/donor-privileges" component={DonorPrivileges} />
+      <Route path="event-organisation" component={EventOrganisation} />
       <Route path="/blood-donation-statistics" component={BloodDonationStatistics} />
       <Route path="/events" component={Events} />
       <Route path="/user-dashboard" component={UserDashboard} />

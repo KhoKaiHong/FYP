@@ -58,11 +58,8 @@ function Navbar() {
     },
     {
       name: "Join Us",
-      href: null,
-      subpages: [
-        { name: "Become an Organiser", href: "#" },
-        { name: "Organise an Event", href: "#" },
-      ],
+      href: "#",
+      subpages: null,
     },
     {
       name: "Resources",
@@ -71,7 +68,7 @@ function Navbar() {
         { name: "Blood Donation Guide", href: "/blood-donation-guide" },
         { name: "Common Misconceptions", href: "/common-misconceptions" },
         { name: "Donor Privileges", href: "/donor-privileges" },
-        { name: "Event Organisation", href: "#" },
+        { name: "Event Organisation", href: "/event-organisation" },
         {
           name: "Blood Donation Statistics",
           href: "/blood-donation-statistics",
