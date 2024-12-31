@@ -95,19 +95,17 @@ const BloodTypeCard = ({ type, level }: BloodTypeLevel) => {
 
 export function BloodLevelIndicator() {
   return (
-    <Card class="w-full border-2 border-brand">
-      <CardHeader>
-        <CardTitle class="text-2xl font-semibold tracking-wide text-center ">
+    <div>
+      <div class="flex items-center justify-center py-8">
+        <h1 class="text-4xl font-semibold tracking-wide text-center">
           Blood Type Levels
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <For each={bloodTypeLevels}>
-            {(bloodType) => <BloodTypeCard {...bloodType} />}
-          </For>
-        </div>
-      </CardContent>
-    </Card>
+        </h1>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <For each={bloodTypeLevels}>
+          {(bloodType) => <BloodTypeCard {...bloodType} />}
+        </For>
+      </div>
+    </div>
   );
 }

@@ -1,11 +1,4 @@
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Carousel,
   type CarouselApi,
   CarouselContent,
@@ -130,72 +123,70 @@ export function BloodDonationSeminars() {
   });
 
   return (
-    <Card class="w-full border-2 border-brand">
-      <CardHeader>
-        <CardTitle class="text-2xl font-semibold tracking-wide text-center ">
+    <div>
+      <div class="flex items-center justify-center py-8">
+        <h1 class="text-4xl font-semibold tracking-wide text-center">
           Seminars
-        </CardTitle>
-      </CardHeader>
-      <CardContent class="grid gap-4">
-        <div class="w-full flex justify-center">
-          <Carousel
-            setApi={setApi}
-            class="max-w-5xl"
-            plugins={[
-              Autoplay({
-                delay: 6000,
-              }),
-            ]}
-            opts={{
-              loop: true,
-            }}
-          >
-            <CarouselContent>
-              <For each={bloodDonationSeminars}>
-                {(seminar, index) => (
-                  <CarouselItem class="md:basis-1/3 sm:basis-1/2">
-                    <SeminarImage
-                      src={seminar.image}
-                      alt={seminar.name}
-                      expandedContent={
-                        <div class="space-y-3 px-4 overflow-y-auto h-full overscroll-none">
-                          <div class="flex items-center gap-x-2">
-                            <Lectern size={18} class="shrink-0" />
-                            <p class="text-sm">{seminar.name}</p>
-                          </div>
-                          <div class="flex items-center gap-x-2">
-                            <MapPin size={18} class="shrink-0" />
-                            <p class="text-sm">{seminar.address}</p>
-                          </div>
-                          <div class="flex items-center gap-x-2">
-                            <Clock size={18} class="shrink-0" />
-                            <p class="text-sm">{seminar.time}</p>
-                          </div>
-                          <div class="flex items-center gap-x-2">
-                            <Mail size={18} class="shrink-0" />
-                            <p class="text-sm">{seminar.email}</p>
-                          </div>
-                          <div class="flex items-center gap-x-2">
-                            <Phone size={18} class="shrink-0" />
-                            <p class="text-sm">{seminar.phone}</p>
-                          </div>
+        </h1>
+      </div>
+      <div class="w-full flex justify-center">
+        <Carousel
+          setApi={setApi}
+          class="max-w-5xl"
+          plugins={[
+            Autoplay({
+              delay: 6000,
+            }),
+          ]}
+          opts={{
+            loop: true,
+          }}
+        >
+          <CarouselContent>
+            <For each={bloodDonationSeminars}>
+              {(seminar, index) => (
+                <CarouselItem class="md:basis-1/3 sm:basis-1/2">
+                  <SeminarImage
+                    src={seminar.image}
+                    alt={seminar.name}
+                    expandedContent={
+                      <div class="space-y-3 px-4 overflow-y-auto h-full overscroll-none">
+                        <div class="flex items-center gap-x-2">
+                          <Lectern size={18} class="shrink-0" />
+                          <p class="text-sm">{seminar.name}</p>
                         </div>
-                      }
-                      index={index() + 1}
-                      selectedIndex={current}
-                    />
-                  </CarouselItem>
-                )}
-              </For>
-            </CarouselContent>
-            <CarouselPrevious class="hidden xl:inline-flex" />
-            <CarouselNext class="hidden xl:inline-flex" />
-          </Carousel>
-        </div>
-      </CardContent>
-      <CardFooter class="justify-center text-sm text-muted-foreground">
+                        <div class="flex items-center gap-x-2">
+                          <MapPin size={18} class="shrink-0" />
+                          <p class="text-sm">{seminar.address}</p>
+                        </div>
+                        <div class="flex items-center gap-x-2">
+                          <Clock size={18} class="shrink-0" />
+                          <p class="text-sm">{seminar.time}</p>
+                        </div>
+                        <div class="flex items-center gap-x-2">
+                          <Mail size={18} class="shrink-0" />
+                          <p class="text-sm">{seminar.email}</p>
+                        </div>
+                        <div class="flex items-center gap-x-2">
+                          <Phone size={18} class="shrink-0" />
+                          <p class="text-sm">{seminar.phone}</p>
+                        </div>
+                      </div>
+                    }
+                    index={index() + 1}
+                    selectedIndex={current}
+                  />
+                </CarouselItem>
+              )}
+            </For>
+          </CarouselContent>
+          <CarouselPrevious class="hidden xl:inline-flex" />
+          <CarouselNext class="hidden xl:inline-flex" />
+        </Carousel>
+      </div>
+      <div class="justify-center text-sm text-muted-foreground py-4 text-center">
         Seminar {current()} of {count()}
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }

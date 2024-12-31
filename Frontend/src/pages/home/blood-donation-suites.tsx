@@ -1,11 +1,4 @@
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Carousel,
   type CarouselApi,
   CarouselContent,
@@ -93,13 +86,13 @@ export function BloodDonationSuites() {
   });
 
   return (
-    <Card class="w-full border-2 border-brand">
-      <CardHeader>
-        <CardTitle class="text-2xl font-semibold tracking-wide text-center ">
+    <div>
+      <div class="flex items-center justify-center py-8">
+        <h1 class="text-4xl font-semibold tracking-wide text-center">
           Blood Donation Suites
-        </CardTitle>
-      </CardHeader>
-      <CardContent class="grid gap-4">
+        </h1>
+      </div>
+      <div class="grid gap-4">
         <div class="w-full flex justify-center">
           <Carousel
             setApi={setApi}
@@ -156,14 +149,14 @@ export function BloodDonationSuites() {
             <CarouselNext class="hidden lg:inline-flex" />
           </Carousel>
         </div>
-      </CardContent>
-      <CardFooter class="justify-center text-sm text-muted-foreground">
+      </div>
+      <div class="flex py-4 justify-center text-sm text-muted-foreground">
         <For each={bloodDonationSuites}>
           {(_, index) => (
             <DotIndicator index={index() + 1} selectedIndex={current} />
           )}
         </For>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }
