@@ -57,11 +57,6 @@ function Navbar() {
       subpages: null,
     },
     {
-      name: "Join Us",
-      href: "#",
-      subpages: null,
-    },
-    {
       name: "Resources",
       href: null,
       subpages: [

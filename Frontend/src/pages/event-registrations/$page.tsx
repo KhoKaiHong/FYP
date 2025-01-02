@@ -77,9 +77,9 @@ function EventRegistrationsPage() {
         <Show when={registrations()} keyed>
           <Card class="border-2 border-brand">
             <CardHeader>
-              <CardTitle>Upcoming Registrations</CardTitle>
+              <CardTitle>Upcoming Registration</CardTitle>
               <CardDescription>
-                View your registrations on upcoming events here.
+                View your registration on upcoming events here.
               </CardDescription>
             </CardHeader>
             <CardContent class="space-y-2">
