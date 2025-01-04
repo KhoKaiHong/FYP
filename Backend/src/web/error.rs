@@ -216,4 +216,3 @@ pub enum ClientError {
     EXISTING_NEW_EVENT_REQUEST,
     EXISTING_CHANGE_EVENT_REQUEST,
 }
-// endregion: --- Client Error

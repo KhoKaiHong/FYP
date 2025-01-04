@@ -10,7 +10,7 @@ use sqlx::FromRow;
 // User
 #[derive(Debug, FromRow, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct UserWithLocation {
+pub struct User {
     pub id: i64,
     pub ic_number: String,
     #[serde(skip_serializing)]
@@ -77,7 +77,7 @@ impl UserModelController {
     }
 
     // Gets a user by id.
-    pub async fn get(model_manager: &ModelManager, id: i64) -> Result<UserWithLocation> {
+    pub async fn get(model_manager: &ModelManager, id: i64) -> Result<User> {
         let db = model_manager.db();
 
         let user = sqlx::query_as("SELECT users.*, states.name AS state_name, districts.name AS district_name FROM users JOIN states ON users.state_id = states.id JOIN districts ON users.district_id = districts.id WHERE users.id = $1")
@@ -96,7 +96,7 @@ impl UserModelController {
     pub async fn get_by_ic_number(
         model_manager: &ModelManager,
         ic_number: &str,
-    ) -> Result<UserWithLocation> {
+    ) -> Result<User> {
         let db = model_manager.db();
 
         let user = sqlx::query_as("SELECT users.*, states.name AS state_name, districts.name AS district_name FROM users JOIN states ON users.state_id = states.id JOIN districts ON users.district_id = districts.id WHERE users.ic_number = $1")
@@ -112,7 +112,7 @@ impl UserModelController {
     }
 
     // Lists all users.
-    pub async fn list(model_manager: &ModelManager) -> Result<Vec<UserWithLocation>> {
+    pub async fn list(model_manager: &ModelManager) -> Result<Vec<User>> {
         let db = model_manager.db();
 
         let users = sqlx::query_as("SELECT users.*, states.name AS state_name, districts.name AS district_name FROM users JOIN states ON users.state_id = states.id JOIN districts ON users.district_id = districts.id")
@@ -126,7 +126,7 @@ impl UserModelController {
     pub async fn list_eligible_by_district(
         model_manager: &ModelManager,
         district_id: i32,
-    ) -> Result<Vec<UserWithLocation>> {
+    ) -> Result<Vec<User>> {
         let db = model_manager.db();
 
         let users = sqlx::query_as("SELECT users.*, states.name AS state_name, districts.name AS district_name FROM users JOIN states ON users.state_id = states.id JOIN districts ON users.district_id = districts.id WHERE district_id = $1 AND eligibility = 'Eligible'")
