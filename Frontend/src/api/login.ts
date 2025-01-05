@@ -42,7 +42,6 @@ export async function userLogin(
   }
 }
 
-// Updated facilityLogin function with ApiResult<FacilityLoginResponse>
 export async function facilityLogin(
   facilityLoginPayload: FacilityLoginPayload
 ): Promise<Result<FacilityLoginResponse, AppError>> {
@@ -71,7 +70,6 @@ export async function facilityLogin(
   }
 }
 
-// Updated organiserLogin function with ApiResult<OrganiserLoginResponse>
 export async function organiserLogin(
   organiserLoginPayload: OrganiserLoginPayload
 ): Promise<Result<OrganiserLoginResponse, AppError>> {
@@ -100,7 +98,6 @@ export async function organiserLogin(
   }
 }
 
-// Updated adminLogin function with ApiResult<AdminLoginResponse>
 export async function adminLogin(
   adminLoginPayload: AdminLoginPayload
 ): Promise<Result<AdminLoginResponse, AppError>> {

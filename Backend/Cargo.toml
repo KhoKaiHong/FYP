@@ -31,7 +31,7 @@ headers = "0.4.0"
 axum-extra = { version = "0.9.6", features = ["typed-header"] }
 
 # Database
-sqlx = { version = "0.8.2", features = [ "runtime-tokio", "tls-rustls-ring", "postgres", "uuid", "chrono" ] }
+sqlx = { version = "0.8.3", features = [ "runtime-tokio", "tls-rustls-ring", "postgres", "uuid", "chrono" ] }
 
 # Tracing
 tracing = "0.1.41"
@@ -52,5 +52,4 @@ chrono = { version = "0.4.39", features = ["serde"] }
 
 [dev-dependencies]
 anyhow = "1.0.95"
-httpc-test = "0.1.10"
 serial_test = "3.2.0"
