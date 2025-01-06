@@ -44,6 +44,13 @@ export async function logout(): Promise<Result<LogoutResponse, AppError>> {
       ) {
         // Attempt to refresh token and retry logout
         return await handleTokenRefresh(accessToken, refreshToken);
+      } else if (
+        (response.status === 401 &&
+          parsedError.message === "SESSION_EXPIRED") ||
+        (response.status === 403 && parsedError.message === "NO_AUTH")
+      ) {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
       }
 
       return err(parsedError);

@@ -6,9 +6,11 @@ import UserProfile from "./profile-card";
 import UserActions from "./actions";
 
 function UserDashboard() {
-  const { user, isLoading } = useUser();
+  const { user, isLoading, refreshUser } = useUser();
 
   const navigate = useNavigate();
+
+  refreshUser();
 
   createEffect(() => {
     const loggedInUser = user();

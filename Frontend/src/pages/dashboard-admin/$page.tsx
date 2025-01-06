@@ -6,7 +6,9 @@ import AdminProfile from "./profile-card";
 import AdminActions from "./actions";
 
 function AdminDashboard() {
-  const { user, isLoading } = useUser();
+  const { user, isLoading, refreshUser } = useUser();
+
+  refreshUser();
 
   const navigate = useNavigate();
 

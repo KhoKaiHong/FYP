@@ -6,7 +6,9 @@ import FaciliyProfile from "./profile-card";
 import FacilityActions from "./actions";
 
 function FacilityDashboard() {
-  const { user, isLoading } = useUser();
+  const { user, isLoading, refreshUser } = useUser();
+
+  refreshUser();
 
   const navigate = useNavigate();
 

@@ -6,7 +6,9 @@ import OrganiserProfile from "./profile-card";
 import OrganiserActions from "./actions";
 
 function OrganiserDashboard() {
-  const { user, isLoading } = useUser();
+  const { user, isLoading, refreshUser } = useUser();
+
+  refreshUser();
 
   const navigate = useNavigate();
 

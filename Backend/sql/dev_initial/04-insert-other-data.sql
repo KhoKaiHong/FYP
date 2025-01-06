@@ -53,11 +53,16 @@ INSERT INTO blood_donation_events (location, address, start_time, end_time, max_
 
 -- Insert data into registrations (10 added)
 INSERT INTO registrations (status, event_id, user_id, registered_at) VALUES
+-- Attended registrations
 ('Attended', 1, 1006, '2024-10-10 03:28:38'),
 ('Attended', 2, 1007, '2024-10-30 08:10:20'),
 ('Attended', 3, 1008, '2024-11-02 10:56:09'),
+-- Absent registrations
 ('Absent', 4, 1003, '2024-11-05 03:46:18'),
 ('Absent', 5, 1004, '2024-11-20 12:10:34'),
+-- Unmarked registrations
+('Registered', 9, 1005, '2024-11-30 14:23:07'),
+-- Pending registrations
 ('Registered', 12, 1000, '2024-12-02 07:12:23'),
 ('Registered', 13, 1001, '2024-12-12 14:14:57'),
 ('Registered', 14, 1002, '2024-12-14 12:03:05'),
