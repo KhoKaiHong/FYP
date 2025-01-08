@@ -1,41 +1,21 @@
-> NOTE: To use watch, install bacon with `cargo install bacon`.
+## Prerequisites
+- Rust (rustc 1.81.0, cargo 1.81.0)
+- PostgreSQL 17.0
 
-## Dev (watch)
-
-```sh
-# Terminal 1 - To run the server.
-bacon run-backend
-
-# Terminal 2 - To run the quick_dev (tests).
-bacon run-quick_dev
-```
-
-## Dev (cargo)
+## Start the server
 
 ```sh
-# Terminal 1 - To run the server.
-cargo run --color always
+# Command to run the server.
+cargo run
 
-# Terminal 2 - To run the quick_dev (tests).
-cargo run --example quick_dev --color always
 ```
 
-## Unit Test (watch)
+## Perform tests
 
 ```sh
 # Perform all unit tests
-bacon test
+cargo test
 
-# Specific test with filter.
-bacon test -- model::task::tests::test_create
-```
-
-## Unit Test (cargo)
-
-```sh
-# Perform all unit tests
-cargo test -- --nocapture --color always
-
-# Specific test with filter.
-cargo test -- model::task::tests::test_create --nocapture --color always
+# Perform specific unit tests, replace the test module with the module you want to test.
+cargo test -- model::user::tests::test_create
 ```
