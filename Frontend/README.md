@@ -7,13 +7,21 @@
 Create a `.env` file in the 'Frontend' directory of the project and add the following variables:
 
 VITE_BACKEND_PATH="http://localhost:8000"
+
 VITE_GOOGLE_MAP_API_KEY="{Your Google Maps API Key}"
 
-## Start the server
+## Install dependencies
 ```sh
-# Command to run the server.
+# Install dependencies
+pnpm install
+```
+
+
+## Start the web server
+```sh
+# Command to run the web server.
 pnpm run dev
 
 ```
 
-The server will be available at http://localhost:3000
+The web server will be available at http://localhost:3000
