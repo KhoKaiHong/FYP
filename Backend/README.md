@@ -5,9 +5,7 @@
 ## Start the server
 
 ```sh
-# Command to run the server.
 cargo run
-
 ```
 
 ## Perform tests

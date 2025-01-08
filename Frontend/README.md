@@ -13,14 +13,12 @@ VITE_GOOGLE_MAP_API_KEY="{Your Google Maps API Key}"
 
 ## Install dependencies
 ```sh
-# Install dependencies
 pnpm install
 ```
 
 
 ## Start the web server
 ```sh
-# Command to run the web server.
 pnpm run dev
 
 ```
