@@ -7,7 +7,7 @@
 Create a `.env` file in the 'Frontend' directory of the project and add the following variables:
 
 VITE_BACKEND_PATH="http://localhost:8000"
-VITE_GOOGLE_MAP_API_KEY="<Your Google Map API Key>"
+VITE_GOOGLE_MAP_API_KEY="{Your Google Maps API Key}"
 
 ## Start the server
 ```sh
