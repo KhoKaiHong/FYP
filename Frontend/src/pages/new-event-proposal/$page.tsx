@@ -79,7 +79,7 @@ function NewEventProposalPage() {
   createEffect(() => {
     const loggedInUser = user();
     if (!isLoading() && (!loggedInUser || loggedInUser.role !== "Organiser")) {
-      navigate("/");
+      navigate("/", { resolve: false });
     }
   });
 
@@ -269,8 +269,9 @@ function NewEventProposalPage() {
     } else {
       return z
         .number()
-        .min(1, { message: "Facility is required" })
-        .max(data.length);
+        .refine((id) => data.some((facility) => facility.id === id), {
+          message: "Facility is required",
+        });
     }
   });
 

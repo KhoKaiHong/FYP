@@ -55,7 +55,7 @@ function OrganisationNotificationDialog() {
       () => {
         if (route) {
           if (location.pathname !== "/" + route) {
-            navigate(route);
+            navigate(route, { resolve: false });
           } else {
             refetch();
           }
@@ -162,7 +162,7 @@ function OrganisationNotificationDialog() {
                           disabled={!notification.redirect}
                           onClick={() => {
                             if (notification.redirect) {
-                              navigate("/" + notification.redirect);
+                              navigate("/" + notification.redirect, { resolve: false });
                             }
                           }}
                         >

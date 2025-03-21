@@ -24,7 +24,7 @@ function OrganiserEventProposalPage() {
   createEffect(() => {
     const loggedInUser = user();
     if (!isLoading() && (!loggedInUser || loggedInUser.role !== "Organiser")) {
-      navigate("/");
+      navigate("/", { resolve: false });
     }
   });
 

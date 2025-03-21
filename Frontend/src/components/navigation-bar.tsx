@@ -83,7 +83,7 @@ function Navbar() {
           <Button
             variant="none"
             class="px-2 gap-x-3"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/", { resolve: false })}
           >
             <Logo />
             <span class="hidden ml-2 text-lg font-semibold sm:block">

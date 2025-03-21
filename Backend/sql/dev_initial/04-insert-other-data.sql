@@ -30,15 +30,15 @@ INSERT INTO admins (email, password, name) VALUES
 -- Insert data into blood_donation_events (19 added)
 INSERT INTO blood_donation_events (location, address, start_time, end_time, max_attendees, latitude, longitude, facility_id, state_id, district_id, organiser_id) VALUES
 -- Past blood donation events
-('AEON Mall Tebrau City', '1, Jalan Desa Tebrau, Taman Desa Tebrau, 81100 Johor Bahru, Johor Darul Ta''zim', '2024-11-02 01:00:00', '2024-11-02 06:00:00', 50, 1.5504988882483934, 103.79546007121144, 1, 1, 2, 1),
-('Aman Central', 'Aman Central, 1, Darul Aman Hwy, Kampung Lubok Peringgi, 05100 Alor Setar, Kedah', '2024-11-05 03:00:00', '2024-11-05 08:00:00', 100, 6.1251197160110635, 100.36693297095691, 3, 2, (SELECT id FROM districts WHERE name = 'Kota Setar'), 3),
-('Central Square', '4th Floor No, 4.09.01, 23, Jalan Kampung Baru, 08000 Sungai Petani, Kedah', '2024-11-12 03:00:00', '2024-11-12 09:00:00', 200, 5.636985974957746, 100.48850811177923, 3, 2, (SELECT id FROM districts WHERE name = 'Kuala Muda'), 4),
-('KB Mall', '1, Jalan Hamzah, Bandar Kota Bharu, 15050 Kota Bharu, Kelantan', '2024-11-20 01:00:00', '2024-11-20 06:00:00', 150, 6.117535241114517, 102.24020087379189, 4, 3, (SELECT id FROM districts WHERE name = 'Kota Bharu'), 5),
-('Dataran Pahlawan Melaka Megamall', 'Jln Merdeka, Banda Hilir, 75000 Melaka', '2024-11-26 02:00:00', '2024-11-26 09:00:00', 300, 2.190001569760413, 102.25044895653002, 5, 4, (SELECT id FROM districts WHERE name = 'Melaka Tengah'), 2),
+('AEON Mall Tebrau City', '1, Jalan Desa Tebrau, Taman Desa Tebrau, 81100 Johor Bahru, Johor Darul Ta''zim', '2024-11-02 01:00:00', '2024-11-02 06:00:00', 50, 1.5504988882483934, 103.79546007121144, 22, 1, 2, 1),
+('Aman Central', 'Aman Central, 1, Darul Aman Hwy, Kampung Lubok Peringgi, 05100 Alor Setar, Kedah', '2024-11-05 03:00:00', '2024-11-05 08:00:00', 100, 6.1251197160110635, 100.36693297095691, 22, 2, (SELECT id FROM districts WHERE name = 'Kota Setar'), 1),
+('Central Square', '4th Floor No, 4.09.01, 23, Jalan Kampung Baru, 08000 Sungai Petani, Kedah', '2024-11-12 03:00:00', '2024-11-12 09:00:00', 200, 5.636985974957746, 100.48850811177923, 22, 2, (SELECT id FROM districts WHERE name = 'Kuala Muda'), 1),
+('KB Mall', '1, Jalan Hamzah, Bandar Kota Bharu, 15050 Kota Bharu, Kelantan', '2024-11-20 01:00:00', '2024-11-20 06:00:00', 150, 6.117535241114517, 102.24020087379189, 22, 3, (SELECT id FROM districts WHERE name = 'Kota Bharu'), 1),
+('Dataran Pahlawan Melaka Megamall', 'Jln Merdeka, Banda Hilir, 75000 Melaka', '2024-11-26 02:00:00', '2024-11-26 09:00:00', 300, 2.190001569760413, 102.25044895653002, 22, 4, (SELECT id FROM districts WHERE name = 'Melaka Tengah'), 1),
 ('Mahkota Parade', 'Lot B-02, Mahkota Parade, 1, Jln Merdeka, Taman Costa Mahkota, 75000 Melaka', '2024-11-29 01:00:00', '2024-11-29 07:00:00', 250, 2.189337789123672, 102.24980078669556, 5, 4, (SELECT id FROM districts WHERE name = 'Melaka Tengah'), 3),
 ('Palm Mall', 'Palm Mall, Level 4, Jalan Sungai Ujong, Kemayan Square, 70200 Seremban, Negeri Sembilan', '2024-12-02 02:00:00', '2024-12-02 08:00:00', 100, 2.7200830958712503, 101.92291014211008, 6, 5, (SELECT id FROM districts WHERE name = 'Seremban'), 1),
 ('East Coast Mall', 'Jalan Putra Square 6, Putra Square, 25200 Kuantan, Pahang', '2024-12-09 03:00:00', '2024-12-09 07:00:00', 150, 3.8185819301644415, 103.32625816792614, 7, 6, (SELECT id FROM districts WHERE name = 'Kuantan'), 2),
-('Ipoh Parade', '105, Jalan Sultan Abdul Jalil, Pusat Perdagangan Greentown, 30450 Ipoh, Perak', '2024-12-15 02:00:00', '2024-12-15 07:00:00', 250, 4.595751513218196, 101.08984128465725, 11, 7, (SELECT id FROM districts WHERE name = 'Kinta'), 3),
+('Ipoh Parade', '105, Jalan Sultan Abdul Jalil, Pusat Perdagangan Greentown, 30450 Ipoh, Perak', '2024-12-15 02:00:00', '2024-12-15 07:00:00', 250, 4.595751513218196, 101.08984128465725, 22, 7, (SELECT id FROM districts WHERE name = 'Kinta'), 3),
 ('1st Avenue Mall', '182, Jalan Magazine, 10300 George Town, Pulau Pinang', '2024-12-28 02:00:00', '2024-12-28 06:00:00', 50, 5.413053410743275, 100.33116965721827, 10, 9, (SELECT id FROM districts WHERE name = 'Timur Laut'), 1),
 ('Queensbay Mall', 'Queensbay Mall, 100, Persiaran Bayan Indah, 11900 Bayan Lepas, Pulau Pinang', '2025-01-05 02:00:00', '2025-01-05 07:00:00', 200, 5.333183408845015, 100.3066133670719, 10, 9, (SELECT id FROM districts WHERE name = 'Barat Daya'), 4),
 -- Upcoming blood donation events
@@ -46,8 +46,8 @@ INSERT INTO blood_donation_events (location, address, start_time, end_time, max_
 ('Vivacity Megamall', 'Q112B, 93350 Kuching, Sarawak', '2025-01-19 01:00:00', '2025-01-19 06:00:00', 100, 1.527042186415022, 110.3695937600573, 19, 11, (SELECT id FROM districts WHERE name = 'Kuching'), 1),
 ('1 Utama Shopping Centre', '1, Lebuh Bandar Utama, Bandar Utama, 47800 Petaling Jaya, Selangor', '2025-01-23 03:00:00', '2025-01-23 08:00:00', 200, 3.148127466123984, 101.61646193049211, 14, 12, (SELECT id FROM districts WHERE name = 'Petaling'), 3),
 ('Sunway Pyramid', '3, Jalan PJS 11/15, Bandar Sunway, 47500 Petaling Jaya, Selangor', '2025-01-28 01:00:00', '2025-01-28 09:00:00', 100, 3.0722551036387156, 101.60638838905393, 14, 12, (SELECT id FROM districts WHERE name = 'Petaling'), 5),
-('Mesra Mall', 'Mesra Mall, Lot 6490, Jalan Kemaman - Dungun, Kampung Baru, 24200 Kemasik, Terengganu', '2025-02-03 03:00:00', '2025-02-03 06:00:00', 300, 4.440697264195204, 103.44849511840275, 15, 13, (SELECT id FROM districts WHERE name = 'Dungun'), 1),
-('Pavilion Kuala Lumpur', '168, Jln Bukit Bintang, Bukit Bintang, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-02-10 03:00:00', '2025-02-10 07:00:00', 150, 3.148998022026934, 101.71340731862986, 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 2),
+('Mesra Mall', 'Mesra Mall, Lot 6490, Jalan Kemaman - Dungun, Kampung Baru, 24200 Kemasik, Terengganu', '2025-02-03 03:00:00', '2025-02-03 06:00:00', 300, 4.440697264195204, 103.44849511840275, 22, 13, (SELECT id FROM districts WHERE name = 'Dungun'), 1),
+('Pavilion Kuala Lumpur', '168, Jln Bukit Bintang, Bukit Bintang, 55100 Kuala Lumpur.', '2025-02-10 03:00:00', '2025-02-10 07:00:00', 150, 3.148998022026934, 101.71340731862986, 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 1),
 ('Financial Park Labuan Complex', 'Jln Merdeka, Financial Park, 87000 Labuan, Wilayah Persekutuan Labuan', '2025-02-17 02:00:00', '2025-02-17 09:00:00', 100, 5.276586556815842, 115.24945783706148, 22, 15, (SELECT id FROM districts WHERE name = 'W.P. Labuan'), 3),
 ('Alamanda Shopping Centre', 'Jalan Alamanda, Presint 1, 62000 Putrajaya, Wilayah Persekutuan Putrajaya', '2025-02-25 01:00:00', '2025-02-25 08:00:00', 200, 2.939551932738423, 101.71061614346809, 22, 16, (SELECT id FROM districts WHERE name = 'W.P. Putrajaya'), 4); 
 
@@ -66,8 +66,7 @@ INSERT INTO registrations (status, event_id, user_id, registered_at) VALUES
 ('Registered', 12, 1000, '2024-12-02 07:12:23'),
 ('Registered', 13, 1001, '2024-12-12 14:14:57'),
 ('Registered', 14, 1002, '2024-12-14 12:03:05'),
-('Registered', 15, 1003, '2024-12-20 13:23:12'),
-('Registered', 16, 1004, '2024-12-28 10:05:47');
+('Registered', 15, 1003, '2024-12-20 13:23:12');
 
 -- Insert data into donation_history (3 added)
 INSERT INTO donation_history (user_id, event_id, created_at) VALUES
@@ -83,10 +82,10 @@ INSERT INTO new_blood_donation_events_requests (
 -- Approved requests
 -- Past blood donation events
 ('AEON Mall Tebrau City', '1, Jalan Desa Tebrau, Taman Desa Tebrau, 81100 Johor Bahru, Johor Darul Ta''zim', '2024-11-02 01:00:00', '2024-11-02 06:00:00', 50, 1.5504988882483934, 103.79546007121144, 'Approved', NULL, 1, 1, 2, 1),
-('Aman Central', 'Aman Central, 1, Darul Aman Hwy, Kampung Lubok Peringgi, 05100 Alor Setar, Kedah', '2024-11-05 03:00:00', '2024-11-05 08:00:00', 100, 6.1251197160110635, 100.36693297095691, 'Approved', NULL, 3, 2, (SELECT id FROM districts WHERE name = 'Kota Setar'), 3),
-('Central Square', '4th Floor No, 4.09.01, 23, Jalan Kampung Baru, 08000 Sungai Petani, Kedah', '2024-11-12 03:00:00', '2024-11-12 09:00:00', 200, 5.636985974957746, 100.48850811177923, 'Approved', NULL, 3, 2, (SELECT id FROM districts WHERE name = 'Kuala Muda'), 4),
-('KB Mall', '1, Jalan Hamzah, Bandar Kota Bharu, 15050 Kota Bharu, Kelantan', '2024-11-20 01:00:00', '2024-11-20 06:00:00', 150, 6.117535241114517, 102.24020087379189, 'Approved', NULL, 4, 3, (SELECT id FROM districts WHERE name = 'Kota Bharu'), 5),
-('Dataran Pahlawan Melaka Megamall', 'Jln Merdeka, Banda Hilir, 75000 Melaka', '2024-11-26 02:00:00', '2024-11-26 09:00:00', 300, 2.190001569760413, 102.25044895653002, 'Approved', NULL, 5, 4, (SELECT id FROM districts WHERE name = 'Melaka Tengah'), 2),
+('Aman Central', 'Aman Central, 1, Darul Aman Hwy, Kampung Lubok Peringgi, 05100 Alor Setar, Kedah', '2024-11-05 03:00:00', '2024-11-05 08:00:00', 100, 6.1251197160110635, 100.36693297095691, 'Approved', NULL, 3, 2, (SELECT id FROM districts WHERE name = 'Kota Setar'), 1),
+('Central Square', '4th Floor No, 4.09.01, 23, Jalan Kampung Baru, 08000 Sungai Petani, Kedah', '2024-11-12 03:00:00', '2024-11-12 09:00:00', 200, 5.636985974957746, 100.48850811177923, 'Approved', NULL, 3, 2, (SELECT id FROM districts WHERE name = 'Kuala Muda'), 1),
+('KB Mall', '1, Jalan Hamzah, Bandar Kota Bharu, 15050 Kota Bharu, Kelantan', '2024-11-20 01:00:00', '2024-11-20 06:00:00', 150, 6.117535241114517, 102.24020087379189, 'Approved', NULL, 4, 3, (SELECT id FROM districts WHERE name = 'Kota Bharu'), 1),
+('Dataran Pahlawan Melaka Megamall', 'Jln Merdeka, Banda Hilir, 75000 Melaka', '2024-11-26 02:00:00', '2024-11-26 09:00:00', 300, 2.190001569760413, 102.25044895653002, 'Approved', NULL, 5, 4, (SELECT id FROM districts WHERE name = 'Melaka Tengah'), 1),
 ('Mahkota Parade', 'Lot B-02, Mahkota Parade, 1, Jln Merdeka, Taman Costa Mahkota, 75000 Melaka', '2024-11-29 01:00:00', '2024-11-29 07:00:00', 250, 2.189337789123672, 102.24980078669556, 'Approved', NULL, 5, 4, (SELECT id FROM districts WHERE name = 'Melaka Tengah'), 3),
 ('Palm Mall', 'Palm Mall, Level 4, Jalan Sungai Ujong, Kemayan Square, 70200 Seremban, Negeri Sembilan', '2024-12-02 02:00:00', '2024-12-02 08:00:00', 100, 2.7200830958712503, 101.92291014211008, 'Approved', NULL, 6, 5, (SELECT id FROM districts WHERE name = 'Seremban'), 1),
 ('East Coast Mall', 'Jalan Putra Square 6, Putra Square, 25200 Kuantan, Pahang', '2024-12-09 03:00:00', '2024-12-09 07:00:00', 150, 3.8185819301644415, 103.32625816792614, 'Approved', NULL, 7, 6, (SELECT id FROM districts WHERE name = 'Kuantan'), 2),
@@ -99,12 +98,12 @@ INSERT INTO new_blood_donation_events_requests (
 ('1 Utama Shopping Centre', '1, Lebuh Bandar Utama, Bandar Utama, 47800 Petaling Jaya, Selangor', '2025-01-23 03:00:00', '2025-01-23 08:00:00', 200, 3.148127466123984, 101.61646193049211, 'Approved', NULL, 14, 12, (SELECT id FROM districts WHERE name = 'Petaling'), 3),
 ('Sunway Pyramid', '3, Jalan PJS 11/15, Bandar Sunway, 47500 Petaling Jaya, Selangor', '2025-01-28 01:00:00', '2025-01-28 09:00:00', 100, 3.0722551036387156, 101.60638838905393, 'Approved', NULL, 14, 12, (SELECT id FROM districts WHERE name = 'Petaling'), 5),
 ('Mesra Mall', 'Mesra Mall, Lot 6490, Jalan Kemaman - Dungun, Kampung Baru, 24200 Kemasik, Terengganu', '2025-02-03 03:00:00', '2025-02-03 06:00:00', 300, 4.440697264195204, 103.44849511840275, 'Approved', NULL, 15, 13, (SELECT id FROM districts WHERE name = 'Dungun'), 1),
-('Pavilion Kuala Lumpur', '168, Jln Bukit Bintang, Bukit Bintang, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-02-10 03:00:00', '2025-02-10 07:00:00', 150, 3.148998022026934, 101.71340731862986, 'Approved', NULL, 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 2),
+('Pavilion Kuala Lumpur', '168, Jln Bukit Bintang, Bukit Bintang, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-02-10 03:00:00', '2025-02-10 07:00:00', 150, 3.148998022026934, 101.71340731862986, 'Approved', NULL, 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 1),
 ('Financial Park Labuan Complex', 'Jln Merdeka, Financial Park, 87000 Labuan, Wilayah Persekutuan Labuan', '2025-02-17 02:00:00', '2025-02-17 09:00:00', 100, 5.276586556815842, 115.24945783706148, 'Approved', NULL, 22, 15, (SELECT id FROM districts WHERE name = 'W.P. Labuan'), 3),
 ('Alamanda Shopping Centre', 'Jalan Alamanda, Presint 1, 62000 Putrajaya, Wilayah Persekutuan Putrajaya', '2025-02-25 01:00:00', '2025-02-25 08:00:00', 200, 2.939551932738423, 101.71061614346809, 'Approved', NULL, 22, 16, (SELECT id FROM districts WHERE name = 'W.P. Putrajaya'), 4),
 -- Rejected requests
 ('Mid Valley Megamall', 'Lingkaran Syed Putra, Mid Valley City, 59200 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-01-23 01:00:00', '2025-01-23 07:00:00', 50, 3.1177141222234273, 101.67739991060756, 'Rejected', 'Insufficient manpower to dispatch at the facility', 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 1),
-('Berjaya Times Square', 'No. 1, Jalan Imbi, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-01-26 02:00:00', '2025-01-26 09:00:00', 100, 3.1423269411587826, 101.71059408876324, 'Rejected', 'No transportation options available at the time', 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 3),
+('Berjaya Times Square', 'No. 1, Jalan Imbi, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-01-26 02:00:00', '2025-01-26 09:00:00', 100, 3.1423269411587826, 101.71059408876324, 'Rejected', 'No transportation options available at the time', 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 1),
 ('Suria KLCC', '241, Petronas Twin Tower, Kuala Lumpur City Centre, 50088 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-02-03 03:00:00', '2025-02-03 06:00:00', 250, 3.1582885400344383, 101.71220350175281, 'Rejected', 'Location does not meet requirements', 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 5),
 -- Pending requests
 ('NU Sentral', 'Nu Sentral Shopping Mall, Jalan Tun Sambanthan, City Centre, 50470 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur', '2025-02-14 01:00:00', '2025-02-14 07:00:00', 50, 3.1330861476540046, 101.68742603204397, 'Pending', NULL, 22, 14, (SELECT id FROM districts WHERE name = 'W.P. Kuala Lumpur'), 2),

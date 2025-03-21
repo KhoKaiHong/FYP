@@ -15,7 +15,7 @@ function FacilityDashboard() {
   createEffect(() => {
     const loggedInUser = user();
     if (!isLoading() && (!loggedInUser || loggedInUser.role !== "Facility")) {
-      navigate("/");
+      navigate("/", { resolve: false });
     }
   });
 

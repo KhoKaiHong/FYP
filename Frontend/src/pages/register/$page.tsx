@@ -35,9 +35,9 @@ function Register() {
   // Handle tab changes
   const handleTabChange = (value: string) => {
     if (value === "user") {
-      navigate("/register/user");
+      navigate("/register/user", { resolve: false });
     } else {
-      navigate("/register/organiser");
+      navigate("/register/organiser", { resolve: false });
     }
   };
 

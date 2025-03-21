@@ -24,7 +24,7 @@ function AdminActions() {
       <Button
         variant="outline"
         class="w-full h-16 border-2 border-brand"
-        onClick={() => navigate("/add-facility")}
+        onClick={() => navigate("/add-facility", { resolve: false })}
       >
         <div class="flex items-center justify-center gap-x-2">
           <Hospital size={24} />
@@ -34,7 +34,7 @@ function AdminActions() {
       <Button
         variant="outline"
         class="w-full h-16 border-2 border-brand"
-        onClick={() => navigate("/add-admin")}
+        onClick={() => navigate("/add-admin", { resolve: false })}
       >
         <div class="flex items-center justify-center gap-x-2">
           <UserRoundCog size={24} />

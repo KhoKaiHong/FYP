@@ -27,7 +27,7 @@ function RegisterRedirectDialog() {
           <Button variant="destructive" onClick={async () => await logout()}>
             Yes
           </Button>
-          <Button onClick={() => navigate("/")}>No</Button>
+          <Button onClick={() => navigate("/", { resolve: false })}>No</Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

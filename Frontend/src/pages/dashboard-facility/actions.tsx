@@ -29,7 +29,7 @@ function FacilityActions() {
       <Button
         variant="outline"
         class="w-full h-16 border-2 border-brand"
-        onClick={() => navigate("/manage-event-proposals")}
+        onClick={() => navigate("/manage-event-proposals", { resolve: false })}
       >
         <div class="flex items-center justify-center gap-x-2">
           <ClipboardPlus size={24} />
@@ -39,7 +39,7 @@ function FacilityActions() {
       <Button
         variant="outline"
         class="w-full h-16 border-2 border-brand"
-        onClick={() => navigate("/manage-events")}
+        onClick={() => navigate("/manage-events", { resolve: false })}
       >
         <div class="flex items-center justify-center gap-x-2">
           <ClipboardList size={24} />
@@ -49,7 +49,7 @@ function FacilityActions() {
       <Button
         variant="outline"
         class="w-full h-16 border-2 border-brand"
-        onClick={() => navigate("/manage-change-requests")}
+        onClick={() => navigate("/manage-change-requests", { resolve: false })}
       >
         <div class="flex items-center justify-center gap-x-2">
           <ClipboardPen size={24} />

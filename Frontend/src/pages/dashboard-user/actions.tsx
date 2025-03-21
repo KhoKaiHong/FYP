@@ -24,7 +24,7 @@ function UserActions() {
       <Button
         variant="outline"
         class="w-full h-16 border-2 border-brand"
-        onClick={() => navigate("/donation-history")}
+        onClick={() => navigate("/donation-history", { resolve: false })}
       >
         <div class="flex items-center justify-center gap-x-2">
           <History size={24} />
@@ -34,7 +34,7 @@ function UserActions() {
       <Button
         variant="outline"
         class="w-full h-16 border-2 border-brand"
-        onClick={() => navigate("/event-registrations")}
+        onClick={() => navigate("/event-registrations", { resolve: false })}
       >
         <div class="flex items-center justify-center gap-x-2">
           <ClipboardList size={24} />

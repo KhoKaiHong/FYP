@@ -55,9 +55,9 @@ function Login() {
     setOrganiserPasswordError("");
     setIsPasswordVisible(false);
     if (value === "user") {
-      navigate("/login/user");
+      navigate("/login/user", { resolve: false });
     } else {
-      navigate("/login/organiser");
+      navigate("/login/organiser", { resolve: false });
     }
   };
 
@@ -121,7 +121,7 @@ function Login() {
           role: "User",
         });
         setError(null);
-        navigate("/");
+        navigate("/", { resolve: false });
       } else {
         setError(response.error);
         if (response.error.message === "IC_NOT_FOUND") {
@@ -167,7 +167,7 @@ function Login() {
           role: "Organiser",
         });
         setError(null);
-        navigate("/");
+        navigate("/", { resolve: false });
       } else {
         setError(response.error);
         if (response.error.message === "EMAIL_NOT_FOUND") {

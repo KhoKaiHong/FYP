@@ -38,11 +38,11 @@ function ProfileDropDown() {
               <p>Guest</p>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/login")}>
+            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/login", { resolve: false })}>
               <LogIn size={18} />
               <p>Log In</p>
             </DropdownMenuItem>
-            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/register")}>
+            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/register", { resolve: false })}>
               <UserRoundPlus size={18} />
               <p>Register</p>
             </DropdownMenuItem>
@@ -77,7 +77,7 @@ function ProfileDropDown() {
               <p>{user()?.name || "Loading..."}</p>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/facility-dashboard")}>
+            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/facility-dashboard", { resolve: false })}>
               <CircleUserRound size={18} />
               <p>Dashboard</p>
             </DropdownMenuItem>
@@ -98,7 +98,7 @@ function ProfileDropDown() {
               <p>{user()?.name || "Loading..."}</p>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/organiser-dashboard")}>
+            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/organiser-dashboard", { resolve: false })}>
               <CircleUserRound size={18} />
               <p>Dashboard</p>
             </DropdownMenuItem>
@@ -119,7 +119,7 @@ function ProfileDropDown() {
               <p>{user()?.name || "Loading..."}</p>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/admin-dashboard")}>
+            <DropdownMenuItem class="gap-x-2" onClick={() => navigate("/admin-dashboard", { resolve: false })}>
               <CircleUserRound size={18} />
               <p>Dashboard</p>
             </DropdownMenuItem>

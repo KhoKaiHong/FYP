@@ -14,7 +14,7 @@ function NotFound() {
         <p class="text-xl text-foreground mb-8">
           Oops! The page you're looking for doesn't exist.
         </p>
-        <Button onClick={() => navigate("/")}>Return Home</Button>
+        <Button onClick={() => navigate("/", { resolve: false })}>Return Home</Button>
       </div>
     </div>
   );

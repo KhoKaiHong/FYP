@@ -30,7 +30,7 @@ function OrganiserActions() {
       <Button
         variant="outline"
         class="w-full h-16 border-2 border-brand"
-        onClick={() => navigate("/new-event-proposal")}
+        onClick={() => navigate("/new-event-proposal", { resolve: false })}
       >
         <div class="flex items-center justify-center gap-x-2">
           <ClipboardPlus size={24} />
@@ -40,7 +40,7 @@ function OrganiserActions() {
       <Button
         variant="outline"
         class="w-full h-16 border-2 border-brand"
-        onClick={() => navigate("/organiser-event-proposals")}
+        onClick={() => navigate("/organiser-event-proposals", { resolve: false })}
       >
         <div class="flex items-center justify-center gap-x-2">
           <ClipboardList size={24} />
@@ -50,7 +50,7 @@ function OrganiserActions() {
       <Button
         variant="outline"
         class="w-full h-16 border-2 border-brand"
-        onClick={() => navigate("/organiser-events")}
+        onClick={() => navigate("/organiser-events", { resolve: false })}
       >
         <div class="flex items-center justify-center gap-x-2">
           <ClipboardCheck size={24} />
@@ -60,7 +60,7 @@ function OrganiserActions() {
       <Button
         variant="outline"
         class="w-full h-16 border-2 border-brand"
-        onClick={() => navigate("/organiser-change-requests")}
+        onClick={() => navigate("/organiser-change-requests", { resolve: false })}
       >
         <div class="flex items-center justify-center gap-x-2">
           <ClipboardPen size={24} />

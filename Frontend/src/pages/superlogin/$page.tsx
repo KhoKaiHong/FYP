@@ -55,9 +55,9 @@ function SuperLogin() {
     setAdminPasswordError("");
     setIsPasswordVisible(false);
     if (value === "facility") {
-      navigate("/superlogin/facility");
+      navigate("/superlogin/facility", { resolve: false });
     } else {
-      navigate("/superlogin/admin");
+      navigate("/superlogin/admin", { resolve: false });
     }
   };
 
@@ -121,7 +121,7 @@ function SuperLogin() {
           role: "Facility",
         });
         setError(null);
-        navigate("/");
+        navigate("/", { resolve: false });
       } else {
         setError(response.error);
         if (response.error.message === "EMAIL_NOT_FOUND") {
@@ -169,7 +169,7 @@ function SuperLogin() {
           role: "Admin",
         });
         setError(null);
-        navigate("/");
+        navigate("/", { resolve: false });
       } else {
         setError(response.error);
         if (response.error.message === "EMAIL_NOT_FOUND") {

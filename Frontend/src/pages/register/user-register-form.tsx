@@ -136,7 +136,7 @@ function UserRegisterForm() {
       response.match(
         () => {
           showSuccessToast({ successTitle: "Register successful" });
-          navigate("/login/user");
+          navigate("/login/user", { resolve: false });
         },
         (error) => {
           if (error.message === "DUPLICATE_RECORD") {

@@ -15,7 +15,7 @@ function UserDashboard() {
   createEffect(() => {
     const loggedInUser = user();
     if (!isLoading() && (!loggedInUser || loggedInUser.role !== "User")) {
-      navigate("/");
+      navigate("/", { resolve: false });
     }
   });
 

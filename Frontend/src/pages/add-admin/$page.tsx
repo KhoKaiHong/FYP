@@ -33,7 +33,7 @@ function AddAdminPage() {
   createEffect(() => {
     const loggedInUser = user();
     if (!isLoading() && (!loggedInUser || loggedInUser.role !== "Admin")) {
-      navigate("/");
+      navigate("/", { resolve: false });
     }
   });
 

@@ -41,7 +41,7 @@ function OrganiserRegisterForm() {
       response.match(
         () => {
           showSuccessToast({ successTitle: "Register successful" });
-          navigate("/login/organiser");
+          navigate("/login/organiser", { resolve: false });
         },
         (error) => {
           if (error.message === "DUPLICATE_RECORD") {

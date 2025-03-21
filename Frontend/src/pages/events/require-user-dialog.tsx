@@ -20,7 +20,7 @@ function RequireUserDialog(props: RequireUserDialogProps) {
 
     function performRedirect() {
         props.onClose();
-        navigate("/login");
+        navigate("/login", { resolve: false });
     }
   return (
     <AlertDialog open={props.open}>

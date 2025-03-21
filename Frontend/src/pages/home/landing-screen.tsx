@@ -22,7 +22,7 @@ export function LandingScreen() {
           <div class="flex justify-center">
             <Button
               class={`px-8 py-6 bg-brand border-brand border-2 text-xl font-bold rounded-full text-slate-50 transition duration-300 hover:bg-white hover:text-brand transform hover:-translate-y-1 shadow-lg hover:shadow-2xl ${colorMode() === "dark" ? "shadow-slate-50 hover:shadow-slate-50" : "shadow"}`}
-              onClick={() => navigate("/events")}
+              onClick={() => navigate("/events", { resolve: false })}
             >
               Donate Now
             </Button>
